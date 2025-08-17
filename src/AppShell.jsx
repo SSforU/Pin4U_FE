@@ -12,10 +12,10 @@ const Page = styled.div`
 /* 폰 화면 (iPhone 390×844 비율 유지) */
 const PhoneFrame = styled.div`
   /* 핵심: 한쪽만 지정 + aspect-ratio 로 다른 축을 자동 계산 */
-  aspect-ratio: 390 / 844;
+  aspect-ratio: 500 / 844;
 
   /* 세로를 기준으로 채우되, 가로를 넘치지 않도록 클램프 */
-  width: min(100vw, calc(100dvh * (390 / 844)));
+  width: min(100vw, calc(100dvh * (500 / 844)));
   /* height는 aspect-ratio에 따라 자동 계산됨 */
 
   background: #fff;
