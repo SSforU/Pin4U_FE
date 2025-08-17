@@ -24,7 +24,7 @@ const PhoneFrame = styled.div`
   box-sizing: border-box;
 
   /* 모바일에선 진짜 풀화면으로 쓰고 싶다면 이 분기 사용 */
-  @media (max-width: 1023.98px) {
+  @media (max-width: 768px) {
     width: 100vw;
     height: 100vh; /* 폴백 */
     height: 100dvh; /* 주소창 변화 대응 */
