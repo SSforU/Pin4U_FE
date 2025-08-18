@@ -3,6 +3,30 @@ import styled from "styled-components";
 import StationList from "../list/StationList";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import HomeSearchBox from "../ui/HomeSearchBox";
+
+const stationsData = [
+  {
+    id: "1",
+    slug: "abCDef12",
+    name: "숭실대입구역",
+    lines: [7],
+    address: "서울 동작구 상도로 378",
+    recommended_counts: 13,
+    created_at: "2025-08-16T00:00:00Z",
+  },
+  {
+    id: "2",
+    slug: "abCDef18",
+    name: "이수역",
+    lines: [4, 7],
+    address: "서울 동작구 동작대로 105-2",
+    recommended_counts: 18,
+    created_at: "2025-08-10T00:00:00Z",
+  },
+  // 더 많은 데이터...
+];
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -11,14 +35,24 @@ export default function HomePage() {
     navigate(`/make-place`);
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredStations =
+    searchTerm.trim() === ""
+      ? stationsData
+      : stationsData.filter((station) =>
+          station.name.includes(searchTerm.trim())
+        );
+
   return (
     <PageContainer>
       <TitleBox>
         <PageTitle>김숭실 님의 지도</PageTitle>
       </TitleBox>
+      <HomeSearchBox onSearch={setSearchTerm} />
 
       <ContentContainer>
-        <StationList />
+        <StationList stations={filteredStations} />
       </ContentContainer>
 
       <ButtonContainer>
