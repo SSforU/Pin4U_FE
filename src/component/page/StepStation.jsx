@@ -1,6 +1,7 @@
 import React from "react";
 import SearchBox from "../ui/SearchBox";
 import { useState } from "react";
+import styled from "styled-components";
 
 export default function StepStation() {
   const [query, setQuery] = useState("");
@@ -21,8 +22,15 @@ export default function StepStation() {
   };
 
   return (
-    <div>
-      Step: Station
+    <Wrapper>
+      <TextBlock>
+        <Title>
+          방문할 장소와 가장 가까운
+          <br />
+          &nbsp;지하철 역을 입력해 주세요.
+        </Title>
+        <Detail>입력한 지하철 역과 가까운 장소를 추천해 드릴게요.</Detail>
+      </TextBlock>
       <SearchBox
         query={query}
         onChange={setQuery}
@@ -35,6 +43,39 @@ export default function StepStation() {
         }}
         placeholder={"지하철 역을 검색하세요"}
       />
-    </div>
+    </Wrapper>
   );
 }
+
+// styled-components
+const Wrapper = styled.div`
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  margin: 0 auto;
+  padding: 24px 20px 0;
+  flex-direction: column;
+  align-items: stretch; // 좌측 정렬 핵심 속성
+  gap: 54px;
+`;
+
+const TextBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+`;
+
+const Title = styled.div`
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+`;
+
+const Detail = styled.div`
+  color: #585858;
+  font-size: 14px;
+  margin: 0;
+  padding-left: 5px;
+`;
