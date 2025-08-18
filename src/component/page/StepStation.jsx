@@ -1,6 +1,5 @@
 import React from "react";
 import SearchBox from "../ui/SearchBox";
-import SearchDetailBox from "../ui/SearchDetailBox";
 import { useState } from "react";
 
 export default function StepStation() {
