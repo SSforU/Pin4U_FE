@@ -2,8 +2,11 @@ import React from "react";
 import SearchBox from "../ui/SearchBox";
 import { useState } from "react";
 import styled from "styled-components";
+import { getResponsiveStyles } from "../../styles/responsive";
+import { useOutletContext } from "react-router-dom";
 
 export default function StepStation() {
+  const { setStation } = useOutletContext();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
@@ -40,6 +43,7 @@ export default function StepStation() {
         loading={loading}
         onSelect={(item) => {
           setQuery(item.title); // 선택값 반영 (선택)
+          setStation(item); // 부모의 state 업데이트
         }}
         placeholder={"지하철 역을 검색하세요"}
       />
@@ -49,13 +53,14 @@ export default function StepStation() {
 
 // styled-components
 const Wrapper = styled.div`
+  ${getResponsiveStyles("search")}
   width: 100%;
   max-width: 500px;
   display: flex;
   margin: 0 auto;
   padding: 24px 20px 0;
   flex-direction: column;
-  align-items: stretch; // 좌측 정렬 핵심 속성
+  align-items: stretch; /*좌측 정렬 핵심 속성 */
   gap: 54px;
 `;
 
