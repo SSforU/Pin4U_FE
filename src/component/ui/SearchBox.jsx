@@ -6,15 +6,15 @@ import { useEffect } from "react";
 function SearchBox({
   query,
   onChange,
-  onDebouncedChange, // ✅ 추가: 타이핑 멈춘 뒤 호출
-  debounceMs = 200, // ✅ 추가: 지연 시간
+  onDebouncedChange, // 추가: 타이핑 멈춘 뒤 호출
+  debounceMs = 200, // 추가: 지연 시간
   suggestions = [],
   onSelect,
   loading = false,
   placeholder,
   ...props
 }) {
-  // ✅ 디바운스 효과
+  // 디바운스 효과
   useEffect(() => {
     if (!onDebouncedChange) return;
     const id = setTimeout(() => onDebouncedChange(query), debounceMs);
