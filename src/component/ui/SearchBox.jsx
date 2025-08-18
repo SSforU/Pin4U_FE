@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { getResponsiveStyles } from "../../styles/responsive";
 
 function SearchBox({ placeholder, onClick, ...props }) {
   function handleClick() {
@@ -20,12 +21,13 @@ function SearchBox({ placeholder, onClick, ...props }) {
 
 export default SearchBox;
 
-//styled-components
+// styled-components
 const SearchBoxContainer = styled.button`
+  ${getResponsiveStyles("search")} // 반응형
+
   background-color: #f7f7f7;
   border: 1px solid #bababa;
   border-radius: 10px;
-  width: 330px;
   height: 50px;
   display: flex;
   align-items: center;

@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { getResponsiveStyles } from "../../styles/responsive";
 
 function ProgressBar({ currentStep = 1, totalSteps = 3, ...props }) {
   return (
@@ -13,9 +14,10 @@ function ProgressBar({ currentStep = 1, totalSteps = 3, ...props }) {
 
 export default ProgressBar;
 
-//styled-components
+// styled-components
 const ProgressBarContainer = styled.div`
-  width: 330px;
+  ${getResponsiveStyles("progress")} // 반응형
+
   height: 6px;
   background-color: #d9d9d9;
   border-radius: 3px;
