@@ -8,7 +8,6 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const handleAddMapClick = () => {
-    // '나만의 지도 추가하기' 버튼 클릭 시 로직
     navigate(`/make-place`);
   };
 
@@ -17,17 +16,6 @@ export default function HomePage() {
       <TitleBox>
         <PageTitle>김숭실 님의 지도</PageTitle>
       </TitleBox>
-
-      <SearchBar>
-        <SearchIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </SearchIcon>
-        <SearchInput type="text" placeholder="장소, 지하철, 주소 검색" />
-      </SearchBar>
 
       <ContentContainer>
         <StationList />

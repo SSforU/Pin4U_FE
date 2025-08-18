@@ -46,8 +46,6 @@ function SearchBox({
           <Item key={it.id} onClick={() => onSelect?.(it)}>
             <Title>{it.title}</Title>
             {it.subtitle && <Sub>{it.subtitle}</Sub>}
-            <Arrow>›</Arrow>
-            <Divider />
           </Item>
         ))}
       </List>
@@ -144,19 +142,8 @@ const Sub = styled.div`
   color: #6b7280;
 `;
 
-const Arrow = styled.div`
-  align-self: center;
-  color: #c0c4cc;
-`;
-
 const Hint = styled.div`
   padding: 16px 6px;
   color: #6b7280;
   font-size: 14px;
-`;
-
-const Divider = styled.div`
-  height: 1px;
-  background: #eee;
-  margin: 10px 0 6px;
 `;
