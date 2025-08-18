@@ -2,6 +2,12 @@
 export const responsiveSizes = {
   // 데스크톱 (500px 기준)
   desktop: {
+    button: "450px", // 500px의 90%
+    progress: "450px",
+    search: "450px",
+  },
+  // 랩탑
+  laptop: {
     button: "400px", // 500px의 80%
     progress: "400px",
     search: "400px",
@@ -32,6 +38,12 @@ export function getResponsiveStyles(componentType) {
     width: 100%;
     max-width: ${responsiveSizes.desktop[componentType]};
     min-width: ${responsiveSizes.smallMobile[componentType]};
+    margin: 0 auto; /* 수평 중앙 정렬 */
+
+     /* 랩탑 */
+    @media (max-width: 1440px) {
+      max-width: ${responsiveSizes.laptop[componentType]};
+    }
     
     /* 태블릿 */
     @media (max-width: 1024px) {
