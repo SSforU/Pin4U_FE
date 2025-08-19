@@ -1,3 +1,4 @@
+// Map.jsx
 import React, { useEffect } from "react";
 import styled from "styled-components";
 
@@ -16,26 +17,34 @@ const MapContainer = styled.div`
   min-height: 240px;
 `;
 
-export default function HomeMap() {
+export default function Map({ station, items }) {
   useEffect(() => {
-    // 카카오맵 API가 로드될 때까지 기다리는 함수
     const initMap = () => {
       if (window.kakao && window.kakao.maps) {
         const container = document.getElementById("map");
         const options = {
-          center: new window.kakao.maps.LatLng(37.5721, 126.9854),
-          level: 10,
+          center: new window.kakao.maps.LatLng(station.lat, station.lng),
+          level: 4,
         };
-        // eslint-disable-next-line no-unused-vars
         const map = new window.kakao.maps.Map(container, options);
+
+        // API의 items 정보를 기반으로 마커를 지도에 표시하는 로직을 여기에 추가
+        // 예시:
+        // items.forEach(item => {
+        //   const markerPosition = new window.kakao.maps.LatLng(item.y, item.x);
+        //   new window.kakao.maps.Marker({
+        //     map: map,
+        //     position: markerPosition,
+        //     title: item.place_name,
+        //   });
+        // });
       } else {
-        // API가 아직 로드되지 않았다면 잠시 후 다시 시도
         setTimeout(initMap, 100);
       }
     };
 
     initMap();
-  }, []);
+  }, [station, items]); // station이나 items가 변경될 때 지도를 다시 로드
 
   return <MapContainer id="map"></MapContainer>;
 }
