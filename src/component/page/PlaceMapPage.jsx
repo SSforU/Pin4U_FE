@@ -133,13 +133,12 @@ export default function PlaceMapPage() {
         />
       </Header>
       <MapWrapper>
-        <Map station={data.station} items={data.items}>
-          {isMemoOpen && (
-            <MapMemo>
-              <MemoText>{data.request_message}</MemoText>
-            </MapMemo>
-          )}
-        </Map>
+        <Map station={data.station} items={data.items} />
+        {isMemoOpen && (
+          <MapMemo>
+            <MemoText>{data.request_message}</MemoText>
+          </MapMemo>
+        )}
       </MapWrapper>
       <CardListWrapper>
         <PlaceCardList items={data.items} onCardClick={handleCardClick} />
