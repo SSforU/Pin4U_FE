@@ -24,9 +24,9 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="station" replace /> },
           { path: "station", element: <StepStation /> },
           { path: "memo", element: <StepMemo /> },
-          { path: "invite", element: <StepInvite /> },
         ],
       },
+      { path: "invite", element: <StepInvite /> },
     ],
   },
 ]);
