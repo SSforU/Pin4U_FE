@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react"; // useState 추가
 import { Outlet, useNavigate, useMatch } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../ui/ProgressBar";
@@ -11,6 +11,7 @@ const TOTAL_STEPS = 3; // 전체 단계 수
 
 function MakePlaceLayout() {
   const navigate = useNavigate();
+  const [station, setStation] = useState(null); // 역 선택 정보를 담을 state
 
   // useMatch로 현재 step 추출
   const match = useMatch("/make-place/:step");
@@ -20,6 +21,9 @@ function MakePlaceLayout() {
   const isLast = currentIndex === STEPS.length - 1;
 
   const currentStep = currentIndex + FLOW_OFFSET;
+
+  // 다음 버튼 비활성화 조건 추가
+  const isNextDisabled = stepParam === "station" && !station;
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -49,7 +53,6 @@ function MakePlaceLayout() {
             src="/PrevButton.png"
             alt="뒤로가기"
             onClick={goPrev}
-            style={{ cursor: "pointer" }}
           />
         </PrevButtonContainer>
       </Top>
@@ -57,6 +60,9 @@ function MakePlaceLayout() {
       <Main>
         <Outlet
           context={{
+            // station과 setStation을 context로 전달
+            station,
+            setStation,
             currentStep,
             totalSteps: TOTAL_STEPS,
             currentIndex,
@@ -68,7 +74,8 @@ function MakePlaceLayout() {
       </Main>
 
       <Bottom>
-        <Button disabled={isLast} onClick={goNext}>
+        {/* disabled 조건에 isNextDisabled 추가 */}
+        <Button disabled={isNextDisabled || isLast} onClick={goNext}>
           {isLast ? "완료" : "다음"}
         </Button>
       </Bottom>
@@ -86,7 +93,7 @@ const Wrapper = styled.div`
 `;
 
 const Top = styled.div`
-  padding: 20px;
+  padding: 20px 20px 0px 20px;
 `;
 
 const Main = styled.main`
