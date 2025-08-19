@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // useState 추가
+import React, { useState } from "react";
 import { Outlet, useNavigate, useMatch } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../ui/ProgressBar";
@@ -11,19 +11,20 @@ const TOTAL_STEPS = 3; // 전체 단계 수
 
 function MakePlaceLayout() {
   const navigate = useNavigate();
-  const [station, setStation] = useState(null); // 역 선택 정보를 담을 state
+  const [station, setStation] = useState(null);
+  const [memo, setMemo] = useState("");
 
   // useMatch로 현재 step 추출
   const match = useMatch("/make-place/:step");
   const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
-  const isLast = currentIndex === STEPS.length - 1;
-
   const currentStep = currentIndex + FLOW_OFFSET;
 
-  // 다음 버튼 비활성화 조건 추가
-  const isNextDisabled = stepParam === "station" && !station;
+  // 다음 버튼 비활성화 조건
+  const isNextDisabled =
+    (stepParam === "station" && !station) ||
+    (stepParam === "memo" && !memo.trim());
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -31,8 +32,11 @@ function MakePlaceLayout() {
   }
 
   function goNext() {
-    if (!isLast) {
+    if (stepParam === "station") {
       goToStep(currentIndex + 1);
+    } else if (stepParam === "memo") {
+      // 메모 단계에서 완료 버튼을 누르면 invite 페이지로 이동
+      navigate("/invite");
     }
   }
 
@@ -58,25 +62,12 @@ function MakePlaceLayout() {
       </Top>
 
       <Main>
-        <Outlet
-          context={{
-            // station과 setStation을 context로 전달
-            station,
-            setStation,
-            currentStep,
-            totalSteps: TOTAL_STEPS,
-            currentIndex,
-            goNext,
-            goPrev,
-            isLast,
-          }}
-        />
+        <Outlet context={{ station, setStation, memo, setMemo }} />
       </Main>
 
       <Bottom>
-        {/* disabled 조건에 isNextDisabled 추가 */}
-        <Button disabled={isNextDisabled || isLast} onClick={goNext}>
-          {isLast ? "완료" : "다음"}
+        <Button disabled={isNextDisabled} onClick={goNext}>
+          {stepParam === "memo" ? "완료" : "다음"}
         </Button>
       </Bottom>
     </Wrapper>

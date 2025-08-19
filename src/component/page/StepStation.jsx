@@ -5,9 +5,9 @@ import styled from "styled-components";
 import { getResponsiveStyles } from "../../styles/responsive";
 import { useOutletContext } from "react-router-dom";
 
-export default function StepStation() {
-  const { setStation } = useOutletContext();
-  const [query, setQuery] = useState("");
+function StepStation() {
+  const { station, setStation } = useOutletContext();
+  const [query, setQuery] = useState(station?.title || "");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
 
@@ -50,6 +50,8 @@ export default function StepStation() {
     </Wrapper>
   );
 }
+
+export default StepStation;
 
 // styled-components
 const Wrapper = styled.div`
