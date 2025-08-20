@@ -1,3 +1,4 @@
+// 최초 앱 접속자 온보딩
 import React from "react";
 import SearchBox from "../ui/SearchBox";
 import { useState } from "react";

@@ -5,9 +5,14 @@ import HomePage from "./component/page/HomePage";
 import MakePlaceLayout from "./component/page/MakePlaceLayout";
 import PlaceMapPage from "./component/page/PlaceMapPage";
 import { Navigate } from "react-router-dom";
-import StepStation from "./component/page/StepStation";
-import StepMemo from "./component/page/StepMemo";
-import StepInvite from "./component/page/StepInvite";
+import StepStation from "./component/step/StepStation";
+import StepMemo from "./component/step/StepMemo";
+import StepInvite from "./component/step/StepInvite";
+import StepNickname from "./component/step/StepNickname";
+import CompleteRecommend from "./component/page/CompleteRecommend";
+import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
+import StepLocation from "./component/step/StepLocation";
+import StepRecommend from "./component/step/StepRecommend";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +32,20 @@ const router = createBrowserRouter([
         ],
       },
       { path: "invite", element: <StepInvite /> },
+      {
+        path: "shared-map/:mapId/onboarding",
+        element: <RecommendPlaceLayout />,
+        children: [
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "location", element: <StepLocation /> },
+          { path: "memo", element: <StepRecommend /> },
+        ],
+      },
+      {
+        path: "shared-map/:mapId/complete",
+        element: <CompleteRecommend />,
+      },
     ],
   },
 ]);
