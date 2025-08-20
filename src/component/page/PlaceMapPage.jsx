@@ -97,6 +97,7 @@ export default function PlaceMapPage() {
 
   const [data, setData] = useState(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false); // Memo 상태 추가
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
   function goPrev() {
     navigate("/");
@@ -111,7 +112,7 @@ export default function PlaceMapPage() {
 
   const handleCardClick = (item) => {
     console.log(`Card clicked: ${item.place_name}`);
-    // 카드 클릭 시 지도에서 해당 장소를 하이라이트하는 등의 로직 추가
+    setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
   };
 
   if (!data) {
@@ -124,7 +125,7 @@ export default function PlaceMapPage() {
         <StationWrapper>
           <PrevButton src="/PrevButton.png" alt="뒤로가기" onClick={goPrev} />
           <StationName>{data.station.name}역</StationName>
-          <SubwayLineIcon imageUrl={subwayLineImages[data.station.line]} />
+          <SubwayLineIcon $imageUrl={subwayLineImages[data.station.line]} />
         </StationWrapper>
         <MapMemoBtnImage
           onClick={() => setIsMemoOpen(!isMemoOpen)}
@@ -138,7 +139,11 @@ export default function PlaceMapPage() {
             <MemoText>{data.request_message}</MemoText>
           </MapMemo>
         )}
-        <Map station={data.station} items={data.items} />
+        <Map
+          station={data.station}
+          items={data.items}
+          selectedItemId={selectedItemId}
+        />
       </MapWrapper>
       <CardListWrapper>
         <PlaceCardList items={data.items} onCardClick={handleCardClick} />
@@ -168,7 +173,6 @@ const Header = styled.div`
 `;
 
 const MapWrapper = styled.div`
-  flex: 1;
   position: relative;
 `;
 
@@ -215,7 +219,7 @@ const SubwayLineIcon = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   flex-shrink: 0;
-  background-image: ${(props) => `url('${props.imageUrl}')`};
+  background-image: ${(props) => `url('${props.$imageUrl}')`};
 `;
 const MapMemoBtnImage = styled.img`
   width: 25px;

@@ -8,6 +8,7 @@ const ListContainer = styled.div`
   gap: 16px;
   padding: 16px;
   overflow-x: auto;
+  background-color: #f7f7f7;
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
     display: none;
