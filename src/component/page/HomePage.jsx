@@ -49,9 +49,9 @@ export default function HomePage() {
       <TitleBox>
         <PageTitle>김숭실 님의 지도</PageTitle>
       </TitleBox>
-      <HomeSearchBox onSearch={setSearchTerm} />
 
       <ContentContainer>
+        <HomeSearchBox onSearch={setSearchTerm} />
         <StationList stations={filteredStations} />
       </ContentContainer>
 

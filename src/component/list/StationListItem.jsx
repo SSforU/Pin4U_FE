@@ -15,15 +15,13 @@ const StationListItem = ({ station }) => {
         <StationNameGroup>
           <StationName>{station.name}</StationName>
           {station.lines.map((line, index) => (
-            <LineBadge key={index} lineColor={lineColors[line]}>
-              {line}
-            </LineBadge>
+            <SubwayLineIcon key={index} imageUrl={subwayLineImages[line]} />
           ))}
         </StationNameGroup>
         <Address>{station.address}</Address>
       </StationInfo>
       <LikeGroup>
-        <img src="Pin.png" />
+        <img src="Pin.png" style={{ width: "16px", height: "16px" }} />
         <LikeCount>{station.recommended_counts}</LikeCount>
       </LikeGroup>
     </Container>
@@ -67,18 +65,7 @@ const StationName = styled.p`
   font-size: 16px;
   font-weight: medium;
   margin: 0;
-  margin-right: 8px;
-`;
-
-const LineBadge = styled.span`
-  display: inline-block;
-  padding: 2px 6px;
-  margin: 0 2px;
-  border-radius: 50px;
-  font-size: 10px;
-  font-weight: bold;
-  color: #fff;
-  background-color: ${(props) => props.lineColor || "#ccc"};
+  margin-right: 2px;
 `;
 
 const Address = styled.p`
@@ -100,8 +87,24 @@ const LikeCount = styled.span`
   margin-left: 4px;
 `;
 
-// 지하철 노선 색상 매핑
-const lineColors = {
-  4: "#00A1D3", // 하늘색
-  7: "#54681E", // 진녹색
+const subwayLineImages = {
+  1: "/1호선.png",
+  2: "/2호선.png",
+  3: "/3호선.png",
+  4: "/4호선.png",
+  5: "/5호선.png",
+  6: "/6호선.png",
+  7: "/7호선.png",
+  8: "/8호선.png",
+  9: "/9호선.png",
 };
+
+const SubwayLineIcon = styled.div`
+  width: 25px;
+  height: 25px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  background-image: ${(props) => `url('${props.imageUrl}')`};
+`;
