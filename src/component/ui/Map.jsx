@@ -13,7 +13,7 @@ const MapContainer = styled.div`
   min-height: 240px;
 `;
 
-export default function Map({ station, items, selectedItemId }) {
+export default function Map({ station, items, selectedItemId, onMarkerClick }) {
   const mapRef = useRef(null);
   const markersRef = useRef({});
 
@@ -23,7 +23,7 @@ export default function Map({ station, items, selectedItemId }) {
         const container = document.getElementById("map");
         const options = {
           center: new window.kakao.maps.LatLng(station.lat, station.lng),
-          level: 4,
+          level: 5,
         };
         const map = new window.kakao.maps.Map(container, options);
         mapRef.current = map;
@@ -63,7 +63,7 @@ export default function Map({ station, items, selectedItemId }) {
           window.kakao.maps.event.addListener(marker, "click", function () {
             // 클릭 시 PlaceMapPage로 선택된 아이템 ID를 전달하는 로직이 필요
             // 현재 코드에서는 직접적인 상위 컴포넌트 상태 변경이 어려우므로 alert만 유지
-            alert("클릭한 장소: " + item.place_name);
+            onMarkerClick(item);
           });
         });
       } else {
