@@ -133,12 +133,12 @@ export default function PlaceMapPage() {
         />
       </Header>
       <MapWrapper>
-        <Map station={data.station} items={data.items} />
         {isMemoOpen && (
           <MapMemo>
             <MemoText>{data.request_message}</MemoText>
           </MapMemo>
         )}
+        <Map station={data.station} items={data.items} />
       </MapWrapper>
       <CardListWrapper>
         <PlaceCardList items={data.items} onCardClick={handleCardClick} />
@@ -169,6 +169,7 @@ const Header = styled.div`
 
 const MapWrapper = styled.div`
   flex: 1;
+  position: relative;
 `;
 
 const StationName = styled.div`
@@ -227,15 +228,15 @@ const MapMemo = styled.div`
   top: 16px;
   left: 16px;
   right: 16px;
-  background-color: #ffc0cb; // 분홍색
-  padding: 12px;
+  background-color: #ffefedc8; // 분홍색
+  padding: 10px 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  text-align: start;
+  z-index: 10; /* 이 속성을 추가하여 지도보다 위에 오도록 합니다 */
 `;
 
 const MemoText = styled.p`
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
 `;
