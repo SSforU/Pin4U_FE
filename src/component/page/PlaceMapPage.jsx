@@ -4,6 +4,7 @@ import Map from "../ui/Map"; // Map 컴포넌트의 경로가 올바른지 확�
 import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import PlaceDetail from "../ui/PlaceDetail";
 
 // API 데이터 예시 (실제로는 fetch를 통해 받아옵니다)
 const mockApiData = {
@@ -103,6 +104,15 @@ export default function PlaceMapPage() {
     navigate("/");
   }
 
+  const selectedItem = selectedItemId
+    ? data.items.find((item) => item.id === selectedItemId)
+    : null;
+
+  // PlaceDetail 닫기 함수
+  const handleCloseDetail = () => {
+    setSelectedItemId(null);
+  };
+
   useEffect(() => {
     // 실제 API 호출 로직은 이 곳에 구현
     // fetch(`/api/place-map/${slug}`).then(...)
@@ -145,9 +155,13 @@ export default function PlaceMapPage() {
           selectedItemId={selectedItemId}
         />
       </MapWrapper>
-      <CardListWrapper>
-        <PlaceCardList items={data.items} onCardClick={handleCardClick} />
-      </CardListWrapper>
+      {selectedItemId ? (
+        <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
+      ) : (
+        <CardListWrapper>
+          <PlaceCardList items={data.items} onCardClick={handleCardClick} />
+        </CardListWrapper>
+      )}
     </PageContainer>
   );
 }
