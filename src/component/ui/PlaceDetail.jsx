@@ -3,6 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import RecommendMsg from "./RecommendMsg";
 import { useState } from "react";
+import PhotoGallery from "./PhotoGallery";
 
 // mockApiData를 PlaceDetail 컴포넌트 내부로 이동
 const mockApiData = {
@@ -31,6 +32,7 @@ const mockApiData = {
 
 export default function PlaceDetail({ item, onClose }) {
   const [showMessage, setShowMessage] = useState(false);
+  const [showGallery, setShowGallery] = useState(false); // 갤러리 상태 추가
   const [messageData, setMessageData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -98,7 +100,7 @@ export default function PlaceDetail({ item, onClose }) {
           }}
         >
           <SectionTitle>사진</SectionTitle>
-          <MoreButton>더보기</MoreButton>
+          <MoreButton onClick={() => setShowGallery(true)}>더보기</MoreButton>
         </div>
         <ImageContainer>
           {item.mock.image_urls.map((url, index) => (
@@ -110,6 +112,12 @@ export default function PlaceDetail({ item, onClose }) {
         <RecommendMsg
           notes={messageData.notes}
           onClose={() => setShowMessage(false)}
+        />
+      )}
+      {showGallery && (
+        <PhotoGallery
+          imageUrls={item.mock.image_urls}
+          onClose={() => setShowGallery(false)}
         />
       )}
     </>

@@ -5,9 +5,10 @@ import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PlaceDetail from "../ui/PlaceDetail";
+import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
 
-// API 데이터 예시 (실제로는 fetch를 통해 받아옵니다)
-const mockApiData = {
+// 지인 추천 API 데이터 예시 (기존 데이터)
+const friendMockApiData = {
   result: "success",
   data: {
     slug: "abCDef12",
@@ -93,6 +94,40 @@ const mockApiData = {
   },
 };
 
+// AI 추천 API 데이터 예시 (새로운 데이터)
+const aiMockApiData = {
+  result: "success",
+  data: {
+    items: [
+      {
+        external_id: "kakao:999999999",
+        id: "999999999",
+        place_name: "카페 온도",
+        category_group_code: "CE7",
+        category_group_name: "카페",
+        category_name: "카페 > 디저트카페",
+        address_name: "서울 동작구 ㅇㅇ로 12",
+        road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
+        x: "126.95790",
+        y: "37.49611",
+        place_url: "http://place.map.kakao.com/999999999",
+        distance_m: 420,
+        mock: {
+          rating: 4.5,
+          rating_count: 87,
+          image_urls: ["/static/images/cafe_ondu_1.jpg"],
+        },
+        ai: {
+          summary_text: "조용한 공부하기 좋은 카페",
+          tags: ["조용", "디저트"],
+        },
+        reason: "사용자 선호(조용/카페)와 유사",
+        recommended_count: 0, // AI 추천 장소는 추천 수 0으로 초기화
+      },
+    ],
+  },
+};
+
 export default function PlaceMapPage() {
   const navigate = useNavigate();
 
@@ -117,7 +152,23 @@ export default function PlaceMapPage() {
     // 실제 API 호출 로직은 이 곳에 구현
     // fetch(`/api/place-map/${slug}`).then(...)
     // 현재는 목업 데이터 사용
-    setData(mockApiData.data);
+    const mergedItems = [
+      ...friendMockApiData.data.items.map((item) => ({ ...item, isAI: false })),
+      ...aiMockApiData.data.items.map((item) => ({ ...item, isAI: true })),
+    ];
+
+    // Map과 PlaceCardList에 각각 필요한 뷰모델을 생성
+    const pinVMs = mergedItems.map((item) => toPinVM(item, item.isAI));
+    const cardVMs = mergedItems.map((item) => toCardVM(item, item.isAI));
+
+    setData({
+      ...friendMockApiData.data,
+      // 이제 UI 컴포넌트에 직접 뷰모델 데이터를 전달
+      // Map 컴포넌트에는 PinVM 리스트를, PlaceCardList에는 CardVM 리스트를 전달
+      items: mergedItems, // 원본 데이터를 계속 가지고 있음
+      pinVMs,
+      cardVMs,
+    });
   }, []);
 
   const handleCardClick = (item) => {
@@ -151,7 +202,7 @@ export default function PlaceMapPage() {
         )}
         <Map
           station={data.station}
-          items={data.items}
+          items={data.pinVMs}
           selectedItemId={selectedItemId}
           onMarkerClick={handleCardClick} // 마커 클릭 이벤트 연결
         />
@@ -160,7 +211,7 @@ export default function PlaceMapPage() {
         <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
       ) : (
         <CardListWrapper>
-          <PlaceCardList items={data.items} onCardClick={handleCardClick} />
+          <PlaceCardList items={data.cardVMs} onCardClick={handleCardClick} />
         </CardListWrapper>
       )}
     </PageContainer>

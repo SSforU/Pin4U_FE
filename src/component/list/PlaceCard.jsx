@@ -13,7 +13,7 @@ const StyledCard = styled.div`
   flex-direction: column;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-
+  flex-shrink: 0;
   &:hover {
     transform: translateY(-4px);
   }
@@ -27,6 +27,7 @@ const ImageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  position: relative;
 `;
 
 const PlaceImage = styled.img`
@@ -57,11 +58,13 @@ const SubText = styled.div`
   color: #888;
 `;
 
-const PlaceCard = ({ placeName, subText, imageUrl, onClick }) => {
+const PlaceCard = ({ placeName, subText, imageUrl, onClick, isAI }) => {
   return (
     <StyledCard onClick={onClick}>
       <ImageWrapper>
         <PlaceImage src={imageUrl} alt={placeName} />
+        {isAI && <AiTag src="/Info_icon.svg" />}
+        {/* isAI prop이 true일 때 태그 표시 */}
       </ImageWrapper>
       <ContentWrapper>
         <PlaceName>{placeName}</PlaceName>
@@ -72,3 +75,11 @@ const PlaceCard = ({ placeName, subText, imageUrl, onClick }) => {
 };
 
 export default PlaceCard;
+
+// AI 태그를 위한 새로운 컴포넌트
+const AiTag = styled.img`
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 4px 6px;
+`;

@@ -49,12 +49,15 @@ export default function Map({ station, items, selectedItemId, onMarkerClick }) {
         );
 
         items.forEach((item) => {
-          const markerPosition = new window.kakao.maps.LatLng(item.y, item.x);
+          const markerPosition = new window.kakao.maps.LatLng(
+            item.lat,
+            item.lng
+          );
 
           const marker = new window.kakao.maps.Marker({
             map: map,
             position: markerPosition,
-            title: item.place_name,
+            title: item.name,
             image: blurredImage, // 초기에는 흐릿한 이미지 설정
           });
 
