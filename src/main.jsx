@@ -9,7 +9,7 @@ import StepStation from "./component/step/StepStation";
 import StepMemo from "./component/step/StepMemo";
 import StepInvite from "./component/step/StepInvite";
 import StepNickname from "./component/step/StepNickname";
-import ParticipationComplete from "./component/page/ParticipationComplete";
+import CompleteRecommend from "./component/page/CompleteRecommend";
 import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
 import StepLocation from "./component/step/StepLocation";
 import StepRecommend from "./component/step/StepRecommend";
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
       },
       {
         path: "shared-map/:mapId/complete",
-        element: <ParticipationComplete />,
+        element: <CompleteRecommend />,
       },
     ],
   },
