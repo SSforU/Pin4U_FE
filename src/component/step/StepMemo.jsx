@@ -1,3 +1,4 @@
+// 최초 앱 접속자 온보딩
 import { React, useState, useEffect } from "react";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../styles/responsive";
@@ -8,25 +9,22 @@ function StepMemo() {
   const { memo, setMemo } = useOutletContext();
   const [content, setContent] = useState(memo || "");
 
-  // memo prop이 변경될 때 content 상태 동기화
+  // memo prop이 변경될 때만 content 상태 동기화 (초기 로드 시에만)
   useEffect(() => {
-    if (memo !== content) {
-      setContent(memo || "");
+    if (memo && memo !== content) {
+      setContent(memo);
     }
-  }, [memo]);
-
-  // 메모 내용이 변경될 때마다 부모 컴포넌트에 전달
-  useEffect(() => {
-    if (setMemo) {
-      setMemo(content);
-    }
-  }, [content, setMemo]);
+  }, [memo]); // content 의존성 제거
 
   // 30자 제한 처리
   const handleMemoChange = (e) => {
     const newContent = e.target.value;
     if (newContent.length <= 30) {
       setContent(newContent);
+      // 부모 컴포넌트에 즉시 전달 (디바운싱 없이)
+      if (setMemo) {
+        setMemo(newContent);
+      }
     }
   };
 
