@@ -4,6 +4,7 @@ import Map from "../ui/Map"; // Map 컴포넌트의 경로가 올바른지 확�
 import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import PlaceDetail from "../ui/PlaceDetail";
 
 // API 데이터 예시 (실제로는 fetch를 통해 받아옵니다)
 const mockApiData = {
@@ -97,10 +98,20 @@ export default function PlaceMapPage() {
 
   const [data, setData] = useState(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false); // Memo 상태 추가
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
   function goPrev() {
     navigate("/");
   }
+
+  const selectedItem = selectedItemId
+    ? data.items.find((item) => item.id === selectedItemId)
+    : null;
+
+  // PlaceDetail 닫기 함수
+  const handleCloseDetail = () => {
+    setSelectedItemId(null);
+  };
 
   useEffect(() => {
     // 실제 API 호출 로직은 이 곳에 구현
@@ -111,7 +122,7 @@ export default function PlaceMapPage() {
 
   const handleCardClick = (item) => {
     console.log(`Card clicked: ${item.place_name}`);
-    // 카드 클릭 시 지도에서 해당 장소를 하이라이트하는 등의 로직 추가
+    setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
   };
 
   if (!data) {
@@ -124,7 +135,7 @@ export default function PlaceMapPage() {
         <StationWrapper>
           <PrevButton src="/PrevButton.png" alt="뒤로가기" onClick={goPrev} />
           <StationName>{data.station.name}역</StationName>
-          <SubwayLineIcon imageUrl={subwayLineImages[data.station.line]} />
+          <SubwayLineIcon $imageUrl={subwayLineImages[data.station.line]} />
         </StationWrapper>
         <MapMemoBtnImage
           onClick={() => setIsMemoOpen(!isMemoOpen)}
@@ -133,16 +144,24 @@ export default function PlaceMapPage() {
         />
       </Header>
       <MapWrapper>
-        <Map station={data.station} items={data.items} />
         {isMemoOpen && (
           <MapMemo>
             <MemoText>{data.request_message}</MemoText>
           </MapMemo>
         )}
+        <Map
+          station={data.station}
+          items={data.items}
+          selectedItemId={selectedItemId}
+        />
       </MapWrapper>
-      <CardListWrapper>
-        <PlaceCardList items={data.items} onCardClick={handleCardClick} />
-      </CardListWrapper>
+      {selectedItemId ? (
+        <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
+      ) : (
+        <CardListWrapper>
+          <PlaceCardList items={data.items} onCardClick={handleCardClick} />
+        </CardListWrapper>
+      )}
     </PageContainer>
   );
 }
@@ -168,7 +187,7 @@ const Header = styled.div`
 `;
 
 const MapWrapper = styled.div`
-  flex: 1;
+  position: relative;
 `;
 
 const StationName = styled.div`
@@ -214,7 +233,7 @@ const SubwayLineIcon = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   flex-shrink: 0;
-  background-image: ${(props) => `url('${props.imageUrl}')`};
+  background-image: ${(props) => `url('${props.$imageUrl}')`};
 `;
 const MapMemoBtnImage = styled.img`
   width: 25px;
@@ -227,15 +246,15 @@ const MapMemo = styled.div`
   top: 16px;
   left: 16px;
   right: 16px;
-  background-color: #ffc0cb; // 분홍색
-  padding: 12px;
+  background-color: #ffefedc8; // 분홍색
+  padding: 10px 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  text-align: start;
+  z-index: 10; /* 이 속성을 추가하여 지도보다 위에 오도록 합니다 */
 `;
 
 const MemoText = styled.p`
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
 `;

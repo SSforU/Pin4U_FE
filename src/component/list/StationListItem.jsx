@@ -21,7 +21,7 @@ const StationListItem = ({ station }) => {
         <Address>{station.address}</Address>
       </StationInfo>
       <LikeGroup>
-        <img src="Pin.png" />
+        <img src="Pin.png" style={{ width: "16px", height: "16px" }} />
         <LikeCount>{station.recommended_counts}</LikeCount>
       </LikeGroup>
     </Container>
