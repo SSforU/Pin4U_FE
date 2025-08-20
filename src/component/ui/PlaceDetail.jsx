@@ -1,7 +1,7 @@
 // PlaceDetail.jsx
 import React from "react";
 import styled from "styled-components";
-import Message from "./Message";
+import RecommendMsg from "./RecommendMsg";
 import { useState } from "react";
 
 // mockApiData를 PlaceDetail 컴포넌트 내부로 이동
@@ -107,7 +107,7 @@ export default function PlaceDetail({ item, onClose }) {
         </ImageContainer>
       </DetailContainer>
       {showMessage && messageData && (
-        <Message
+        <RecommendMsg
           notes={messageData.notes}
           onClose={() => setShowMessage(false)}
         />
