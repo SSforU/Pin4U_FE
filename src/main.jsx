@@ -13,6 +13,7 @@ import CompleteRecommend from "./component/page/CompleteRecommend";
 import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
 import StepLocation from "./component/step/StepLocation";
 import StepRecommend from "./component/step/StepRecommend";
+import StartRecommend from "./component/page/StartRecommend";
 
 const router = createBrowserRouter([
   {
@@ -33,13 +34,17 @@ const router = createBrowserRouter([
       },
       { path: "invite", element: <StepInvite /> },
       {
+        path: "shared-map/:mapId",
+        element: <StartRecommend />,
+      },
+      {
         path: "shared-map/:mapId/onboarding",
         element: <RecommendPlaceLayout />,
         children: [
           { index: true, element: <Navigate to="nickname" replace /> },
           { path: "nickname", element: <StepNickname /> },
           { path: "location", element: <StepLocation /> },
-          { path: "memo", element: <StepRecommend /> },
+          { path: "recommend", element: <StepRecommend /> },
         ],
       },
       {

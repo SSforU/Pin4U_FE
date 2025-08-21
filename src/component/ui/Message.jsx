@@ -54,7 +54,7 @@ function Message({
       {/* 메모 입력 섹션 - Memo 컴포넌트 재사용 */}
       <MemoSection>
         <Memo
-          height={imagePreview ? 180 : 120}
+          height={imagePreview ? 180 : 150}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
