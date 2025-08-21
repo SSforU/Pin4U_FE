@@ -37,10 +37,26 @@ function StepRecommend() {
 
   // 카테고리 토글 처리
   const handleCategoryToggle = (category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((cat) => cat !== category)
-        : [...prev, category]
+    setSelectedCategories((prev) => {
+      // 이미 선택된 카테고리라면 제거
+      if (prev.includes(category)) {
+        return prev.filter((cat) => cat !== category);
+      }
+
+      // 최대 3개까지만 선택 가능
+      if (prev.length >= 3) {
+        return prev; // 3개가 이미 선택된 상태면 추가하지 않음
+      }
+
+      // 새로운 카테고리 추가
+      return [...prev, category];
+    });
+  };
+
+  // 카테고리가 비활성화되어야 하는지 확인
+  const isCategoryDisabled = (category) => {
+    return (
+      selectedCategories.length >= 3 && !selectedCategories.includes(category)
     );
   };
 
@@ -64,14 +80,18 @@ function StepRecommend() {
         </TextBlock>
 
         <CategorySection>
-          <CategoryLabel>
-            이 장소의 키워드를 선택해주세요. (최대 3개)
-          </CategoryLabel>
+          <TextBlock>
+            <CategoryLabel>
+              이 장소의 키워드를 선택해주세요. (최대 3개)
+            </CategoryLabel>
+          </TextBlock>
+          {/* 해당 장소 추가 예정 */}
           <CategoryGrid>
             {categories.map((category) => (
               <CategoryButton
                 key={category}
                 isSelected={selectedCategories.includes(category)}
+                disabled={isCategoryDisabled(category)}
                 onClick={() => handleCategoryToggle(category)}
               >
                 {category}
@@ -81,6 +101,9 @@ function StepRecommend() {
         </CategorySection>
 
         <InputSection>
+          <TextBlock>
+            <InputLabel>김숭실 님에게 전달할 메시지를 입력해주세요.</InputLabel>
+          </TextBlock>
           <InputContainer>
             <Message
               value={content}
@@ -124,7 +147,7 @@ const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: 12px;
   text-align: left;
 `;
 
@@ -163,7 +186,15 @@ const Detail = styled.p`
 const InputSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 5px;
+`;
+
+const InputLabel = styled.p`
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #383838;
 `;
 
 const InputContainer = styled.div`
@@ -191,34 +222,55 @@ const CategorySection = styled.div`
 const CategoryLabel = styled.label`
   font-family: "Pretendard", sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   color: #333;
 `;
 
 const CategoryGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3개씩 균등하게 배치 */
   gap: 12px;
   width: 100%;
+
+  /* 모바일에서는 2개씩 */
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
-const CategoryButton = styled.button`
+const CategoryButton = styled.div`
   padding: 12px 16px;
-  border: 2px solid ${(props) => (props.isSelected ? "#ff7e74" : "#e0e0e0")};
+  border: 2px solid
+    ${(props) => {
+      if (props.disabled) return "#e0e0e0";
+      return props.isSelected ? "#ff7e74" : "#e0e0e0";
+    }};
   border-radius: 8px;
-  background-color: ${(props) => (props.isSelected ? "#ffefed" : "#E7E7E7")};
-  color: ${(props) => (props.isSelected ? "#ff7e74" : "#585858")};
+  background-color: ${(props) => {
+    if (props.disabled) return "#f5f5f5";
+    return props.isSelected ? "#ffefed" : "#E7E7E7";
+  }};
+  color: ${(props) => {
+    if (props.disabled) return "#bababa";
+    return props.isSelected ? "#ff7e74" : "#585858";
+  }};
   font-family: "Pretendard", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s ease;
   text-align: center;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
 
   &:hover {
-    border: 2px solid #ff7e74;
-    color: #ff7e74;
-    background-color: #ffefed;
+    ${(props) =>
+      !props.disabled &&
+      `
+      border: 2px solid #ff7e74;
+      color: #ff7e74;
+      background-color: #ffefed;
+    `}
   }
 
   @media (max-width: 768px) {
