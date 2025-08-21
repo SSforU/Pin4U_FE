@@ -156,14 +156,13 @@ const PlaceName = styled.h2`
 `;
 
 const MessageButton = styled.button`
-  background-color: #ffefed;
-  color: #c94040;
+  background-color: #ff7e74;
+  color: #ffffff;
   border: none;
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 4px 7px;
+  border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
-  font-weight: bold;
 `;
 
 const Section = styled.div`
