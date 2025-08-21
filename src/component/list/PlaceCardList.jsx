@@ -6,7 +6,10 @@ import PlaceCard from "./PlaceCard";
 const ListContainer = styled.div`
   display: flex;
   gap: 16px;
-  padding: 16px;
+  padding-top: 20px;
+  padding-bottom: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
   overflow-x: auto;
   background-color: #f7f7f7;
   -webkit-overflow-scrolling: touch;
@@ -33,7 +36,7 @@ const ListContainer = styled.div`
   }
 `;
 
-const PlaceCardList = ({ items, onCardClick }) => {
+const PlaceCardList = ({ items, onCardClick, onAiTagClick }) => {
   return (
     <ListContainer>
       {items.map((item) => (
@@ -44,6 +47,7 @@ const PlaceCardList = ({ items, onCardClick }) => {
           imageUrl={item.imageUrl || "/default-image.png"}
           isAI={item.isAI}
           onClick={() => onCardClick(item)}
+          onAiTagClick={item.isAI ? () => onAiTagClick(item) : undefined} // Only pass handler if it's an AI card
         />
       ))}
     </ListContainer>

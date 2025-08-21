@@ -1,15 +1,13 @@
 // PlaceCard.jsx
 import React from "react";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
 
 const StyledCard = styled.div`
-  width: 140px;
-  height: 180px;
+  width: 100px;
+  height: 150px;
   background-color: white;
   border-radius: 12px;
   box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -59,21 +57,19 @@ const SubText = styled.div`
   color: #888;
 `;
 
-const PlaceCard = ({ placeName, subText, imageUrl, onClick, isAI }) => {
-  const [showMessage, setShowMessage] = useState(false);
-
-  useEffect(() => {
-    if (showMessage) {
-      const timer = setTimeout(() => {
-        setShowMessage(false);
-      }, 5000); // 5초 후에 메시지를 숨깁니다.
-      return () => clearTimeout(timer); // 컴포넌트 언마운트 시 타이머를 정리합니다.
-    }
-  }, [showMessage]);
-
+const PlaceCard = ({
+  placeName,
+  subText,
+  imageUrl,
+  onClick,
+  isAI,
+  onAiTagClick,
+}) => {
   const handleAiTagClick = (e) => {
-    e.stopPropagation(); // 카드 전체 클릭 이벤트가 발생하지 않도록 방지
-    setShowMessage(true);
+    e.stopPropagation(); // Prevents the card's onClick from firing
+    if (onAiTagClick) {
+      onAiTagClick(); // Call the new handler passed from the parent
+    }
   };
 
   return (
@@ -87,11 +83,6 @@ const PlaceCard = ({ placeName, subText, imageUrl, onClick, isAI }) => {
         <PlaceName>{placeName}</PlaceName>
         <SubText>{subText}</SubText>
       </ContentWrapper>
-      {showMessage && (
-        <MessagePopup>
-          김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.
-        </MessagePopup>
-      )}
     </StyledCard>
   );
 };
@@ -104,18 +95,4 @@ const AiTag = styled.img`
   top: 5px;
   left: 5px;
   padding: 4px 6px;
-`;
-
-const MessagePopup = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 1000;
-  white-space: nowrap;
 `;

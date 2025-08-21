@@ -134,6 +134,7 @@ export default function PlaceMapPage() {
   const [data, setData] = useState(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false); // Memo 상태 추가
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
 
   function goPrev() {
     navigate("/");
@@ -147,6 +148,16 @@ export default function PlaceMapPage() {
   const handleCloseDetail = () => {
     setSelectedItemId(null);
   };
+
+  // AI 팝업 타이머 설정
+  useEffect(() => {
+    if (showAiPopup) {
+      const timer = setTimeout(() => {
+        setShowAiPopup(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAiPopup]);
 
   useEffect(() => {
     // 실제 API 호출 로직은 이 곳에 구현
@@ -174,6 +185,12 @@ export default function PlaceMapPage() {
   const handleCardClick = (item) => {
     console.log(`Card clicked: ${item.place_name}`);
     setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
+  };
+
+  const handleAiTagClick = (item) => {
+    // This handler is now specifically for the AI tag
+    console.log(`AI Tag clicked: ${item.place_name}`);
+    setShowAiPopup(true);
   };
 
   if (!data) {
@@ -211,8 +228,18 @@ export default function PlaceMapPage() {
         <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
       ) : (
         <CardListWrapper>
-          <PlaceCardList items={data.cardVMs} onCardClick={handleCardClick} />
+          <PlaceCardList
+            items={data.cardVMs}
+            onCardClick={handleCardClick}
+            onAiTagClick={handleAiTagClick}
+          />
         </CardListWrapper>
+      )}
+      {/* AI 팝업 렌더링 위치 */}
+      {showAiPopup && (
+        <MessagePopup>
+          김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.
+        </MessagePopup>
       )}
     </PageContainer>
   );
@@ -309,4 +336,18 @@ const MemoText = styled.p`
   margin: 0;
   font-size: 16px;
   color: #333;
+`;
+
+const MessagePopup = styled.div`
+  position: fixed;
+  bottom: calc(100svh * 265 / 844);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffefeddc;
+  color: #585858;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  white-space: nowrap;
 `;
