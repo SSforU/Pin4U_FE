@@ -5,24 +5,28 @@ export const responsiveSizes = {
     layout: "1200px", // 전체 페이지 레이아웃
     content: "800px", // 메인 콘텐츠 영역
     component: "400px", // 개별 컴포넌트
+    search: "100%", // 검색/입력 컴포넌트 - 너비 제한 해제
   },
   // 랩탑
   laptop: {
     layout: "1024px",
     content: "700px",
     component: "350px",
+    search: "100%",
   },
   // 태블릿
   tablet: {
     layout: "768px",
     content: "600px",
     component: "300px",
+    search: "100%",
   },
   // 모바일
   mobile: {
     layout: "480px",
     content: "100%",
     component: "100%",
+    search: "100%", // 모바일에서도 100% 사용
   },
 };
 
