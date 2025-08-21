@@ -153,6 +153,7 @@ export default function PlaceMapPage() {
           station={data.station}
           items={data.items}
           selectedItemId={selectedItemId}
+          onMarkerClick={handleCardClick} // 마커 클릭 이벤트 연결
         />
       </MapWrapper>
       {selectedItemId ? (
