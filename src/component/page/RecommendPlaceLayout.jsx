@@ -6,7 +6,7 @@ import ProgressBar from "../ui/ProgressBar";
 import Button from "../ui/Button";
 import { getResponsiveStyles } from "../../styles/responsive";
 
-const STEPS = ["nickname", "location", "memo"];
+const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
 
@@ -28,7 +28,7 @@ function RecommendPlaceLayout() {
   const isNextDisabled =
     (stepParam === "nickname" && !nickname.trim()) ||
     (stepParam === "location" && !location) ||
-    (stepParam === "memo" && !memo.trim());
+    (stepParam === "recommend" && !memo.trim());
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -40,7 +40,7 @@ function RecommendPlaceLayout() {
       goToStep(currentIndex + 1);
     } else if (stepParam === "location") {
       goToStep(currentIndex + 1);
-    } else if (stepParam === "memo") {
+    } else if (stepParam === "recommend") {
       handleComplete();
     }
   }
@@ -101,11 +101,14 @@ function RecommendPlaceLayout() {
         />
       </Main>
 
-      <Bottom>
-        <Button disabled={isNextDisabled} onClick={goNext}>
-          {stepParam === "memo" ? "참여 완료" : "다음"}
-        </Button>
-      </Bottom>
+      {stepParam !== "recommend" && (
+        // Recommend 단계에서는 버튼 미노출
+        <Bottom>
+          <Button disabled={isNextDisabled} onClick={goNext}>
+            {stepParam === "recommend" ? "참여 완료" : "다음"}
+          </Button>
+        </Bottom>
+      )}
     </Wrapper>
   );
 }

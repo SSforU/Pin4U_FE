@@ -39,7 +39,7 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="nickname" replace /> },
           { path: "nickname", element: <StepNickname /> },
           { path: "location", element: <StepLocation /> },
-          { path: "memo", element: <StepRecommend /> },
+          { path: "recommend", element: <StepRecommend /> },
         ],
       },
       {
