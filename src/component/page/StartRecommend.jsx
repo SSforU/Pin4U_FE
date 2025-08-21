@@ -1,40 +1,36 @@
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import { getResponsiveStyles } from "../../styles/responsive";
 import Button from "../ui/Button";
 
-function CompleteRecommend() {
+function StartRecommend() {
   const navigate = useNavigate();
+  const { mapId } = useParams();
 
-  const handleGoHome = () => {
-    navigate("/make-place");
+  const handleGoRecommend = () => {
+    navigate(`/shared-map/${mapId}/onboarding/nickname`);
   };
 
   return (
     <Wrapper>
       <Main>
         <ImageContainer>
-          <PlaneImage src="/Recommend_Plane.png" alt="비행기" />
+          <PlaneImage src="/Pin4U_Logo.png" alt="비행기" />
         </ImageContainer>
         <Content>
-          <Title>
-            김숭실 님을 위한
-            <br />
-            장소 추천을 완료했어요!
-          </Title>
-          <Detail>좋은 장소를 공유해 주셔서 감사해요.</Detail>
+          <Title>장소 추천을 시작해보세요!</Title>
         </Content>
       </Main>
 
       <Bottom>
-        <Button onClick={handleGoHome}>내 지도 만들러 가기</Button>
+        <Button onClick={handleGoRecommend}>장소 추천하러 가기</Button>
       </Bottom>
     </Wrapper>
   );
 }
 
-export default CompleteRecommend;
+export default StartRecommend;
 
 // styled-components
 const Wrapper = styled.div`

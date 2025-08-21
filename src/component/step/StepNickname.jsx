@@ -17,21 +17,23 @@ function StepNickname() {
 
   return (
     <Wrapper>
-      <TextBlock>
-        <Title>닉네임을 입력해주세요</Title>
-        <Detail>지도에 표시될 닉네임을 입력해주세요.</Detail>
-      </TextBlock>
+      <Container>
+        <TextBlock>
+          <Title>닉네임을 입력해주세요</Title>
+          <Detail>지도에 표시될 닉네임을 입력해주세요.</Detail>
+        </TextBlock>
 
-      <InputContainer>
-        <NicknameInput
-          type="text"
-          value={nickname}
-          onChange={handleNicknameChange}
-          placeholder="닉네임 입력"
-          maxLength={20}
-        />
-        <CharCount>{nickname.length}/20</CharCount>
-      </InputContainer>
+        <InputContainer>
+          <NicknameInput
+            type="text"
+            value={nickname}
+            onChange={handleNicknameChange}
+            placeholder="닉네임 입력"
+            maxLength={20}
+          />
+          <CharCount>{nickname.length}/20</CharCount>
+        </InputContainer>
+      </Container>
     </Wrapper>
   );
 }
@@ -47,6 +49,16 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: stretch;
   gap: 54px;
+`;
+
+const Container = styled.div`
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 32px;
+  height: 100%;
+  justify-content: flex-start;
 `;
 
 const TextBlock = styled.div`

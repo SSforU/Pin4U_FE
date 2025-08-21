@@ -22,7 +22,7 @@ export default Button;
 const StyledButton = styled.button`
   ${getResponsiveStyles("button")} // 반응형
 
-  background-color: ${(props) => (props.disabled ? "#bababa" : "#ff7e74")};
+  background-color: ${(props) => (props.disabled ? "#FFD5D2" : "#ff7e74")};
   border: none;
   border-radius: 10px;
   padding: 11px 77px;
@@ -34,10 +34,8 @@ const StyledButton = styled.button`
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    background-color: ${(props) => (props.disabled ? "#bababa" : "#ff6b5f")};
     transform: ${(props) => (props.disabled ? "none" : "translateY(-1px)")};
   }
-
   &:active {
     transform: ${(props) => (props.disabled ? "none" : "translateY(0)")};
   }

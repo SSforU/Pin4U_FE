@@ -1,34 +1,32 @@
-// 500×844 비율에 최적화된 반응형 크기 관리
+// 실제 화면 크기에 최적화된 반응형 크기 관리
 export const responsiveSizes = {
-  // 데스크톱 (500px 기준)
+  // 데스크톱
   desktop: {
-    button: "450px", // 500px의 90%
-    progress: "450px",
-    search: "450px",
+    layout: "1200px", // 전체 페이지 레이아웃
+    content: "800px", // 메인 콘텐츠 영역
+    component: "400px", // 개별 컴포넌트
+    search: "100%", // 검색/입력 컴포넌트 - 너비 제한 해제
   },
   // 랩탑
   laptop: {
-    button: "400px", // 500px의 80%
-    progress: "400px",
-    search: "400px",
+    layout: "1024px",
+    content: "700px",
+    component: "350px",
+    search: "100%",
   },
   // 태블릿
   tablet: {
-    button: "350px", // 500px의 70%
-    progress: "350px",
-    search: "350px",
+    layout: "768px",
+    content: "600px",
+    component: "300px",
+    search: "100%",
   },
   // 모바일
   mobile: {
-    button: "300px", // 500px의 60%
-    progress: "300px",
-    search: "300px",
-  },
-  // 작은 모바일
-  smallMobile: {
-    button: "250px", // 500px의 50%
-    progress: "250px",
-    search: "250px",
+    layout: "480px",
+    content: "100%",
+    component: "100%",
+    search: "100%", // 모바일에서도 100% 사용
   },
 };
 
@@ -37,27 +35,21 @@ export function getResponsiveStyles(componentType) {
   return `
     width: 100%;
     max-width: ${responsiveSizes.desktop[componentType]};
-    min-width: ${responsiveSizes.smallMobile[componentType]};
     margin: 0 auto; /* 수평 중앙 정렬 */
 
-     /* 랩탑 */
-    @media (max-width: 1440px) {
+    /* 랩탑 */
+    @media (max-width: 1024px) {
       max-width: ${responsiveSizes.laptop[componentType]};
     }
     
     /* 태블릿 */
-    @media (max-width: 1024px) {
+    @media (max-width: 768px) {
       max-width: ${responsiveSizes.tablet[componentType]};
     }
     
     /* 모바일 */
-    @media (max-width: 768px) {
-      max-width: ${responsiveSizes.mobile[componentType]};
-    }
-    
-    /* 작은 모바일 */
     @media (max-width: 480px) {
-      max-width: ${responsiveSizes.smallMobile[componentType]};
+      max-width: ${responsiveSizes.mobile[componentType]};
     }
   `;
 }

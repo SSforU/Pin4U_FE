@@ -6,7 +6,7 @@ import ProgressBar from "../ui/ProgressBar";
 import Button from "../ui/Button";
 import { getResponsiveStyles } from "../../styles/responsive";
 
-const STEPS = ["nickname", "location", "memo"];
+const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
 
@@ -27,8 +27,7 @@ function RecommendPlaceLayout() {
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
     (stepParam === "nickname" && !nickname.trim()) ||
-    (stepParam === "location" && !location) ||
-    (stepParam === "memo" && !memo.trim());
+    (stepParam === "location" && !location);
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -40,8 +39,6 @@ function RecommendPlaceLayout() {
       goToStep(currentIndex + 1);
     } else if (stepParam === "location") {
       goToStep(currentIndex + 1);
-    } else if (stepParam === "memo") {
-      handleComplete();
     }
   }
 
@@ -52,27 +49,6 @@ function RecommendPlaceLayout() {
       navigate(`/shared-map/${mapId}`);
     }
   }
-
-  const handleComplete = () => {
-    // 참여 완료 처리
-    const participationData = {
-      mapId,
-      nickname,
-      location,
-      memo,
-      participatedAt: new Date().toISOString(),
-    };
-
-    // 로컬 스토리지에 저장 (나중에 서버로 전송)
-    const existingData = JSON.parse(
-      localStorage.getItem(`map_${mapId}`) || "[]"
-    );
-    existingData.push(participationData);
-    localStorage.setItem(`map_${mapId}`, JSON.stringify(existingData));
-
-    console.log("참여 완료:", participationData);
-    navigate(`/shared-map/${mapId}/complete`);
-  };
 
   return (
     <Wrapper>
@@ -101,11 +77,14 @@ function RecommendPlaceLayout() {
         />
       </Main>
 
-      <Bottom>
-        <Button disabled={isNextDisabled} onClick={goNext}>
-          {stepParam === "memo" ? "참여 완료" : "다음"}
-        </Button>
-      </Bottom>
+      {stepParam !== "recommend" && (
+        // Recommend 단계에서는 버튼 미노출
+        <Bottom>
+          <Button disabled={isNextDisabled} onClick={goNext}>
+            다음으로
+          </Button>
+        </Bottom>
+      )}
     </Wrapper>
   );
 }
@@ -129,7 +108,7 @@ const Main = styled.main`
 `;
 
 const PrevButtonContainer = styled.div`
-  ${getResponsiveStyles("progress")}
+  ${getResponsiveStyles("layout")}
   margin-top: 40px;
   display: flex;
 `;
@@ -139,5 +118,5 @@ const PrevButtonWrapper = styled.img`
 `;
 
 const Bottom = styled.div`
-  padding: 20px;
+  padding: 40px;
 `;
