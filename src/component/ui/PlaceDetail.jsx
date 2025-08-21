@@ -65,12 +65,15 @@ export default function PlaceDetail({ item, onClose }) {
       <DetailContainer>
         <Header>
           <PlaceName>{item.place_name}</PlaceName>
-          <MessageButton
-            onClick={handleMessageButtonClick}
-            disabled={isLoading}
-          >
-            {isLoading ? "로딩 중..." : "메시지 보기"}
-          </MessageButton>
+          <HeaderRight>
+            <MessageButton
+              onClick={handleMessageButtonClick}
+              disabled={isLoading}
+            >
+              {isLoading ? "로딩 중..." : "메시지 보기"}
+            </MessageButton>
+            <CloseButton src="/Cancel.png" onClick={onClose} />
+          </HeaderRight>
         </Header>
 
         <Section>
@@ -217,4 +220,19 @@ const MoreButton = styled.span`
   font-size: 14px;
   color: #c94040;
   cursor: pointer;
+`;
+
+const CloseButton = styled.img`
+  width: 15px;
+  height: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
