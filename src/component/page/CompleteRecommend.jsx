@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { getResponsiveStyles } from "../../styles/responsive";
 import Button from "../ui/Button";
 
 function CompleteRecommend() {
@@ -37,6 +38,7 @@ export default CompleteRecommend;
 
 // styled-components
 const Wrapper = styled.div`
+  ${getResponsiveStyles("layout")}
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;

@@ -129,7 +129,7 @@ const Main = styled.main`
 `;
 
 const PrevButtonContainer = styled.div`
-  ${getResponsiveStyles("progress")}
+  ${getResponsiveStyles("layout")}
   margin-top: 40px;
   display: flex;
 `;
