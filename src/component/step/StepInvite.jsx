@@ -22,7 +22,7 @@ function StepInvite() {
   }, []);
 
   const handleCopyLink = () => {
-    const shareUrl = `${window.location.origin}/shared-map/${mapId}/onboarding`;
+    const shareUrl = `${window.location.origin}/shared-map/${mapId}`;
 
     // 숨겨진 input 요소 생성
     const input = document.createElement("input");
