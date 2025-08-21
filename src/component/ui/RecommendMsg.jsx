@@ -19,44 +19,30 @@ const Overlay = styled.div`
 const MessageModal = styled.div`
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 80%;
-  max-width: 350px;
+  width: 70%;
+  max-width: 300px;
   padding: 24px;
   box-sizing: border-box;
   text-align: center;
   position: relative;
   background: #fff2f2;
   border-radius: 10px;
-  outline: 4px solid #ffb0ab;
-  outline-offset: -2px;
+  border-image-slice: 27 27 27 27;
+  border-image-width: 20px 20px 20px 20px;
+  border-image-outset: 5px 5px 5px 5px;
+  border-image-repeat: stretch stretch;
+  border-image-source: url("/Msg_border.png");
+  border-style: solid;
   padding-bottom: 70px; /* 길찾기 버튼 공간 확보 */
 `;
 
-const CloseButton = styled.img`
-  position: absolute;
-  top: 15px;
-  right: 15px;
+const UserAvatar = styled.img`
   width: 20px;
   height: 20px;
-  cursor: pointer;
-`;
-
-const UserInfo = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-  text-align: left;
-`;
-
-const UserAvatar = styled.img`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 10px;
 `;
 
 const Nickname = styled.span`
-  font-weight: bold;
+  /* font-weight: bold; */
 `;
 
 const SectionContainer = styled.div`
@@ -66,16 +52,21 @@ const SectionContainer = styled.div`
 const SectionTitle = styled.div`
   display: flex;
   align-items: center;
-  font-weight: bold;
+  /* font-weight: bold; */
   margin-bottom: 8px;
   text-align: left;
   gap: 5px;
-  font-size: 14px;
+  font-size: 16px;
 `;
 
 const SectionIcon = styled.img`
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+`;
+
+const TagImg = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const MessageImage = styled.img`
@@ -148,7 +139,7 @@ const ArrowButton = styled.button`
   }
 `;
 
-export default function RecommendMsg({ notes, onClose }) {
+export default function RecommendMsg({ place, notes, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const currentNote = notes[currentIndex];
@@ -167,24 +158,21 @@ export default function RecommendMsg({ notes, onClose }) {
   return (
     <Overlay onClick={onClose}>
       <MessageModal onClick={(e) => e.stopPropagation()}>
-        <CloseButton src="/Close_icon.png" alt="닫기" onClick={onClose} />
         <SectionContainer>
           <SectionTitle>
-            <SectionIcon src="/Location_icon.png" alt="장소 아이콘" />
-            장소 지점
+            <SectionIcon src="/Pin.png" alt="장소 아이콘" />
+            {place}
           </SectionTitle>
         </SectionContainer>
-        <UserInfo>
-          <UserAvatar
-            src={currentNote.image_url || "/default_avatar.png"}
-            alt="아바타"
-          />
+        <SectionTitle>
+          <UserAvatar src={"/User_Voice.svg"} />
           <Nickname>{currentNote.nickname}</Nickname>님이 추천한 장소예요.
-        </UserInfo>
+        </SectionTitle>
         {currentNote.tags && (
           <SectionTitle>
+            <TagImg src={"/Tag.svg"} />
             {currentNote.tags.map((tag, tagIndex) => (
-              <span key={tagIndex}># {tag}</span>
+              <span key={tagIndex}>{tag}</span>
             ))}
           </SectionTitle>
         )}

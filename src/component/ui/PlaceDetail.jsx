@@ -10,7 +10,7 @@ const mockApiData = {
   result: "success",
   data: {
     external_id: "kakao:123456789",
-    recommended_count: 2,
+    place_name: "장소이름예시",
     notes: [
       {
         nickname: "민수",
@@ -113,6 +113,7 @@ export default function PlaceDetail({ item, onClose }) {
       </DetailContainer>
       {showMessage && messageData && (
         <RecommendMsg
+          place={messageData.place_name}
           notes={messageData.notes}
           onClose={() => setShowMessage(false)}
         />
