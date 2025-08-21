@@ -7,7 +7,7 @@ function CompleteRecommend() {
   const navigate = useNavigate();
 
   const handleGoHome = () => {
-    navigate("/");
+    navigate("/make-place");
   };
 
   return (
