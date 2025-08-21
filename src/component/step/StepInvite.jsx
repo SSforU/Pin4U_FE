@@ -67,8 +67,8 @@ function StepInvite() {
       <Bottom>
         <ActionButtons>
           <CopyLinkButton onClick={handleCopyLink}>
-            <LinkIcon src="/Link_Horizontal.png" alt="링크" />
-            {copySuccess ? "링크 복사 완료!" : "내 지도 링크 복사하기"}
+            <LinkIcon src="/Link_Horizontal.png" alt="링크" />내 지도 링크
+            복사하기
           </CopyLinkButton>
           <CompleteButton onClick={handleComplete}>완료하기</CompleteButton>
         </ActionButtons>
@@ -160,12 +160,13 @@ const ActionButtons = styled.div`
   gap: 20px;
   padding: 0 20px;
   justify-content: center;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
 `;
 
 const CopyLinkButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 11px 77px;
   background-color: transparent;
@@ -179,9 +180,9 @@ const CopyLinkButton = styled.button`
   line-height: 18px;
   transition: all 0.2s ease;
   height: 50px;
-  justify-content: center;
   min-width: 220px;
   max-width: 220px;
+  white-space: nowrap;
 
   &:hover {
     background-color: #fff5f5;
@@ -232,6 +233,7 @@ const CompleteButton = styled.button`
   justify-content: center;
   min-width: 100px;
   max-width: 100px;
+  white-space: nowrap;
 
   &:hover {
     background-color: #ff665c;
