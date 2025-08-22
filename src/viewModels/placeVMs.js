@@ -13,6 +13,5 @@ export const toCardVM = (item, isAI = false) => ({
   id: item.id,
   name: item.place_name,
   imageUrl: item.mock?.image_urls?.[0],
-  summary: item.ai?.summary_text,
   isAI: isAI, // AI 추천 여부 플래그 추가
 });

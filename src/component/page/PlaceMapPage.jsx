@@ -24,7 +24,7 @@ const friendMockApiData = {
       {
         external_id: "kakao:123456789",
         id: "123456789",
-        place_name: "미학당 지점",
+        place_name: "미학당",
         category_group_code: "CE7",
         category_group_name: "카페",
         category_name: "음식점 > 카페",
@@ -36,7 +36,7 @@ const friendMockApiData = {
         mock: {
           rating: 4.6,
           rating_count: 128,
-          image_urls: ["/static/images/cafe_ondu_1.jpg"],
+          image_urls: ["/picture.png"],
         },
         ai: {
           summary_text: "조용한 분위기 선호 사용자에게 적합한 카페.",
@@ -59,7 +59,7 @@ const friendMockApiData = {
         mock: {
           rating: 4.8,
           rating_count: 99,
-          image_urls: ["/static/images/cafe_garden_1.jpg"],
+          image_urls: ["/picture.png"],
         },
         ai: {
           summary_text: "야외 정원이 매력적인 카페.",
@@ -70,7 +70,7 @@ const friendMockApiData = {
       {
         external_id: "kakao:112233445",
         id: "112233445",
-        place_name: "콘하스 지점",
+        place_name: "콘하스",
         category_group_code: "CE7",
         category_group_name: "카페",
         category_name: "음식점 > 카페",
@@ -82,7 +82,7 @@ const friendMockApiData = {
         mock: {
           rating: 4.5,
           rating_count: 201,
-          image_urls: ["/static/images/cafe_conhas_1.jpg"],
+          image_urls: ["/picture.png"],
         },
         ai: {
           summary_text: "넓고 쾌적한 공간의 인테리어가 좋은 카페.",
@@ -115,7 +115,12 @@ const aiMockApiData = {
         mock: {
           rating: 4.5,
           rating_count: 87,
-          image_urls: ["/static/images/cafe_ondu_1.jpg"],
+          image_urls: [
+            "/picture.png",
+            "/picture.png",
+            "/picture.png",
+            "/picture.png",
+          ],
         },
         ai: {
           summary_text: "조용한 공부하기 좋은 카페",

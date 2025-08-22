@@ -1,6 +1,7 @@
 // PlaceCard.jsx
 import React from "react";
 import styled from "styled-components";
+import { useState, useEffect } from "react";
 
 const StyledCard = styled.div`
   width: 100px;
@@ -21,7 +22,6 @@ const StyledCard = styled.div`
 const ImageWrapper = styled.div`
   width: 100%;
   height: 100px;
-  background-color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,9 +30,10 @@ const ImageWrapper = styled.div`
 `;
 
 const PlaceImage = styled.img`
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  height: 90%;
   object-fit: cover;
+  border-radius: 8px;
 `;
 
 const ContentWrapper = styled.div`
@@ -46,25 +47,24 @@ const ContentWrapper = styled.div`
 `;
 
 const PlaceName = styled.div`
-  font-size: 16px;
-  font-weight: bold;
+  font-weight: 500;
   color: #333;
-  margin-bottom: 4px;
+  font-size: ${(props) => props.fontSize};
 `;
 
-const SubText = styled.div`
-  font-size: 12px;
-  color: #888;
-`;
+const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
+  // 폰트 크기 상태를 관리하는 state
+  const [fontSize, setFontSize] = useState("16px");
 
-const PlaceCard = ({
-  placeName,
-  subText,
-  imageUrl,
-  onClick,
-  isAI,
-  onAiTagClick,
-}) => {
+  useEffect(() => {
+    // placeName의 길이에 따라 폰트 크기 조정
+    if (placeName && placeName.length > 8) {
+      setFontSize("11px");
+    } else {
+      setFontSize("16px");
+    }
+  }, [placeName]); // placeName이 변경될 때마다 이펙트 실행
+
   const handleAiTagClick = (e) => {
     e.stopPropagation(); // Prevents the card's onClick from firing
     if (onAiTagClick) {
@@ -80,8 +80,7 @@ const PlaceCard = ({
         {/* isAI prop이 true일 때 태그 표시 */}
       </ImageWrapper>
       <ContentWrapper>
-        <PlaceName>{placeName}</PlaceName>
-        <SubText>{subText}</SubText>
+        <PlaceName fontSize={fontSize}>{placeName}</PlaceName>
       </ContentWrapper>
     </StyledCard>
   );

@@ -43,7 +43,6 @@ const PlaceCardList = ({ items, onCardClick, onAiTagClick }) => {
         <PlaceCard
           key={item.id}
           placeName={item.name}
-          subText={item.summary}
           imageUrl={item.imageUrl || "/default-image.png"}
           isAI={item.isAI}
           onClick={() => onCardClick(item)}
