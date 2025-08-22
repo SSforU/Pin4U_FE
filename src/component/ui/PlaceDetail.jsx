@@ -1,27 +1,28 @@
 // PlaceDetail.jsx
 import React from "react";
 import styled from "styled-components";
-import Message from "./Message";
+import RecommendMsg from "./RecommendMsg";
 import { useState } from "react";
+import PhotoGallery from "./PhotoGallery";
 
 // mockApiData를 PlaceDetail 컴포넌트 내부로 이동
 const mockApiData = {
   result: "success",
   data: {
     external_id: "kakao:123456789",
-    recommended_count: 2,
+    place_name: "장소이름예시",
     notes: [
       {
         nickname: "민수",
         recommend_message: "평일 저녁 조용",
-        image_url: "/user_avatar_minsu.png",
+        image_url: "/picture.png",
         tags: ["분위기 맛집"],
         created_at: "2025-08-16T00:01:00Z",
       },
       {
         nickname: "지은",
         recommend_message: "단체 4~6명 OK",
-        image_url: "/user_avatar_jieun.png",
+        image_url: "/picture.png",
         tags: ["힐링 스팟"],
         created_at: "2025-08-16T00:02:00Z",
       },
@@ -31,6 +32,7 @@ const mockApiData = {
 
 export default function PlaceDetail({ item, onClose }) {
   const [showMessage, setShowMessage] = useState(false);
+  const [showGallery, setShowGallery] = useState(false); // 갤러리 상태 추가
   const [messageData, setMessageData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -63,12 +65,20 @@ export default function PlaceDetail({ item, onClose }) {
       <DetailContainer>
         <Header>
           <PlaceName>{item.place_name}</PlaceName>
-          <MessageButton
-            onClick={handleMessageButtonClick}
-            disabled={isLoading}
-          >
-            {isLoading ? "로딩 중..." : "메시지 보기"}
-          </MessageButton>
+          <HeaderRight>
+            <MessageButtonContainer>
+              <MessageButton
+                onClick={handleMessageButtonClick}
+                disabled={isLoading}
+                src="/Mail.svg"
+              />
+              {/* 메시지 개수 뱃지 추가 */}
+              {mockApiData.data.notes.length > 0 && (
+                <MessageCount>{mockApiData.data.notes.length}</MessageCount>
+              )}
+            </MessageButtonContainer>
+            <CloseButton src="/X.svg" onClick={onClose} />
+          </HeaderRight>
         </Header>
 
         <Section>
@@ -98,7 +108,7 @@ export default function PlaceDetail({ item, onClose }) {
           }}
         >
           <SectionTitle>사진</SectionTitle>
-          <MoreButton>더보기</MoreButton>
+          <MoreButton onClick={() => setShowGallery(true)}>더보기</MoreButton>
         </div>
         <ImageContainer>
           {item.mock.image_urls.map((url, index) => (
@@ -107,9 +117,16 @@ export default function PlaceDetail({ item, onClose }) {
         </ImageContainer>
       </DetailContainer>
       {showMessage && messageData && (
-        <Message
+        <RecommendMsg
+          place={messageData.place_name}
           notes={messageData.notes}
           onClose={() => setShowMessage(false)}
+        />
+      )}
+      {showGallery && (
+        <PhotoGallery
+          imageUrls={item.mock.image_urls}
+          onClose={() => setShowGallery(false)}
         />
       )}
     </>
@@ -144,15 +161,31 @@ const PlaceName = styled.h2`
   margin: 0;
 `;
 
-const MessageButton = styled.button`
-  background-color: #ffefed;
-  color: #c94040;
+const MessageButtonContainer = styled.div`
+  position: relative;
+`;
+
+const MessageButton = styled.img`
   border: none;
-  padding: 8px 12px;
-  border-radius: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
+`;
+
+const MessageCount = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff7e74;
+  color: #ffffff;
+  font-size: 10px;
   font-weight: bold;
+  border-radius: 50%;
+  padding: 1px 5px;
+  min-width: 10px;
+  text-align: center;
 `;
 
 const Section = styled.div`
@@ -209,4 +242,19 @@ const MoreButton = styled.span`
   font-size: 14px;
   color: #c94040;
   cursor: pointer;
+`;
+
+const CloseButton = styled.img`
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
