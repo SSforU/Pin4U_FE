@@ -9,7 +9,7 @@ const StyledTextarea = styled.textarea`
   font-size: 16px;
   font-weight: 400;
   line-height: 18px;
-  border: 1px solid #bababa;
+  border: 2px solid #bababa;
   border-radius: 10px;
   background-color: #f7f7f7;
   resize: none;
