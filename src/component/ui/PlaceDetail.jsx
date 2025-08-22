@@ -15,14 +15,14 @@ const mockApiData = {
       {
         nickname: "민수",
         recommend_message: "평일 저녁 조용",
-        image_url: "/user_avatar_minsu.png",
+        image_url: "/picture.png",
         tags: ["분위기 맛집"],
         created_at: "2025-08-16T00:01:00Z",
       },
       {
         nickname: "지은",
         recommend_message: "단체 4~6명 OK",
-        image_url: "/user_avatar_jieun.png",
+        image_url: "/picture.png",
         tags: ["힐링 스팟"],
         created_at: "2025-08-16T00:02:00Z",
       },
@@ -66,13 +66,18 @@ export default function PlaceDetail({ item, onClose }) {
         <Header>
           <PlaceName>{item.place_name}</PlaceName>
           <HeaderRight>
-            <MessageButton
-              onClick={handleMessageButtonClick}
-              disabled={isLoading}
-            >
-              {isLoading ? "로딩 중..." : "메시지 보기"}
-            </MessageButton>
-            <CloseButton src="/Cancel.png" onClick={onClose} />
+            <MessageButtonContainer>
+              <MessageButton
+                onClick={handleMessageButtonClick}
+                disabled={isLoading}
+                src="/Mail.svg"
+              />
+              {/* 메시지 개수 뱃지 추가 */}
+              {mockApiData.data.notes.length > 0 && (
+                <MessageCount>{mockApiData.data.notes.length}</MessageCount>
+              )}
+            </MessageButtonContainer>
+            <CloseButton src="/X.svg" onClick={onClose} />
           </HeaderRight>
         </Header>
 
@@ -156,14 +161,31 @@ const PlaceName = styled.h2`
   margin: 0;
 `;
 
-const MessageButton = styled.button`
-  background-color: #ff7e74;
-  color: #ffffff;
+const MessageButtonContainer = styled.div`
+  position: relative;
+`;
+
+const MessageButton = styled.img`
   border: none;
-  padding: 4px 7px;
+  width: 30px;
+  height: 30px;
   border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
+`;
+
+const MessageCount = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff7e74;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 1px 5px;
+  min-width: 10px;
+  text-align: center;
 `;
 
 const Section = styled.div`
@@ -223,8 +245,8 @@ const MoreButton = styled.span`
 `;
 
 const CloseButton = styled.img`
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   background: none;
   border: none;
   cursor: pointer;

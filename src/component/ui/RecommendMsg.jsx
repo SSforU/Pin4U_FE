@@ -136,8 +136,8 @@ const ButtonContainer = styled.div`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  left: -20px;
-  right: -20px;
+  left: -50px;
+  right: -50px;
   pointer-events: none;
 `;
 
@@ -197,8 +197,9 @@ export default function RecommendMsg({ place, notes, onClose }) {
             ))}
           </SectionTitle>
         )}
-        {/* 여기에 사진과 메시지 내용을 추가 */}
-        <MessageImage src="/picture.png" alt="추천 사진" />
+        {currentNote.image_url && (
+          <MessageImage src={currentNote.image_url} alt="추천 사진" />
+        )}
         <MessageContentBorder>
           <MessageContentInner>
             <MessageText>{currentNote.recommend_message}</MessageText>
