@@ -33,7 +33,7 @@ const MessageModal = styled.div`
   border-image-repeat: stretch stretch;
   border-image-source: url("/Msg_border.png");
   border-style: solid;
-  padding-bottom: 70px; /* 길찾기 버튼 공간 확보 */
+  padding-bottom: 90px; /* 길찾기 버튼 공간 확보 */
 `;
 
 const UserAvatar = styled.img`
@@ -70,29 +70,49 @@ const TagImg = styled.img`
 `;
 
 const MessageImage = styled.img`
-  width: 100%;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
+  margin-bottom: 20px;
+  margin-top: 10px;
 `;
 
-const MessageContent = styled.p`
-  background-color: #f7f7f7;
+// 테두리 및 패딩 역할을 하는 부모 컴포넌트
+const MessageContentBorder = styled.div`
+  /* 깅엄 체크 무늬 배경 이미지 적용 */
+  background-image: url("/repeat.png");
+  background-repeat: repeat;
+  background-size: 20px;
+
   border-radius: 8px;
   padding: 12px;
+  position: relative; /* 자식 요소를 위한 포지셔닝 */
+`;
+
+// 불투명도를 조절하는 흰색 배경 역할을 하는 자식 컴포넌트
+const MessageContentInner = styled.div`
+  background-color: rgba(255, 255, 255, 0.7); /* 투명도를 조절한 흰색 배경 */
+  border-radius: 4px; /* 부모보다 약간 작은 border-radius */
+  padding: 10px; /* 내부 텍스트 패딩 */
+`;
+
+// 텍스트 스타일
+const MessageText = styled.p`
   font-size: 14px;
-  text-align: left;
   line-height: 1.5;
+  color: #333;
+  margin: 0;
 `;
 
 const FindPathButton = styled.button`
-  background-color: #ff5050;
-  color: #ffffff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 20px;
+  background-color: #ffffff;
+  color: #ff7e74;
+  border: 1px solid #ff7e74;
+  padding: 10px 14px;
+  border-radius: 6px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 500;
   cursor: pointer;
   position: absolute;
   bottom: 20px;
@@ -102,9 +122,10 @@ const FindPathButton = styled.button`
   align-items: center;
   gap: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 170px;
 
   &:hover {
-    background-color: #e64040;
+    background-color: #ffefed;
   }
 `;
 
@@ -177,16 +198,20 @@ export default function RecommendMsg({ place, notes, onClose }) {
           </SectionTitle>
         )}
         {/* 여기에 사진과 메시지 내용을 추가 */}
-        <MessageImage src="/example_recommend.jpeg" alt="추천 사진" />
-        <MessageContent>{currentNote.recommend_message}</MessageContent>
+        <MessageImage src="/picture.png" alt="추천 사진" />
+        <MessageContentBorder>
+          <MessageContentInner>
+            <MessageText>{currentNote.recommend_message}</MessageText>
+          </MessageContentInner>
+        </MessageContentBorder>
 
         <FindPathButton>
           <img
-            src="/marker_white.png"
+            src="/kakaoMap.png"
             alt="마커"
-            style={{ width: "16px", height: "16px" }}
+            style={{ width: "16px", height: "16px", borderRadius: "5px" }}
           />
-          길찾기 바로 가기
+          길찾기 바로가기
         </FindPathButton>
         {hasMultipleNotes && (
           <ButtonContainer>
