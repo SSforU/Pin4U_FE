@@ -80,6 +80,7 @@ function StepRecommend() {
           next = [...prev, category];
         }
 
+        // JSON.stringify 제거하고 직접 비교로 성능 최적화
         setPlaceRecommendations((p) => {
           const currentPlace = p[currentPlaceIndex];
           if (
@@ -321,17 +322,18 @@ const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 24px;
-  padding: 24px 20px;
+  gap: 12px; // 15px에서 12px로 줄이기
+  padding: 14px 20px; /* 16px에서 14px로 줄이기 */
   height: 100%;
   justify-content: flex-start;
+  /* max-width와 margin 제거 - 전체 너비 사용 */
 `;
 
 const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px; // 8px에서 6px로 줄이기
   text-align: left;
 `;
 
@@ -356,7 +358,7 @@ const Title = styled.h1`
 const Detail = styled.p`
   font-family: "Pretendard", sans-serif;
   color: #585858;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
@@ -370,7 +372,7 @@ const Detail = styled.p`
 const InputSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px; // 8px에서 6px로 줄이기
 `;
 
 const InputLabel = styled.p`
@@ -402,7 +404,7 @@ const CharCount = styled.div`
 const CategorySection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px; // 10px에서 8px로 줄이기
 `;
 
 const CategoryLabel = styled.label`
@@ -426,7 +428,7 @@ const CategoryGrid = styled.div`
 `;
 
 const CategoryButton = styled.div`
-  padding: 6px 8px;
+  padding: 12px 16px;
   border: 2px solid
     ${(props) => {
       if (props.disabled) return "#e0e0e0";
@@ -449,7 +451,7 @@ const CategoryButton = styled.div`
   text-align: center;
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
   pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
-  min-height: 30px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -475,7 +477,7 @@ const CategoryButton = styled.div`
 const PlaceSection = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
+  margin-bottom: 4px;
   gap: 2px;
 `;
 
