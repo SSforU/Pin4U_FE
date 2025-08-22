@@ -322,8 +322,8 @@ const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px; // 15px에서 12px로 줄이기
-  padding: 14px 20px; /* 16px에서 14px로 줄이기 */
+  gap: 12px;
+  padding: 12px 20px;
   height: 100%;
   justify-content: flex-start;
   /* max-width와 margin 제거 - 전체 너비 사용 */
@@ -333,7 +333,7 @@ const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px; // 8px에서 6px로 줄이기
+  gap: 5px;
   text-align: left;
 `;
 
@@ -344,7 +344,7 @@ const Title = styled.h1`
   line-height: 1.3;
   letter-spacing: -0.2px;
   color: #000000;
-  margin: 0;
+  margin: 0px 0px 5px 0px;
 
   @media (max-width: 768px) {
     font-size: 22px;
@@ -369,10 +369,45 @@ const Detail = styled.p`
   }
 `;
 
+// <--- 장소 섹션 --->
+const PlaceSection = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 2px;
+`;
+
+const PlaceIcon = styled.img`
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+`;
+
+const PlaceInfo = styled.div`
+  display: flex;
+  gap: 5px;
+`;
+
+const PlaceDisplay = styled.div`
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #383838;
+  margin: 0px;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+  }
+`;
+
 const InputSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px; // 8px에서 6px로 줄이기
+  gap: 6px;
 `;
 
 const InputLabel = styled.p`
@@ -386,25 +421,28 @@ const InputLabel = styled.p`
 
 const InputContainer = styled.div`
   position: relative;
+  max-height: 180px;
 `;
 
 const CharCount = styled.div`
   position: absolute;
   right: 0;
-  top: -24px;
+  top: -20px;
   font-family: "Pretendard", sans-serif;
   font-weight: 400;
   font-size: 12px;
   line-height: 1.4;
   color: #bababa;
   text-align: center;
+  z-index: 1;
 `;
 
 // <--- 카테고리 섹션 --->
 const CategorySection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px; // 10px에서 8px로 줄이기
+  gap: 6px;
+  margin-bottom: 8px;
 `;
 
 const CategoryLabel = styled.label`
@@ -473,42 +511,14 @@ const CategoryButton = styled.div`
   }
 `;
 
-// <--- 장소 섹션 --->
-const PlaceSection = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
-  gap: 2px;
-`;
-
-const PlaceIcon = styled.img`
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-`;
-
-const PlaceInfo = styled.div`
-  display: flex;
-  gap: 5px;
-`;
-
-const PlaceDisplay = styled.div`
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: #383838;
-  margin: 0px;
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 15px;
-  }
-`;
-
 // <--- 진행 표시기 --->
+const ProgressSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0;
+`;
+
 const ProgressIndicator = styled.div`
   font-family: "Pretendard", sans-serif;
   font-size: 16px;
@@ -528,12 +538,6 @@ const ProgressIndicator = styled.div`
     font-size: 13px;
     padding: 5px 12px;
   }
-`;
-
-const ProgressSection = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const ArrowButton = styled.button`
@@ -581,14 +585,16 @@ const ArrowIcon = styled.img`
 
 const ButtonSection = styled.div`
   display: flex;
-  justify-content: center; /* 20px에서 40px로 늘림 */
+  justify-content: center;
   opacity: 1;
   transform: translateY(0);
   transition: all 0.4s ease-out;
+  min-height: 50px;
 
   &.hidden {
     opacity: 0;
-    transform: translateY(100%);
+    transform: translateY(0);
     pointer-events: none;
+    visibility: hidden; /* 보이지 않게 하되 공간은 유지 */
   }
 `;
