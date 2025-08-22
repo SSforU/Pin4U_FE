@@ -160,6 +160,19 @@ const ArrowButton = styled.button`
   }
 `;
 
+// 이미지 아래 메시지 인덱스를 표시하는 컴포넌트
+const MessageIndex = styled.div`
+  position: absolute;
+  bottom: -40px; /* 길찾기 버튼과 간격 확보 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+`;
+
 export default function RecommendMsg({ place, notes, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -215,17 +228,22 @@ export default function RecommendMsg({ place, notes, onClose }) {
           길찾기 바로가기
         </FindPathButton>
         {hasMultipleNotes && (
-          <ButtonContainer>
-            <ArrowButton onClick={handlePrev} disabled={currentIndex === 0}>
-              <img src="/Chevron_Left.png" />
-            </ArrowButton>
-            <ArrowButton
-              onClick={handleNext}
-              disabled={currentIndex === notes.length - 1}
-            >
-              <img src="/Chevron_Right.png" />
-            </ArrowButton>
-          </ButtonContainer>
+          <>
+            <MessageIndex>
+              {currentIndex + 1}/{notes.length}
+            </MessageIndex>
+            <ButtonContainer>
+              <ArrowButton onClick={handlePrev} disabled={currentIndex === 0}>
+                <img src="/Chevron_Left.png" />
+              </ArrowButton>
+              <ArrowButton
+                onClick={handleNext}
+                disabled={currentIndex === notes.length - 1}
+              >
+                <img src="/Chevron_Right.png" />
+              </ArrowButton>
+            </ButtonContainer>
+          </>
         )}
       </MessageModal>
     </Overlay>
