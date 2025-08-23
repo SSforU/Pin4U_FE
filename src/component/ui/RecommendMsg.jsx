@@ -173,7 +173,7 @@ const MessageIndex = styled.div`
   font-size: 12px;
 `;
 
-export default function RecommendMsg({ place, notes, onClose }) {
+export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const currentNote = notes[currentIndex];
@@ -187,6 +187,13 @@ export default function RecommendMsg({ place, notes, onClose }) {
     setCurrentIndex(
       (prevIndex) => (prevIndex - 1 + notes.length) % notes.length
     );
+  };
+
+  const handleFindPathClick = (e) => {
+    e.stopPropagation(); // 오버레이 닫힘 방지
+    if (!placeUrl) return;
+    // 새 탭으로 열기 (같은 탭 원하면 window.location.href = placeUrl)
+    window.open(placeUrl, "_blank", "noopener");
   };
 
   return (
@@ -219,7 +226,7 @@ export default function RecommendMsg({ place, notes, onClose }) {
           </MessageContentInner>
         </MessageContentBorder>
 
-        <FindPathButton>
+        <FindPathButton onClick={handleFindPathClick} disabled={!placeUrl}>
           <img
             src="/kakaoMap.png"
             alt="마커"

@@ -43,7 +43,7 @@ const ContentWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 8px;
+  padding: 2px 8px 14px 8px;
   text-align: center;
 `;
 
@@ -59,8 +59,10 @@ const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
 
   useEffect(() => {
     // placeName의 길이에 따라 폰트 크기 조정
-    if (placeName && placeName.length > 8) {
-      setFontSize("11px");
+    if (placeName && placeName.length > 12) {
+      setFontSize("9px");
+    } else if (placeName && placeName.length > 5) {
+      setFontSize("12px");
     } else {
       setFontSize("16px");
     }
@@ -77,12 +79,12 @@ const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
     <StyledCard onClick={onClick}>
       <ImageWrapper>
         <PlaceImage src={imageUrl} alt={placeName} />
-        {isAI && <AiTag src="/AI_icon.svg" onClick={handleAiTagClick} />}
-        {/* isAI prop이 true일 때 태그 표시 */}
       </ImageWrapper>
       <ContentWrapper>
         <PlaceName fontSize={fontSize}>{placeName}</PlaceName>
       </ContentWrapper>
+      {isAI && <AiTag src="/AI_icon.svg" onClick={handleAiTagClick} />}
+      {/* isAI prop이 true일 때 태그 표시 */}
     </StyledCard>
   );
 };
@@ -92,7 +94,7 @@ export default PlaceCard;
 // AI 태그를 위한 새로운 컴포넌트
 const AiTag = styled.img`
   position: absolute;
-  top: 5px;
-  left: 5px;
-  padding: 4px 6px;
+  bottom: 3px;
+  left: 3px;
+  padding: 4px 4px;
 `;
