@@ -103,13 +103,13 @@ const Top = styled.div`
 `;
 
 const Main = styled.main`
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
   overflow: auto;
 `;
 
 const PrevButtonContainer = styled.div`
   ${getResponsiveStyles("layout")}
-  margin-top: 40px;
+  margin-top: 25px;
   display: flex;
 `;
 

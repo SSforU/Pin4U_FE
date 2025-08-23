@@ -80,6 +80,7 @@ function StepRecommend() {
           next = [...prev, category];
         }
 
+        // JSON.stringify 제거하고 직접 비교로 성능 최적화
         setPlaceRecommendations((p) => {
           const currentPlace = p[currentPlaceIndex];
           if (
@@ -321,17 +322,18 @@ const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 24px;
-  padding: 24px 20px;
+  gap: 12px;
+  padding: 12px 20px;
   height: 100%;
   justify-content: flex-start;
+  /* max-width와 margin 제거 - 전체 너비 사용 */
 `;
 
 const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: 5px;
   text-align: left;
 `;
 
@@ -342,7 +344,7 @@ const Title = styled.h1`
   line-height: 1.3;
   letter-spacing: -0.2px;
   color: #000000;
-  margin: 0;
+  margin: 0px 0px 5px 0px;
 
   @media (max-width: 768px) {
     font-size: 22px;
@@ -356,7 +358,7 @@ const Title = styled.h1`
 const Detail = styled.p`
   font-family: "Pretendard", sans-serif;
   color: #585858;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
@@ -367,115 +369,11 @@ const Detail = styled.p`
   }
 `;
 
-const InputSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const InputLabel = styled.p`
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: #333333;
-  margin: 0;
-`;
-
-const InputContainer = styled.div`
-  position: relative;
-`;
-
-const CharCount = styled.div`
-  position: absolute;
-  right: 0;
-  top: -24px;
-  font-family: "Pretendard", sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #bababa;
-  text-align: center;
-`;
-
-// <--- 카테고리 섹션 --->
-const CategorySection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const CategoryLabel = styled.label`
-  font-family: "Pretendard", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333333;
-  margin: 0;
-`;
-
-const CategoryGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  width: 100%;
-
-  @media (max-width: 480px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-`;
-
-const CategoryButton = styled.div`
-  padding: 6px 8px;
-  border: 2px solid
-    ${(props) => {
-      if (props.disabled) return "#e0e0e0";
-      return props.isSelected ? "#ff7e74" : "#E7E7E7";
-    }};
-  border-radius: 8px;
-  background-color: ${(props) => {
-    if (props.disabled) return "#f5f5f5";
-    return props.isSelected ? "#ffefed" : "#E7E7E7";
-  }};
-  color: ${(props) => {
-    if (props.disabled) return "#bababa";
-    return props.isSelected ? "#ff7e74" : "#585858";
-  }};
-  font-family: "Pretendard", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  transition: all 0.2s ease;
-  text-align: center;
-  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
-  min-height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    ${(props) =>
-      !props.disabled &&
-      `
-      border: 2px solid #ff7e74;
-      color: #ff7e74;
-      background-color: #ffefed;
-    `}
-  }
-
-  @media (max-width: 768px) {
-    padding: 10px 14px;
-    font-size: 13px;
-    min-height: 40px;
-  }
-`;
-
 // <--- 장소 섹션 --->
 const PlaceSection = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
+  margin-bottom: 4px;
   gap: 2px;
 `;
 
@@ -506,7 +404,121 @@ const PlaceDisplay = styled.div`
   }
 `;
 
+const InputSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+const InputLabel = styled.p`
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #333333;
+  margin: 0;
+`;
+
+const InputContainer = styled.div`
+  position: relative;
+  max-height: 180px;
+`;
+
+const CharCount = styled.div`
+  position: absolute;
+  right: 0;
+  top: -20px;
+  font-family: "Pretendard", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #bababa;
+  text-align: center;
+  z-index: 1;
+`;
+
+// <--- 카테고리 섹션 --->
+const CategorySection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+`;
+
+const CategoryLabel = styled.label`
+  font-family: "Pretendard", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+  margin: 0;
+`;
+
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+`;
+
+const CategoryButton = styled.div`
+  padding: 12px 16px;
+  border: 2px solid
+    ${(props) => {
+      if (props.disabled) return "#e0e0e0";
+      return props.isSelected ? "#ff7e74" : "#E7E7E7";
+    }};
+  border-radius: 8px;
+  background-color: ${(props) => {
+    if (props.disabled) return "#f5f5f5";
+    return props.isSelected ? "#ffefed" : "#E7E7E7";
+  }};
+  color: ${(props) => {
+    if (props.disabled) return "#bababa";
+    return props.isSelected ? "#ff7e74" : "#585858";
+  }};
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: all 0.2s ease;
+  text-align: center;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    ${(props) =>
+      !props.disabled &&
+      `
+      border: 2px solid #ff7e74;
+      color: #ff7e74;
+      background-color: #ffefed;
+    `}
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+`;
+
 // <--- 진행 표시기 --->
+const ProgressSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0;
+`;
+
 const ProgressIndicator = styled.div`
   font-family: "Pretendard", sans-serif;
   font-size: 16px;
@@ -526,12 +538,6 @@ const ProgressIndicator = styled.div`
     font-size: 13px;
     padding: 5px 12px;
   }
-`;
-
-const ProgressSection = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const ArrowButton = styled.button`
@@ -579,14 +585,16 @@ const ArrowIcon = styled.img`
 
 const ButtonSection = styled.div`
   display: flex;
-  justify-content: center; /* 20px에서 40px로 늘림 */
+  justify-content: center;
   opacity: 1;
   transform: translateY(0);
   transition: all 0.4s ease-out;
+  min-height: 50px;
 
   &.hidden {
     opacity: 0;
-    transform: translateY(100%);
+    transform: translateY(0);
     pointer-events: none;
+    visibility: hidden; /* 보이지 않게 하되 공간은 유지 */
   }
 `;

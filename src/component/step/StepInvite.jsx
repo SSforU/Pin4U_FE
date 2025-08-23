@@ -37,7 +37,7 @@ function StepInvite() {
     try {
       document.execCommand("copy");
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      setTimeout(() => setCopySuccess(false), 3000);
     } catch (err) {
       // 에러 발생 시에도 링크는 보여줌
       alert(`복사 실패! 링크: ${shareUrl}`, err);
@@ -53,7 +53,9 @@ function StepInvite() {
   return (
     <Wrapper>
       <Main>
-        <Preview />
+        <ImageContainer>
+          <LogoImage src="/Pin4U_Logo.png" alt="비행기" />
+        </ImageContainer>
         <Content>
           <Title>
             김숭실 님을 위한
@@ -73,9 +75,12 @@ function StepInvite() {
           <CompleteButton onClick={handleComplete}>완료하기</CompleteButton>
         </ActionButtons>
         {copySuccess && (
-          <CopySuccessMessage>
-            링크가 클립보드에 복사되었습니다!
-          </CopySuccessMessage>
+          <CopySuccessPopup>
+            <CopySuccessContent>
+              <CheckIcon src="/LinkCopyComplete.png" alt="체크" />
+              <CopySuccessText>링크가 복사되었어요!</CopySuccessText>
+            </CopySuccessContent>
+          </CopySuccessPopup>
         )}
       </Bottom>
     </Wrapper>
@@ -103,7 +108,7 @@ const Main = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 54px;
+  gap: 35px;
   width: 100%;
 `;
 
@@ -112,29 +117,52 @@ const Bottom = styled.div`
   width: 100%;
   padding: 20px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
+
+  @media (max-width: 768px) {
+    padding: 16px 10px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px 5px;
+    margin-bottom: 14px;
+  }
+`;
+const ImageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 160px;
+
+  @media (max-width: 768px) {
+    max-width: 250px;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 200px;
+  }
 `;
 
-const Preview = styled.div`
-  width: 180px;
-  height: 180px;
-  background-color: #d9d9d9;
-  border-radius: 10px;
-  position: relative;
-
-  &::after {
-    content: "🗺️";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 48px;
-  }
+const LogoImage = styled.img`
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+  object-fit: contain;
 `;
 
 const Content = styled.div`
   text-align: center;
   padding: 0 60px;
+
+  @media (max-width: 768px) {
+    padding: 0 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 20px;
+  }
 `;
 
 const Title = styled.h1`
@@ -161,6 +189,16 @@ const ActionButtons = styled.div`
   padding: 0 20px;
   justify-content: center;
   /* flex-wrap: wrap; */
+
+  @media (max-width: 768px) {
+    gap: 16px;
+    padding: 0 10px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 14px;
+    padding: 0 5px;
+  }
 `;
 
 const CopyLinkButton = styled.button`
@@ -168,7 +206,7 @@ const CopyLinkButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 11px 77px;
+  padding: 11px 20px;
   background-color: transparent;
   color: #ff7e74;
   border: 1.5px solid #ff7e74;
@@ -181,7 +219,6 @@ const CopyLinkButton = styled.button`
   transition: all 0.2s ease;
   height: 50px;
   min-width: 220px;
-  max-width: 220px;
   white-space: nowrap;
 
   &:hover {
@@ -191,34 +228,34 @@ const CopyLinkButton = styled.button`
   /* 반응형 버튼 너비 */
   @media (max-width: 1440px) {
     min-width: 200px;
-    max-width: 200px;
-    padding: 11px 60px;
+    padding: 11px 16px;
   }
 
   @media (max-width: 1024px) {
     min-width: 180px;
-    max-width: 180px;
-    padding: 11px 50px;
+    padding: 11px 14px;
   }
 
   @media (max-width: 768px) {
     min-width: 160px;
-    max-width: 160px;
-    padding: 11px 40px;
+    padding: 11px 12px;
+    font-size: 15px;
   }
 
   @media (max-width: 480px) {
     min-width: 140px;
-    max-width: 140px;
-    padding: 11px 30px;
+    padding: 11px 10px;
+    font-size: 14px;
+    height: 48px;
   }
 `;
 
 const CompleteButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 11px 77px;
+  padding: 11px 20px;
   background-color: #ff7e74;
   color: white;
   border: none;
@@ -230,9 +267,7 @@ const CompleteButton = styled.button`
   line-height: 18px;
   transition: background-color 0.2s ease;
   height: 50px;
-  justify-content: center;
   min-width: 100px;
-  max-width: 100px;
   white-space: nowrap;
 
   &:hover {
@@ -242,26 +277,25 @@ const CompleteButton = styled.button`
   /* 반응형 버튼 너비 */
   @media (max-width: 1440px) {
     min-width: 90px;
-    max-width: 90px;
-    padding: 11px 60px;
+    padding: 11px 16px;
   }
 
   @media (max-width: 1024px) {
     min-width: 80px;
-    max-width: 80px;
-    padding: 11px 50px;
+    padding: 11px 14px;
   }
 
   @media (max-width: 768px) {
     min-width: 70px;
-    max-width: 70px;
-    padding: 11px 40px;
+    padding: 11px 12px;
+    font-size: 15px;
   }
 
   @media (max-width: 480px) {
     min-width: 60px;
-    max-width: 60px;
-    padding: 11px 30px;
+    padding: 11px 10px;
+    font-size: 14px;
+    height: 48px;
   }
 `;
 
@@ -270,12 +304,54 @@ const LinkIcon = styled.img`
   height: 24px;
 `;
 
-const CopySuccessMessage = styled.p`
+// 링크 복사 성공 팝업
+const CopySuccessPopup = styled.div`
+  opacity: 0.8;
+  position: fixed;
+  top: 82%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ff7e74;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 11px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+  min-width: 200px;
+  justify-content: center;
+  animation: popupFadeIn 0.3s ease-out;
+
+  @keyframes popupFadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+      opacity: 0.8;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+`;
+
+const CopySuccessContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const CheckIcon = styled.img`
+  width: 15px;
+  height: 15px;
+`;
+
+const CopySuccessText = styled.p`
   font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 16px;
-  color: #ff7e74;
-  margin-top: 10px;
-  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 18px;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
 `;

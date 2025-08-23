@@ -11,9 +11,20 @@ function StepLocation() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
-  const [selectedLocations, setSelectedLocations] = useState(
-    location ? [location] : []
-  );
+
+  // 오류 처리 로직 추가
+  const [selectedLocations, setSelectedLocations] = useState(() => {
+    // location이 배열이고 내용이 있을 때만 초기화
+    if (location && Array.isArray(location) && location.length > 0) {
+      return location;
+    }
+    // location이 단일 객체일 때도 배열로 변환
+    if (location && typeof location === "object" && !Array.isArray(location)) {
+      return [location];
+    }
+    // 그 외의 경우 빈 배열
+    return [];
+  });
 
   // 실제에선 API 호출
   const fetchStations = async (q) => {

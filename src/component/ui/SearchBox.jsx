@@ -60,7 +60,7 @@ const SearchBoxContainer = styled.div`
   ${getResponsiveStyles("search")} // 반응형
 
   background-color: #f7f7f7;
-  border: 1px solid #bababa;
+  border: 2px solid #bababa;
   border-radius: 10px;
   height: 50px;
   display: flex;
