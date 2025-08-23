@@ -15,6 +15,8 @@ const Overlay = styled.div`
   box-sizing: border-box;
   z-index: 20;
   height: calc(100dvh * 422 / 844);
+  display: flex;
+  flex-direction: column;
 `;
 
 const GalleryHeader = styled.div`
@@ -23,6 +25,8 @@ const GalleryHeader = styled.div`
   justify-content: start;
   gap: 10px;
   background-color: #fff;
+  flex-shrink: 0;
+  padding-bottom: 15px;
 `;
 
 const BackButton = styled.img`
