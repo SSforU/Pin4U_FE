@@ -26,6 +26,7 @@ const GalleryHeader = styled.div`
   gap: 10px;
   background-color: #fff;
   flex-shrink: 0;
+  padding-bottom: 15px;
 `;
 
 const BackButton = styled.img`

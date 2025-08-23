@@ -17,6 +17,7 @@ const StyledCard = styled.div`
   &:hover {
     transform: translateY(-4px);
   }
+  position: relative;
 `;
 
 const ImageWrapper = styled.div`
@@ -76,7 +77,7 @@ const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
     <StyledCard onClick={onClick}>
       <ImageWrapper>
         <PlaceImage src={imageUrl} alt={placeName} />
-        {isAI && <AiTag src="/Info_icon.svg" onClick={handleAiTagClick} />}
+        {isAI && <AiTag src="/AI_icon.svg" onClick={handleAiTagClick} />}
         {/* isAI prop이 true일 때 태그 표시 */}
       </ImageWrapper>
       <ContentWrapper>
