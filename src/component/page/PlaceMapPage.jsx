@@ -201,7 +201,7 @@ export default function PlaceMapPage() {
 
       try {
         // 1) 지인 추천(요청 상세) 불러오기: /api/requests/{slug}
-        const reqRes = await axios.get(`BASE_URL/api/requests/${slug}`, {
+        const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
           signal: controller.signal,
         });
         const reqData = reqRes?.data?.data;
@@ -214,7 +214,7 @@ export default function PlaceMapPage() {
         let aiItems = [];
         try {
           const aiRes = await axios.get(
-            `BASE_URL/api/recommendations/auto?slug=${slug}&n=5&q=`,
+            `${BASE_URL}/api/recommendations/auto?slug=${slug}&n=5&q=`,
             {
               signal: controller.signal,
             }

@@ -27,7 +27,7 @@ export default function HomePage() {
       try {
         // 필요하면 params에 station_code 등 추가
         // const params = { station_code: "7-733" };
-        const { data } = await axios.get("BASE_URL/api/requests", {
+        const { data } = await axios.get(`${BASE_URL}/api/requests`, {
           params: {},
         });
 

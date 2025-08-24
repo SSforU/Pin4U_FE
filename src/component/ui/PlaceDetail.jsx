@@ -54,7 +54,7 @@ export default function PlaceDetail({ item, onClose }) {
 
     try {
       const res = await axios.get(
-        `BASE_URL/api/requests/${slug}/places/notes`,
+        `${BASE_URL}/api/requests/${slug}/places/notes`,
         { params: { external_id: item.external_id } } // ?external_id=...
       );
       const payload = res?.data?.data;
