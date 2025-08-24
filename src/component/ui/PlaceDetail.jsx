@@ -40,6 +40,8 @@ export default function PlaceDetail({ item, onClose }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
   if (!item) {
     return null;
   }
@@ -52,7 +54,7 @@ export default function PlaceDetail({ item, onClose }) {
 
     try {
       const res = await axios.get(
-        `https://api.ss4u-pin4u.store/api/requests/${slug}/places/notes`,
+        `${BASE_URL}/api/requests/${slug}/places/notes`,
         { params: { external_id: item.external_id } } // ?external_id=...
       );
       const payload = res?.data?.data;

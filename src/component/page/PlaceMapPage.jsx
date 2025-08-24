@@ -168,6 +168,8 @@ export default function PlaceMapPage() {
   const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
   const [error, setError] = useState("");
 
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
   function goPrev() {
     navigate("/");
   }
@@ -199,12 +201,9 @@ export default function PlaceMapPage() {
 
       try {
         // 1) 지인 추천(요청 상세) 불러오기: /api/requests/{slug}
-        const reqRes = await axios.get(
-          `https://api.ss4u-pin4u.store/api/requests/${slug}`,
-          {
-            signal: controller.signal,
-          }
-        );
+        const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
+          signal: controller.signal,
+        });
         const reqData = reqRes?.data?.data;
         if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
 
@@ -215,7 +214,7 @@ export default function PlaceMapPage() {
         let aiItems = [];
         try {
           const aiRes = await axios.get(
-            `https://api.ss4u-pin4u.store/api/recommendations/auto?${slug}=&n=5`,
+            `${BASE_URL}/api/recommendations/auto?slug=${slug}&n=5&q=`,
             {
               signal: controller.signal,
             }
