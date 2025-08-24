@@ -1,49 +1,41 @@
 // 최초 앱 접속자 온보딩
+// 저장했던 메모, 역 정보 백엔드에 전달(POST)
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { getResponsiveStyles } from "../../styles/responsive";
-import ProgressBar from "../ui/ProgressBar";
 
-function StepInvite() {
+function CompleteMakePlace() {
   const navigate = useNavigate();
-  const [mapId, setMapId] = useState("");
+  const { userProfile } = useOutletContext();
   const [copySuccess, setCopySuccess] = useState(false);
+  const [createdSlug, setCreatedSlug] = useState(null);
 
-  // 컴포넌트 마운트 시 고유한 mapId 생성
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // StepMemo에서 이미 생성된 링크 정보 가져오기
   useEffect(() => {
-    // 간단한 고유 ID 생성 (실제로는 서버에서 생성해야 하는데 임의로 작성)
-    const generateMapId = () => {
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substring(2, 8);
-      return `${timestamp}-${random}`;
-    };
-    setMapId(generateMapId());
+    const slug = localStorage.getItem("createdSlug");
+    if (slug) {
+      setCreatedSlug(slug);
+    }
   }, []);
 
+  // 링크 복사 함수
   const handleCopyLink = () => {
-    const shareUrl = `${window.location.origin}/shared-map/${mapId}`;
-
-    // 숨겨진 input 요소 생성
-    const input = document.createElement("input");
-    input.value = shareUrl;
-    input.style.position = "fixed";
-    input.style.opacity = 0;
-
-    document.body.appendChild(input);
-    input.select();
-    input.setSelectionRange(0, 99999); // 모바일 지원
-
-    try {
-      document.execCommand("copy");
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 3000);
-    } catch (err) {
-      // 에러 발생 시에도 링크는 보여줌
-      alert(`복사 실패! 링크: ${shareUrl}`, err);
+    if (createdSlug) {
+      // 올바른 경로로 링크 생성 (/shared-map/:slug)
+      const shareUrl = `${window.location.origin}/shared-map/${createdSlug}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      });
+    } else {
+      // 링크가 생성되지 않았으면 에러 처리
+      console.error(
+        "링크가 생성되지 않았습니다. StepMemo에서 먼저 링크를 생성해주세요."
+      );
     }
-
-    document.body.removeChild(input);
   };
 
   const handleComplete = () => {
@@ -58,7 +50,7 @@ function StepInvite() {
         </ImageContainer>
         <Content>
           <Title>
-            김숭실 님을 위한
+            {userProfile?.nickname || "사용자"} 님을 위한
             <br />
             지도가 완성되었어요!
           </Title>
@@ -87,7 +79,7 @@ function StepInvite() {
   );
 }
 
-export default StepInvite;
+export default CompleteMakePlace;
 
 // styled-components
 const Wrapper = styled.div`

@@ -1,15 +1,11 @@
+// #1 고정 사용자 조회 API 호출
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { getResponsiveStyles } from "../../styles/responsive";
-import Button from "../ui/Button";
 
 function CompleteRecommend() {
-  const navigate = useNavigate();
-
-  const handleGoHome = () => {
-    navigate("/make-place");
-  };
+  const { userProfile } = useOutletContext();
 
   return (
     <Wrapper>
@@ -19,17 +15,17 @@ function CompleteRecommend() {
         </ImageContainer>
         <Content>
           <Title>
-            김숭실 님을 위한
+            {userProfile?.nickname || "사용자"} 님을 위한
             <br />
             장소 추천을 완료했어요!
           </Title>
           <Detail>좋은 장소를 공유해 주셔서 감사해요.</Detail>
+          <Detail>
+            {localStorage.getItem("friendNickname") || "친구"}님을 위한 지도도
+            생성해보세요!
+          </Detail>
         </Content>
       </Main>
-
-      <Bottom>
-        <Button onClick={handleGoHome}>내 지도 만들러 가기</Button>
-      </Bottom>
     </Wrapper>
   );
 }

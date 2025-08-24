@@ -1,5 +1,6 @@
 // 최초 앱 접속자 온보딩(로그인 기능이 없으므로 생략, 추후 구현 에정)
 // 링크로 접속한 사용자의 온보딩
+// 닉네임 localStorage에 저장
 import React from "react";
 import styled from "styled-components";
 import { useOutletContext } from "react-router-dom";
@@ -9,9 +10,11 @@ function StepNickname() {
 
   const handleNicknameChange = (e) => {
     const newNickname = e.target.value;
-    if (newNickname.length <= 20) {
-      // 20자 제한
+    if (newNickname.length <= 10) {
+      // 10자 제한
       setNickname(newNickname);
+      // localStorage에 저장
+      localStorage.setItem("friendNickname", newNickname);
     }
   };
 
