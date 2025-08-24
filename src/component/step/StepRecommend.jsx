@@ -22,7 +22,6 @@ function StepRecommend() {
   // StepLocation에서 선택한 장소들을 localStorage에서 불러오기
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
-
   // 장소별 입력 데이터 저장 (tags, message, image)
   const [placeRecommendations, setPlaceRecommendations] = useState([]);
 
@@ -30,18 +29,24 @@ function StepRecommend() {
   useEffect(() => {
     const loadSelectedLocations = () => {
       try {
-        const savedLocations = localStorage.getItem("selectedLocations");
-        if (savedLocations) {
-          const locations = JSON.parse(savedLocations);
-          console.log("StepRecommend: 로드된 장소들:", locations);
-          setSelectedPlaces(locations);
+        // selectedLocationsWithDetails에서 데이터 로드
+        const savedLocationsWithDetails = localStorage.getItem(
+          "selectedLocationsWithDetails"
+        );
+        if (savedLocationsWithDetails) {
+          const locationsWithDetails = JSON.parse(savedLocationsWithDetails);
+          console.log("StepRecommend: 로드된 장소들:", locationsWithDetails);
 
-          // 각 장소별로 기본 데이터 구조 초기화
-          const initialRecommendations = locations.map(() => ({
-            tags: [],
-            message: "",
-            image: null,
-          }));
+          // 각 장소별로 기본 데이터 구조 초기화 (기존 데이터 유지)
+          const initialRecommendations = locationsWithDetails.map(
+            (location) => ({
+              tags: location.tags || [],
+              message: location.recommend_message || "",
+              image: location.image_url || null,
+            })
+          );
+
+          setSelectedPlaces(locationsWithDetails);
           setPlaceRecommendations(initialRecommendations);
           console.log(
             "StepRecommend: 초기화된 추천 데이터:",
@@ -52,9 +57,10 @@ function StepRecommend() {
         }
       } catch (error) {
         console.error("선택된 장소 정보 로드 실패:", error);
-        // 에러 시 기본 데이터로 초기화
         setSelectedPlaces([]);
         setPlaceRecommendations([]);
+      } finally {
+        // 로딩 완료
       }
     };
 
@@ -78,9 +84,7 @@ function StepRecommend() {
   const isAllCompleted = useMemo(() => {
     return (
       placeRecommendations.length > 0 &&
-      placeRecommendations.every(
-        (place) => place.tags.length > 0 && place.message.trim().length > 0
-      )
+      placeRecommendations.every((place) => place.message.trim().length > 0)
     );
   }, [placeRecommendations]);
 
@@ -231,24 +235,38 @@ function StepRecommend() {
   const handleComplete = useCallback(async () => {
     try {
       // 1. localStorage에서 데이터 수집
-      const nickname = localStorage.getItem("friendNickname");
-      const locations = JSON.parse(
-        localStorage.getItem("selectedLocations") || "[]"
+      const nickname = localStorage.getItem("recommendUserNickname"); // 닉네임 키 수정
+      const locationsWithDetails = JSON.parse(
+        localStorage.getItem("selectedLocationsWithDetails") || "[]"
       );
 
       console.log("StepRecommend: 완료 처리 시작");
       console.log("StepRecommend: 닉네임:", nickname);
-      console.log("StepRecommend: 선택된 장소들:", locations);
+      console.log("StepRecommend: 선택된 장소들:", locationsWithDetails);
       console.log("StepRecommend: 장소별 추천 데이터:", placeRecommendations);
 
       // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
-      const items = locations.map((location, index) => ({
-        external_id: location.external_id, // StepLocation에서 저장된 external_id 사용
+      // guest_id 생성 (UUID v4 형식)
+      const generateGuestId = () => {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      };
+
+      const guestId = generateGuestId();
+
+      const items = locationsWithDetails.map((location, index) => ({
+        external_id: location.external_id,
         recommender_nickname: nickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
-        // guest_id 제거 - 서버가 쿠키에서 자동 추출
+        guest_id: guestId, // guest_id 추가
       }));
 
       console.log("StepRecommend: API 요청 데이터:", { items });
@@ -260,20 +278,25 @@ function StepRecommend() {
       );
 
       if (response.data.result === "success") {
-        // 4. localStorage에 데이터 저장 (기존 로직 유지)
+        // 4. localStorage에 데이터 저장
         const finalData = {
           slug,
           placeRecommendations,
           completedAt: new Date().toISOString(),
         };
 
-        const messages = placeRecommendations.map((place) => place.message);
-        const images = placeRecommendations.map((place) => place.image);
-        const tags = placeRecommendations.map((place) => place.tags);
-
-        localStorage.setItem("recommendMessages", JSON.stringify(messages));
-        localStorage.setItem("recommendImages", JSON.stringify(images));
-        localStorage.setItem("recommendTags", JSON.stringify(tags));
+        localStorage.setItem(
+          "recommendMessages",
+          JSON.stringify(placeRecommendations.map((p) => p.message))
+        );
+        localStorage.setItem(
+          "recommendImages",
+          JSON.stringify(placeRecommendations.map((p) => p.image))
+        );
+        localStorage.setItem(
+          "recommendTags",
+          JSON.stringify(placeRecommendations.map((p) => p.tags))
+        );
         localStorage.setItem(
           `recommendations_${slug}`,
           JSON.stringify(finalData)
@@ -286,7 +309,6 @@ function StepRecommend() {
       }
     } catch (error) {
       console.error("추천 제출 실패:", error);
-      // 에러 처리 (사용자에게 알림 등)
       if (error.response) {
         const { status, data } = error.response;
         console.error(`에러 ${status}:`, data.error?.message);

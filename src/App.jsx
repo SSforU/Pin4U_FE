@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import StartMakePlace from "./component/page/StartMakePlace.jsx";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
@@ -9,6 +10,7 @@ import styled from "styled-components";
 function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   // 고정 사용자(id=1) 프로필 조회
   useEffect(() => {
@@ -34,6 +36,16 @@ function App() {
     fetchUserProfile();
   }, []);
 
+  // localStorage에서 첫 방문자 여부 확인
+  useEffect(() => {
+    const isFirstTimeUser = localStorage.getItem("isFirstTimeUser");
+    if (isFirstTimeUser) {
+      setIsFirstVisit(false);
+    } else {
+      setIsFirstVisit(true);
+    }
+  }, []);
+
   // 로딩 중일 때
   if (loading) {
     return (
@@ -47,7 +59,11 @@ function App() {
   return (
     <AppShell>
       <GlobalStyle />
-      <Outlet context={{ userProfile }} />
+      {isFirstVisit ? (
+        <StartMakePlace onComplete={() => setIsFirstVisit(false)} />
+      ) : (
+        <Outlet context={{ userProfile }} />
+      )}
     </AppShell>
   );
 }

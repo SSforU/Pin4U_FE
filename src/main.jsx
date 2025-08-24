@@ -14,6 +14,7 @@ import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
 import StepLocation from "./component/step/StepLocation";
 import StepRecommend from "./component/step/StepRecommend";
 import StartRecommend from "./component/page/StartRecommend";
+import StartMakePlace from "./component/page/StartMakePlace";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,11 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
+
+      {
+        path: "start-make-place",
+        element: <StartMakePlace />,
+      },
 
       {
         path: "make-place",

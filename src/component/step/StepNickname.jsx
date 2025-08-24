@@ -3,18 +3,13 @@
 // 닉네임 localStorage에 저장
 import React from "react";
 import styled from "styled-components";
-import { useOutletContext } from "react-router-dom";
 
-function StepNickname() {
-  const { nickname, setNickname } = useOutletContext();
-
+function StepNickname({ nickname, setNickname }) {
   const handleNicknameChange = (e) => {
     const newNickname = e.target.value;
     if (newNickname.length <= 10) {
       // 10자 제한
       setNickname(newNickname);
-      // localStorage에 저장
-      localStorage.setItem("friendNickname", newNickname);
     }
   };
 
@@ -23,7 +18,7 @@ function StepNickname() {
       <Container>
         <TextBlock>
           <Title>닉네임을 입력해주세요</Title>
-          <Detail>지도에 표시될 닉네임을 입력해주세요.</Detail>
+          <Detail>나만의 지도에 표시될 닉네임을 입력해주세요.</Detail>
         </TextBlock>
 
         <InputContainer>
@@ -31,10 +26,10 @@ function StepNickname() {
             type="text"
             value={nickname}
             onChange={handleNicknameChange}
-            placeholder="닉네임 입력"
-            maxLength={20}
+            placeholder="닉네임 입력 (2-10자)"
+            maxLength={10}
           />
-          <CharCount>{nickname.length}/20</CharCount>
+          <CharCount>{nickname.length}/10</CharCount>
         </InputContainer>
       </Container>
     </Wrapper>

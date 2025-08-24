@@ -135,13 +135,34 @@ function StepLocation() {
       console.log("StepLocation: 선택된 장소 추가:", item);
       console.log("StepLocation: 전체 선택된 장소들:", newSelectedLocations);
       setSelectedLocations(newSelectedLocations);
-      setLocation(newSelectedLocations); // 부모 컴포넌트에 배열로 전달
-      // localStorage에 저장
+
+      // 부모 컴포넌트에 배열로 전달 (다음 버튼 활성화를 위해)
+      setLocation(newSelectedLocations);
+
+      // localStorage에 기본 구조로 저장 (API 명세에 맞게)
+      const locationsWithDetails = newSelectedLocations.map((location) => ({
+        external_id: location.external_id,
+        title: location.title,
+        recommender_nickname: "", // 나중에 입력받을 닉네임
+        recommend_message: "", // 나중에 입력받을 메시지
+        tags: [], // 나중에 선택할 태그들
+        image_url: null, // 나중에 첨부할 이미지
+      }));
+
       localStorage.setItem(
         "selectedLocations",
         JSON.stringify(newSelectedLocations)
       );
+      localStorage.setItem(
+        "selectedLocationsWithDetails",
+        JSON.stringify(locationsWithDetails)
+      );
+
       console.log("StepLocation: localStorage에 저장 완료");
+      console.log(
+        "StepLocation: 부모 location state 업데이트:",
+        newSelectedLocations
+      );
       setQuery(""); // 검색어 초기화
     }
   };
@@ -151,11 +172,39 @@ function StepLocation() {
       (loc) => loc.id !== locationId
     );
     setSelectedLocations(newSelectedLocations);
+
+    // 부모 컴포넌트 state 업데이트
     setLocation(newSelectedLocations.length > 0 ? newSelectedLocations : null);
+
     // localStorage에 저장
     localStorage.setItem(
       "selectedLocations",
       JSON.stringify(newSelectedLocations)
+    );
+
+    // selectedLocationsWithDetails도 업데이트
+    if (newSelectedLocations.length > 0) {
+      const locationsWithDetails = newSelectedLocations.map((location) => ({
+        external_id: location.external_id,
+        title: location.title,
+        recommender_nickname: "",
+        recommend_message: "",
+        tags: [],
+        image_url: null,
+      }));
+
+      localStorage.setItem(
+        "selectedLocationsWithDetails",
+        JSON.stringify(locationsWithDetails)
+      );
+    } else {
+      // 장소가 없으면 localStorage에서 제거
+      localStorage.removeItem("selectedLocationsWithDetails");
+    }
+
+    console.log(
+      "StepLocation: 장소 제거 후 location state:",
+      newSelectedLocations
     );
   };
 
