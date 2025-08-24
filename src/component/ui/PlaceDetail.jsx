@@ -120,6 +120,7 @@ export default function PlaceDetail({ item, onClose }) {
         <RecommendMsg
           place={messageData.place_name}
           notes={messageData.notes}
+          placeUrl={item.place_url}
           onClose={() => setShowMessage(false)}
         />
       )}
