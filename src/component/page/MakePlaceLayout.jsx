@@ -1,6 +1,6 @@
 // #1 고정 사용자 조회 API 호출 + props 전달
 // #4 URL 생성(slug) API 연동 (완료 버튼 누르면 링크 생성)
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Outlet,
@@ -11,6 +11,7 @@ import {
 import styled from "styled-components";
 import ProgressBar from "../ui/ProgressBar";
 import Button from "../ui/Button";
+import StepNickname from "../step/StepNickname";
 import { getResponsiveStyles } from "../../styles/responsive";
 
 const STEPS = ["station", "memo"];
@@ -20,10 +21,23 @@ const TOTAL_STEPS = 3; // 전체 단계 수
 function MakePlaceLayout() {
   const navigate = useNavigate();
   const { userProfile } = useOutletContext();
+  const [nickname, setNickname] = useState("");
   const [station, setStation] = useState(null);
   const [memo, setMemo] = useState("");
+  const [showNickname, setShowNickname] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // localStorage에서 닉네임 확인 (첫 방문자 구분용)
+  useEffect(() => {
+    const savedNickname = localStorage.getItem("userNickname");
+    if (savedNickname) {
+      setShowNickname(false); // 닉네임이 있으면 기존 단계들 보여줌
+    } else {
+      setShowNickname(true); // 닉네임이 없으면 닉네임 입력 단계 보여줌
+    }
+  }, []);
+
   // useMatch로 현재 step 추출
   const match = useMatch("/make-place/:step");
   const stepParam = match?.params?.step || STEPS[0];
@@ -32,9 +46,10 @@ function MakePlaceLayout() {
   const currentStep = currentIndex + FLOW_OFFSET;
 
   // 다음 버튼 비활성화 조건
-  const isNextDisabled =
-    (stepParam === "station" && !station) ||
-    (stepParam === "memo" && !memo.trim());
+  const isNextDisabled = showNickname
+    ? !nickname.trim() || nickname.length < 2 // 닉네임 단계에서는 2자 이상이어야 활성화
+    : (stepParam === "station" && !station) ||
+      (stepParam === "memo" && !memo.trim());
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -42,7 +57,10 @@ function MakePlaceLayout() {
   }
 
   async function goNext() {
-    if (stepParam === "station") {
+    if (showNickname) {
+      // 닉네임 단계에서는 닉네임 입력 완료 처리
+      handleNicknameComplete(nickname);
+    } else if (stepParam === "station") {
       goToStep(currentIndex + 1);
     } else if (stepParam === "memo") {
       // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
@@ -81,6 +99,15 @@ function MakePlaceLayout() {
     }
   }
 
+  // 닉네임 입력 완료 시 호출되는 함수
+  const handleNicknameComplete = (inputNickname) => {
+    setNickname(inputNickname);
+    localStorage.setItem("userNickname", inputNickname); // 첫 방문자 구분용으로 저장
+    setShowNickname(false);
+    // station 단계로 이동
+    navigate("/make-place/station");
+  };
+
   return (
     <Wrapper>
       <Top>
@@ -100,8 +127,23 @@ function MakePlaceLayout() {
             {userProfile?.nickname || "사용자"}님의 지도 만들기
           </UserTitle>
         </UserInfoSection>
-        {/* 고정 사용자 정보를 하위 컴포넌트들에게 전달하기 위해 userProfile(props) 전달 */}
-        <Outlet context={{ station, setStation, memo, setMemo, userProfile }} />
+
+        {/* 닉네임이 없으면 StepNickname을 보여주고, 있으면 기존 단계들을 보여줌 */}
+        {showNickname ? (
+          <StepNickname nickname={nickname} setNickname={setNickname} />
+        ) : (
+          <Outlet
+            context={{
+              nickname,
+              setNickname,
+              station,
+              setStation,
+              memo,
+              setMemo,
+              userProfile,
+            }}
+          />
+        )}
       </Main>
 
       <Bottom>
