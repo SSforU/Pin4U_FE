@@ -6,6 +6,7 @@ import PlaceCard from "./PlaceCard";
 const ListContainer = styled.div`
   display: flex;
   gap: 16px;
+  height: 200px;
   padding-top: 20px;
   padding-bottom: 30px;
   padding-left: 30px;
@@ -39,16 +40,20 @@ const ListContainer = styled.div`
 const PlaceCardList = ({ items, onCardClick, onAiTagClick }) => {
   return (
     <ListContainer>
-      {items.map((item) => (
-        <PlaceCard
-          key={item.id}
-          placeName={item.name}
-          imageUrl={item.imageUrl || "/default-image.png"}
-          isAI={item.isAI}
-          onClick={() => onCardClick(item)}
-          onAiTagClick={item.isAI ? () => onAiTagClick(item) : undefined} // Only pass handler if it's an AI card
-        />
-      ))}
+      {items.length > 0 ? (
+        items.map((item) => (
+          <PlaceCard
+            key={item.id}
+            placeName={item.name}
+            imageUrl={item.imageUrl || "/default-image.png"}
+            isAI={item.isAI}
+            onClick={() => onCardClick(item)}
+            onAiTagClick={item.isAI ? () => onAiTagClick(item) : undefined} // Only pass handler if it's an AI card
+          />
+        ))
+      ) : (
+        <p>추천받은 장소가 없어요</p>
+      )}
     </ListContainer>
   );
 };
