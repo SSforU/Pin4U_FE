@@ -36,10 +36,10 @@ function App() {
     fetchUserProfile();
   }, []);
 
-  // localStorage에서 닉네임 확인
+  // localStorage에서 첫 방문자 여부 확인
   useEffect(() => {
-    const savedNickname = localStorage.getItem("userNickname");
-    if (savedNickname) {
+    const isFirstTimeUser = localStorage.getItem("isFirstTimeUser");
+    if (isFirstTimeUser) {
       setIsFirstVisit(false);
     } else {
       setIsFirstVisit(true);

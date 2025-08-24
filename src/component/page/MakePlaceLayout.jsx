@@ -28,13 +28,13 @@ function MakePlaceLayout() {
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-  // localStorage에서 닉네임 확인 (첫 방문자 구분용)
+  // localStorage에서 첫 방문자 여부 확인
   useEffect(() => {
-    const savedNickname = localStorage.getItem("userNickname");
-    if (savedNickname) {
-      setShowNickname(false); // 닉네임이 있으면 기존 단계들 보여줌
+    const isFirstTimeUser = localStorage.getItem("isFirstTimeUser");
+    if (isFirstTimeUser) {
+      setShowNickname(false); // 첫 방문자가 아니면 기존 단계들 보여줌
     } else {
-      setShowNickname(true); // 닉네임이 없으면 닉네임 입력 단계 보여줌
+      setShowNickname(true); // 첫 방문자면 닉네임 입력 단계 보여줌
     }
   }, []);
 
@@ -102,7 +102,7 @@ function MakePlaceLayout() {
   // 닉네임 입력 완료 시 호출되는 함수
   const handleNicknameComplete = (inputNickname) => {
     setNickname(inputNickname);
-    localStorage.setItem("userNickname", inputNickname); // 첫 방문자 구분용으로 저장
+    localStorage.setItem("isFirstTimeUser", "true"); // 첫 방문자 구분용으로 저장
     setShowNickname(false);
     // station 단계로 이동
     navigate("/make-place/station");
@@ -124,7 +124,8 @@ function MakePlaceLayout() {
       <Main>
         <UserInfoSection>
           <UserTitle>
-            {userProfile?.nickname || "사용자"}님의 지도 만들기
+            {userProfile?.nickname || "사용자"}
+            님의 지도 만들기
           </UserTitle>
         </UserInfoSection>
 
