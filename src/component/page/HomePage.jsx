@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import HomeSearchBox from "../ui/HomeSearchBox";
 import axios from "axios";
+import { useOutletContext } from "react-router-dom";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ export default function HomePage() {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const { userProfile } = useOutletContext();
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
     const load = async () => {
@@ -22,10 +27,9 @@ export default function HomePage() {
       try {
         // 필요하면 params에 station_code 등 추가
         // const params = { station_code: "7-733" };
-        const { data } = await axios.get(
-          "https://api.ss4u-pin4u.store/api/requests",
-          { params: {} }
-        );
+        const { data } = await axios.get("BASE_URL/api/requests", {
+          params: {},
+        });
 
         // 서버 응답 스펙에 맞춰 UI용으로 가볍게 매핑
         const items = data?.data?.items ?? [];
@@ -78,10 +82,12 @@ export default function HomePage() {
     return stations.filter((s) => s.name.includes(q));
   }, [searchTerm, stations]);
 
+  console.log(">>> stations", stations, filteredStations);
+
   return (
     <PageContainer>
       <TitleBox>
-        <PageTitle>김숭실 님의 지도</PageTitle>
+        <PageTitle>{userProfile?.nickname} 님의 지도</PageTitle>
       </TitleBox>
 
       <ContentContainer>
