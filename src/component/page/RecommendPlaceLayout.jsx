@@ -1,6 +1,12 @@
-// src/component/page/OnboardingLayout.jsx
+// #1 고정 사용자 조회 API 호출 (props 전달용)
 import React, { useState } from "react";
-import { Outlet, useNavigate, useMatch, useParams } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useMatch,
+  useParams,
+  useOutletContext,
+} from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../ui/ProgressBar";
 import Button from "../ui/Button";
@@ -12,13 +18,14 @@ const TOTAL_STEPS = 3; // 전체 단계 수
 
 function RecommendPlaceLayout() {
   const navigate = useNavigate();
-  const { mapId } = useParams();
+  const { slug } = useParams();
+  const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
   const [memo, setMemo] = useState("");
 
   // useMatch로 현재 step 추출
-  const match = useMatch("/shared-map/:mapId/onboarding/:step");
+  const match = useMatch("/shared-map/:slug/onboarding/:step");
   const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
@@ -31,7 +38,7 @@ function RecommendPlaceLayout() {
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
-    navigate(`/shared-map/${mapId}/onboarding/${STEPS[safe]}`);
+    navigate(`/shared-map/${slug}/onboarding/${STEPS[safe]}`);
   }
 
   function goNext() {
@@ -46,7 +53,7 @@ function RecommendPlaceLayout() {
     if (currentIndex > 0) {
       goToStep(currentIndex - 1);
     } else {
-      navigate(`/shared-map/${mapId}`);
+      navigate(`/shared-map/${slug}`);
     }
   }
 
@@ -72,7 +79,8 @@ function RecommendPlaceLayout() {
             setLocation,
             memo,
             setMemo,
-            mapId,
+            slug,
+            userProfile, // userProfile을 하위 컴포넌트들에게 전달
           }}
         />
       </Main>

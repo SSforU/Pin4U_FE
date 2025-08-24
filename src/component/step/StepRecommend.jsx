@@ -1,4 +1,5 @@
 // 장소 추천 단계
+// #6 추천 장소 최종 제출 API 호출 (POST)
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
@@ -6,38 +7,86 @@ import { getResponsiveStyles } from "../../styles/responsive";
 import { useOutletContext } from "react-router-dom";
 import Message from "../ui/Message";
 import Button from "../ui/Button";
+import axios from "axios";
 
 function StepRecommend() {
-  const { memo } = useOutletContext();
-  const [content, setContent] = useState(memo || "");
+  const { memo, userProfile } = useOutletContext();
+  const [content, setContent] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [IMAGE_FILE, setImageFile] = useState(null);
   const navigate = useNavigate();
-  const { mapId } = useParams();
+  const { slug } = useParams();
 
-  // 임시 데이터 (나중에 StepLocation에서 받아올 예정)
-  const [selectedPlaces] = useState([
-    { id: 1, name: "카페 모모", external_id: "kakao:123456789" },
-    { id: 2, name: "맛집 맛집", external_id: "kakao:987654321" },
-    { id: 3, name: "힐링 카페", external_id: "kakao:456789123" },
-  ]);
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // StepLocation에서 선택한 장소들을 localStorage에서 불러오기
+  const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
 
-  // 장소별 입력 데이터 저장 (tags, message)
-  const [placeRecommendations, setPlaceRecommendations] = useState(() =>
-    selectedPlaces.map(() => ({ tags: [], message: "" }))
-  );
+  // 장소별 입력 데이터 저장 (tags, message, image)
+  const [placeRecommendations, setPlaceRecommendations] = useState([]);
+
+  // 컴포넌트 마운트 시 localStorage에서 선택된 장소들 불러오기
+  useEffect(() => {
+    const loadSelectedLocations = () => {
+      try {
+        const savedLocations = localStorage.getItem("selectedLocations");
+        if (savedLocations) {
+          const locations = JSON.parse(savedLocations);
+          console.log("StepRecommend: 로드된 장소들:", locations);
+          setSelectedPlaces(locations);
+
+          // 각 장소별로 기본 데이터 구조 초기화
+          const initialRecommendations = locations.map(() => ({
+            tags: [],
+            message: "",
+            image: null,
+          }));
+          setPlaceRecommendations(initialRecommendations);
+          console.log(
+            "StepRecommend: 초기화된 추천 데이터:",
+            initialRecommendations
+          );
+        } else {
+          console.log("StepRecommend: localStorage에 선택된 장소가 없습니다.");
+        }
+      } catch (error) {
+        console.error("선택된 장소 정보 로드 실패:", error);
+        // 에러 시 기본 데이터로 초기화
+        setSelectedPlaces([]);
+        setPlaceRecommendations([]);
+      }
+    };
+
+    loadSelectedLocations();
+  }, []);
+
+  // 현재 장소의 데이터를 UI에 반영
+  useEffect(() => {
+    if (
+      placeRecommendations.length > 0 &&
+      currentPlaceIndex < placeRecommendations.length
+    ) {
+      const currentData = placeRecommendations[currentPlaceIndex];
+      setContent(currentData.message || "");
+      setSelectedCategories(currentData.tags || []);
+      setImageFile(currentData.image || null);
+    }
+  }, [currentPlaceIndex, placeRecommendations]);
 
   // 모든 장소의 입력이 완료되었는지 확인 (메모이제이션)
   const isAllCompleted = useMemo(() => {
-    return placeRecommendations.every(
-      (place) => place.tags.length > 0 && place.message.trim().length > 0
+    return (
+      placeRecommendations.length > 0 &&
+      placeRecommendations.every(
+        (place) => place.tags.length > 0 && place.message.trim().length > 0
+      )
     );
   }, [placeRecommendations]);
 
   // memo prop이 변경될 때만 content 상태 동기화 (초기 로드 시에만)
   useEffect(() => {
-    if (memo && memo !== content) {
+    if (memo && memo !== content && content === "") {
       setContent(memo);
     }
   }, [memo, content]);
@@ -48,7 +97,7 @@ function StepRecommend() {
       const newContent = e.target.value;
       if (newContent.length <= 120) {
         setContent(newContent);
-        // setMemo 호출 제거 - 각 장소별로 독립적으로 관리
+        // 현재 장소의 메시지 업데이트
         setPlaceRecommendations((prev) => {
           const copy = [...prev];
           copy[currentPlaceIndex] = {
@@ -80,16 +129,8 @@ function StepRecommend() {
           next = [...prev, category];
         }
 
-        // JSON.stringify 제거하고 직접 비교로 성능 최적화
+        // 현재 장소의 태그 업데이트
         setPlaceRecommendations((p) => {
-          const currentPlace = p[currentPlaceIndex];
-          if (
-            currentPlace.tags.length === next.length &&
-            currentPlace.tags.every((tag, i) => tag === next[i])
-          ) {
-            return p; // 변경사항이 없으면 기존 배열 반환
-          }
-
           const copy = [...p];
           copy[currentPlaceIndex] = {
             ...copy[currentPlaceIndex],
@@ -125,6 +166,10 @@ function StepRecommend() {
           tags: selectedCategories,
           message: content,
         };
+        console.log(
+          `StepRecommend: ${currentPlaceIndex + 1}번째 장소 데이터 저장:`,
+          copy[currentPlaceIndex]
+        );
         return copy;
       });
 
@@ -133,9 +178,13 @@ function StepRecommend() {
 
       // 다음 장소의 저장된 데이터 로드
       const nextPlaceData = placeRecommendations[nextIndex];
+      console.log(
+        `StepRecommend: ${nextIndex + 1}번째 장소 데이터 로드:`,
+        nextPlaceData
+      );
       setSelectedCategories(nextPlaceData?.tags || []);
       setContent(nextPlaceData?.message || "");
-      setImageFile(null);
+      setImageFile(nextPlaceData?.image || null);
     }
   }, [
     currentPlaceIndex,
@@ -156,6 +205,10 @@ function StepRecommend() {
           tags: selectedCategories,
           message: content,
         };
+        console.log(
+          `StepRecommend: ${currentPlaceIndex + 1}번째 장소 데이터 저장:`,
+          copy[currentPlaceIndex]
+        );
         return copy;
       });
 
@@ -164,27 +217,82 @@ function StepRecommend() {
 
       // 이전 장소의 저장된 데이터 로드
       const prevPlaceData = placeRecommendations[prevIndex];
+      console.log(
+        `StepRecommend: ${prevIndex + 1}번째 장소 데이터 로드:`,
+        prevPlaceData
+      );
       setSelectedCategories(prevPlaceData?.tags || []);
       setContent(prevPlaceData?.message || "");
-      setImageFile(null);
+      setImageFile(prevPlaceData?.image || null);
     }
   }, [currentPlaceIndex, placeRecommendations, selectedCategories, content]);
 
-  // 완료 처리 (CompleteRecommend로 이동) (메모이제이션)
-  const handleComplete = useCallback(() => {
-    // 모든 장소 추천 데이터를 localStorage에 저장
-    const finalData = {
-      mapId,
-      placeRecommendations,
-      completedAt: new Date().toISOString(),
-    };
+  // 완료 처리 (API 호출 후 CompleteRecommend로 이동) (메모이제이션)
+  const handleComplete = useCallback(async () => {
+    try {
+      // 1. localStorage에서 데이터 수집
+      const nickname = localStorage.getItem("friendNickname");
+      const locations = JSON.parse(
+        localStorage.getItem("selectedLocations") || "[]"
+      );
 
-    localStorage.setItem(`recommendations_${mapId}`, JSON.stringify(finalData));
-    console.log("모든 장소 추천 완료:", finalData);
+      console.log("StepRecommend: 완료 처리 시작");
+      console.log("StepRecommend: 닉네임:", nickname);
+      console.log("StepRecommend: 선택된 장소들:", locations);
+      console.log("StepRecommend: 장소별 추천 데이터:", placeRecommendations);
 
-    // CompleteRecommend로 이동 (절대 경로 사용)
-    navigate(`/shared-map/${mapId}/complete`);
-  }, [mapId, placeRecommendations, navigate]);
+      // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
+      const items = locations.map((location, index) => ({
+        external_id: location.external_id, // StepLocation에서 저장된 external_id 사용
+        recommender_nickname: nickname,
+        recommend_message: placeRecommendations[index]?.message || "",
+        image_url: placeRecommendations[index]?.image || null,
+        tags: placeRecommendations[index]?.tags || [],
+        // guest_id 제거 - 서버가 쿠키에서 자동 추출
+      }));
+
+      console.log("StepRecommend: API 요청 데이터:", { items });
+
+      // 3. API 호출 - 추천 장소 최종 제출
+      const response = await axios.post(
+        `${BASE_URL}/api/requests/${slug}/recommendations`,
+        { items: items }
+      );
+
+      if (response.data.result === "success") {
+        // 4. localStorage에 데이터 저장 (기존 로직 유지)
+        const finalData = {
+          slug,
+          placeRecommendations,
+          completedAt: new Date().toISOString(),
+        };
+
+        const messages = placeRecommendations.map((place) => place.message);
+        const images = placeRecommendations.map((place) => place.image);
+        const tags = placeRecommendations.map((place) => place.tags);
+
+        localStorage.setItem("recommendMessages", JSON.stringify(messages));
+        localStorage.setItem("recommendImages", JSON.stringify(images));
+        localStorage.setItem("recommendTags", JSON.stringify(tags));
+        localStorage.setItem(
+          `recommendations_${slug}`,
+          JSON.stringify(finalData)
+        );
+
+        console.log("추천 제출 완료:", finalData);
+
+        // 5. CompleteRecommend로 이동
+        navigate(`/shared-map/${slug}/complete`);
+      }
+    } catch (error) {
+      console.error("추천 제출 실패:", error);
+      // 에러 처리 (사용자에게 알림 등)
+      if (error.response) {
+        const { status, data } = error.response;
+        console.error(`에러 ${status}:`, data.error?.message);
+      }
+    }
+  }, [slug, placeRecommendations, navigate, BASE_URL]);
 
   // 카테고리 배열 메모이제이션
   const categories = useMemo(
@@ -221,10 +329,10 @@ function StepRecommend() {
         </TextBlock>
         {/* 장소 표시 */}
         <PlaceSection>
-          <PlaceIcon src="/Pin.png" alt="장소 아이콘" />
-          <PlaceInfo>
-            <PlaceDisplay>{currentPlace?.name || "장소명"}</PlaceDisplay>
-          </PlaceInfo>
+          <PlaceTitle>
+            <PlaceIcon src="/Pin.png" alt="장소 아이콘" />
+            <PlaceDisplay>{currentPlace?.title || "장소명"}</PlaceDisplay>
+          </PlaceTitle>
         </PlaceSection>
 
         <CategorySection>
@@ -249,7 +357,10 @@ function StepRecommend() {
 
         <InputSection>
           <TextBlock>
-            <InputLabel>김숭실 님에게 전달할 메시지를 입력해주세요.</InputLabel>
+            <InputLabel>
+              {userProfile?.nickname || "사용자"} 님에게 전달할 메시지를
+              입력해주세요.
+            </InputLabel>
           </TextBlock>
           <InputContainer>
             <Message
@@ -372,20 +483,23 @@ const Detail = styled.p`
 // <--- 장소 섹션 --->
 const PlaceSection = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 4px;
-  gap: 2px;
+  gap: 0px;
+`;
+
+const PlaceTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 3px;
 `;
 
 const PlaceIcon = styled.img`
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
-`;
-
-const PlaceInfo = styled.div`
-  display: flex;
-  gap: 5px;
+  flex-shrink: 0;
+  margin-top: 0;
 `;
 
 const PlaceDisplay = styled.div`
@@ -401,6 +515,40 @@ const PlaceDisplay = styled.div`
 
   @media (max-width: 480px) {
     font-size: 15px;
+  }
+`;
+
+const PlaceAddress = styled.div`
+  font-family: "Pretendard", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #888888;
+  margin: 0px;
+  line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
+`;
+
+const PlaceDistance = styled.div`
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ff7e74;
+  margin: 0px;
+  line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 11px;
   }
 `;
 

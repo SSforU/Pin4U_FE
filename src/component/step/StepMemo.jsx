@@ -1,4 +1,5 @@
 // 최초 앱 접속자 온보딩
+// 고정 사용자가 작성한 memo localStorage에 저장
 import { React, useState, useEffect } from "react";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../styles/responsive";
@@ -16,15 +17,17 @@ function StepMemo() {
     }
   }, [memo]); // content 의존성 제거
 
-  // 30자 제한 처리
+  // 80자 제한 처리 (API 명세에 맞춤)
   const handleMemoChange = (e) => {
     const newContent = e.target.value;
-    if (newContent.length <= 30) {
+    if (newContent.length <= 80) {
       setContent(newContent);
       // 부모 컴포넌트에 즉시 전달 (디바운싱 없이)
       if (setMemo) {
         setMemo(newContent);
       }
+      // localStorage에 저장
+      localStorage.setItem("requestMessage", newContent);
     }
   };
 
@@ -41,9 +44,9 @@ function StepMemo() {
           value={content}
           onChange={handleMemoChange}
           placeholder={"메모 입력"}
-          maxLength={30}
+          maxLength={80}
         />
-        <CharCount>{content.length}/30</CharCount>
+        <CharCount>{content.length}/80</CharCount>
       </MemoContainer>
     </Wrapper>
   );
