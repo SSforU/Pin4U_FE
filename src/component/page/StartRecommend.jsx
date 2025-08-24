@@ -1,21 +1,60 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+// 링크로 접속한 사용자가 station과 memo 정보를 조회
+// #7 A-지도화면 API 연동
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../styles/responsive";
 import Button from "../ui/Button";
+import axios from "axios";
 
 function StartRecommend() {
   const navigate = useNavigate();
-  const { mapId } = useParams();
+  const { slug } = useParams();
+  const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
-  // 임시 데이터 (나중에 MakePlaceLayout에서 받아올 예정)
-  const locationData = {
-    station: "숭실대입구역 7호선",
-    memo: "공부하기 좋은 카페 추천해 줘!",
-  };
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  // API에서 받아온 데이터 상태
+  const [locationData, setLocationData] = useState({
+    station: "",
+    memo: "",
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // API에서 요청 정보 조회 (station + memo)
+  useEffect(() => {
+    const fetchRequestInfo = async () => {
+      try {
+        setIsLoading(true);
+        // API 호출
+        const response = await axios.get(`${BASE_URL}/api/requests/${slug}`);
+
+        // 올바른 응답 구조에서 데이터 추출
+        const { station, requestMessage } = response.data.data;
+        // 필요한 데이터만 추출
+        setLocationData({
+          station: station.name, // 역 이름만
+          memo: requestMessage, // 요청 메시지만
+        });
+      } catch (error) {
+        console.error("요청 정보 조회 실패:", error);
+        // 에러 시 기본값 설정
+        setLocationData({
+          station: "정보를 불러올 수 없습니다",
+          memo: "정보를 불러올 수 없습니다",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchRequestInfo();
+    }
+  }, [slug, BASE_URL]);
 
   const handleGoRecommend = () => {
-    navigate(`/shared-map/${mapId}/onboarding/nickname`);
+    navigate(`/shared-map/${slug}/onboarding/nickname`);
   };
 
   return (
@@ -26,7 +65,7 @@ function StartRecommend() {
         </ImageContainer>
         <Content>
           <Title>
-            김숭실 님을 위한
+            {userProfile?.nickname || "사용자"} 님을 위한
             <br />
             장소를 추천해주세요!
           </Title>
@@ -37,13 +76,15 @@ function StartRecommend() {
           {/* 위치 정보 */}
           <InfoItem>
             <InfoIcon src="/Pin.png" alt="위치" />
-            <InfoText>{locationData.station}</InfoText>
+            <InfoText>
+              {isLoading ? "로딩 중..." : locationData.station}
+            </InfoText>
           </InfoItem>
 
           {/* 메모 정보 */}
           <InfoItem>
             <InfoIcon src="/Recommend_Memo.png" alt="메모" />
-            <InfoText>{locationData.memo}</InfoText>
+            <InfoText>{isLoading ? "로딩 중..." : locationData.memo}</InfoText>
           </InfoItem>
         </InfoSection>
       </Main>

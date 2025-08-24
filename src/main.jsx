@@ -7,7 +7,7 @@ import PlaceMapPage from "./component/page/PlaceMapPage";
 import { Navigate } from "react-router-dom";
 import StepStation from "./component/step/StepStation";
 import StepMemo from "./component/step/StepMemo";
-import StepInvite from "./component/step/StepInvite";
+import CompleteMakePlace from "./component/page/CompleteMakePlace";
 import StepNickname from "./component/step/StepNickname";
 import CompleteRecommend from "./component/page/CompleteRecommend";
 import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
@@ -32,13 +32,13 @@ const router = createBrowserRouter([
           { path: "memo", element: <StepMemo /> },
         ],
       },
-      { path: "invite", element: <StepInvite /> },
+      { path: "complete", element: <CompleteMakePlace /> },
       {
-        path: "shared-map/:mapId",
+        path: "shared-map/:slug",
         element: <StartRecommend />,
       },
       {
-        path: "shared-map/:mapId/onboarding",
+        path: "shared-map/:slug/onboarding",
         element: <RecommendPlaceLayout />,
         children: [
           { index: true, element: <Navigate to="nickname" replace /> },
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "shared-map/:mapId/complete",
+        path: "shared-map/:slug/complete",
         element: <CompleteRecommend />,
       },
     ],

@@ -1,16 +1,24 @@
 // 링크로 접속한 사용자의 온보딩
+// #1 고정 사용자 조회 API 연동
+// #5 역 주변 반경 장소 검색 API 연동
 import React from "react";
 import SearchBox from "../ui/SearchBox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../styles/responsive";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
+import axios from "axios";
 
 function StepLocation() {
-  const { location, setLocation } = useOutletContext();
+  const { location, setLocation, userProfile } = useOutletContext();
+  const { slug } = useParams(); // slug 파라미터 가져오기
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [stationInfo, setStationInfo] = useState(null);
+  const [requestMemo, setRequestMemo] = useState("");
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   // 오류 처리 로직 추가
   const [selectedLocations, setSelectedLocations] = useState(() => {
@@ -26,45 +34,95 @@ function StepLocation() {
     return [];
   });
 
-  // 실제에선 API 호출
+  // slug로부터 역 정보와 메모 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!slug) return;
+
+      try {
+        // 7번 API: 역 정보와 메모
+        const requestResponse = await axios.get(
+          `${BASE_URL}/api/requests/${slug}`
+        );
+        if (requestResponse.data.result === "success") {
+          setStationInfo(requestResponse.data.data.station);
+          setRequestMemo(requestResponse.data.data.requestMessage);
+        }
+      } catch (error) {
+        console.error("데이터 조회 실패:", error);
+      }
+    };
+
+    fetchData();
+  }, [slug, BASE_URL]);
+
+  // 실제 API 호출로 장소 검색
   const fetchStations = async (q) => {
+    if (!q || !stationInfo) {
+      setItems([]);
+      return;
+    }
     setLoading(true);
-    const db = [
-      {
-        id: 1,
-        title: "미학당",
-        subtitle: "서울 동작구 사당로 56 2층 초록색문",
-      },
-      { id: 2, title: "서브웨이 숭실대점", subtitle: "서울 동작구 상도동 501" },
-      {
-        id: 3,
-        title: "베트남식당 퍼민",
-        subtitle: "서울 동작구 사당로 36 1층 101호",
-      },
-      {
-        id: 4,
-        title: "스타벅스 숭실대점",
-        subtitle: "서울 동작구 상도동 502",
-      },
-      {
-        id: 5,
-        title: "맥도날드 숭실대점",
-        subtitle: "서울 동작구 상도동 503",
-      },
-      {
-        id: 6,
-        title: "은화수식당",
-        subtitle: "서울 동작구 상도동 503",
-      },
-      {
-        id: 7,
-        title: "니뽕내뽕",
-        subtitle: "서울 동작구 상도동 503",
-      },
-    ];
-    await new Promise((r) => setTimeout(r, 200));
-    setItems(q ? db.filter((x) => x.title.includes(q)) : []);
-    setLoading(false);
+
+    try {
+      // API 명세에 맞게 호출 (limit 파라미터 제거 - 서버에서 10개 고정)
+      const response = await axios.get(`${BASE_URL}/api/places/search`, {
+        params: {
+          q: q.trim(),
+          station: stationInfo.code,
+        },
+      });
+
+      if (response.data.result === "success") {
+        // API 응답을 SearchBox에서 사용하는 형식으로 변환
+        const places = response.data.data.items.map((place) => ({
+          id: place.external_id, // external_id를 id로 사용
+          external_id: place.external_id, // API 호출 시 사용할 external_id
+          title: place.place_name,
+          subtitle: place.address_name,
+          // 추가 정보들
+          category: place.category_group_name,
+          distance: place.distance_m,
+          rating: place.mock?.rating,
+          ratingCount: place.mock?.rating_count,
+          phone: place.phone,
+          roadAddress: place.road_address_name,
+          placeUrl: place.place_url,
+          coordinates: {
+            x: parseFloat(place.x),
+            y: parseFloat(place.y),
+          },
+          // 원본 데이터 보존
+          originalData: place,
+        }));
+
+        setItems(places);
+      } else {
+        console.error("장소 검색 실패:", response.data.error);
+        setItems([]);
+      }
+    } catch (error) {
+      console.error("장소 검색 API 호출 실패:", error);
+
+      // 에러 타입별 처리
+      if (error.response) {
+        const { status, data } = error.response;
+
+        if (status === 400) {
+          console.error("잘못된 요청:", data.error?.message);
+        } else if (status === 404) {
+          console.error("역을 찾을 수 없음:", data.error?.message);
+        } else if (status === 429) {
+          console.error("API 쿼터 초과:", data.error?.message);
+        } else if (status === 502) {
+          console.error("외부 API 오류:", data.error?.message);
+        }
+      }
+
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLocationSelect = (item) => {
@@ -74,8 +132,16 @@ function StepLocation() {
     );
     if (!isAlreadySelected) {
       const newSelectedLocations = [...selectedLocations, item];
+      console.log("StepLocation: 선택된 장소 추가:", item);
+      console.log("StepLocation: 전체 선택된 장소들:", newSelectedLocations);
       setSelectedLocations(newSelectedLocations);
       setLocation(newSelectedLocations); // 부모 컴포넌트에 배열로 전달
+      // localStorage에 저장
+      localStorage.setItem(
+        "selectedLocations",
+        JSON.stringify(newSelectedLocations)
+      );
+      console.log("StepLocation: localStorage에 저장 완료");
       setQuery(""); // 검색어 초기화
     }
   };
@@ -86,6 +152,11 @@ function StepLocation() {
     );
     setSelectedLocations(newSelectedLocations);
     setLocation(newSelectedLocations.length > 0 ? newSelectedLocations : null);
+    // localStorage에 저장
+    localStorage.setItem(
+      "selectedLocations",
+      JSON.stringify(newSelectedLocations)
+    );
   };
 
   return (
@@ -93,14 +164,34 @@ function StepLocation() {
       <ContentSection>
         <TextBlock>
           <Title>
-            김숭실 님에게 추천하고 싶은
+            {userProfile?.nickname || "사용자"} 님에게 추천하고 싶은
             <br />
-            장소를 추천해주세요.
+            장소를 입력해주세요.
           </Title>
           <Detail>
-            김숭실님이 설정한 역 반경 800m 안에서 추천이 가능해요.
+            {userProfile?.nickname || "사용자"}님이 설정한 역 반경 800m 안에서
+            추천이 가능해요.
           </Detail>
         </TextBlock>
+
+        {/* 역과 메모 정보 표시 */}
+        {stationInfo && (
+          <InfoSection>
+            {/* 역 정보 */}
+            <InfoItem>
+              <InfoIcon src="/Pin.png" alt="위치" />
+              <InfoText>{stationInfo.name}</InfoText>
+            </InfoItem>
+
+            {/* 메모 정보 */}
+            {requestMemo && (
+              <InfoItem>
+                <InfoIcon src="/Recommend_Memo.png" alt="메모" />
+                <InfoText>{requestMemo}</InfoText>
+              </InfoItem>
+            )}
+          </InfoSection>
+        )}
 
         <SearchSection>
           <SearchBox
@@ -122,6 +213,9 @@ function StepLocation() {
                 <SelectedLocationItem key={loc.id}>
                   <LocationInfo>
                     <LocationTitle>{loc.title}</LocationTitle>
+                    {loc.distance && (
+                      <LocationDistance>{loc.distance}m</LocationDistance>
+                    )}
                   </LocationInfo>
                   <RemoveButton
                     src="/Cancel.png"
@@ -155,7 +249,7 @@ const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 24px;
+  gap: 15px;
   padding: 24px 20px;
   height: 100%;
   justify-content: flex-start;
@@ -283,6 +377,14 @@ const LocationTitle = styled.div`
   }
 `;
 
+const LocationDistance = styled.span`
+  font-family: "Pretendard", sans-serif;
+  font-size: 12px;
+  color: #888888;
+  margin-top: 2px;
+  font-weight: 400;
+`;
+
 const RemoveButton = styled.img`
   width: 12px;
   height: 12px;
@@ -310,4 +412,32 @@ const RemoveButton = styled.img`
     width: 10px;
     height: 10px;
   }
+`;
+
+// 새로운 스타일 추가
+const InfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 2px;
+  padding: 8px 10px;
+`;
+
+const InfoItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const InfoIcon = styled.img`
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+`;
+
+const InfoText = styled.span`
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  color: #333333;
+  line-height: 1.5;
 `;
