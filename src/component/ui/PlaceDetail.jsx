@@ -4,33 +4,36 @@ import styled from "styled-components";
 import RecommendMsg from "./RecommendMsg";
 import { useState } from "react";
 import PhotoGallery from "./PhotoGallery";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 // mockApiData를 PlaceDetail 컴포넌트 내부로 이동
-const mockApiData = {
-  result: "success",
-  data: {
-    external_id: "kakao:123456789",
-    place_name: "장소이름예시",
-    notes: [
-      {
-        nickname: "민수",
-        recommend_message: "평일 저녁 조용",
-        image_url: "/picture.png",
-        tags: ["분위기 맛집"],
-        created_at: "2025-08-16T00:01:00Z",
-      },
-      {
-        nickname: "지은",
-        recommend_message: "단체 4~6명 OK",
-        image_url: "/picture.png",
-        tags: ["힐링 스팟"],
-        created_at: "2025-08-16T00:02:00Z",
-      },
-    ],
-  },
-};
+// const mockApiData = {
+//   result: "success",
+//   data: {
+//     external_id: "kakao:123456789",
+//     place_name: "장소이름예시",
+//     notes: [
+//       {
+//         nickname: "민수",
+//         recommend_message: "평일 저녁 조용",
+//         image_url: "/picture.png",
+//         tags: ["분위기 맛집"],
+//         created_at: "2025-08-16T00:01:00Z",
+//       },
+//       {
+//         nickname: "지은",
+//         recommend_message: "단체 4~6명 OK",
+//         image_url: "/picture.png",
+//         tags: ["힐링 스팟"],
+//         created_at: "2025-08-16T00:02:00Z",
+//       },
+//     ],
+//   },
+// };
 
 export default function PlaceDetail({ item, onClose }) {
+  const { slug } = useParams(); // /api/requests/{slug}/... 에 사용
   const [showMessage, setShowMessage] = useState(false);
   const [showGallery, setShowGallery] = useState(false); // 갤러리 상태 추가
   const [messageData, setMessageData] = useState(null);
@@ -41,24 +44,36 @@ export default function PlaceDetail({ item, onClose }) {
     return null;
   }
 
-  const handleMessageButtonClick = () => {
+  // 메시지 보기 버튼 클릭 시: 실제 API 호출
+  const handleMessageButtonClick = async () => {
+    if (!item.external_id) return; // 안전장치
     setIsLoading(true);
-    // 실제 API 호출 로직은 여기에 구현
-    // fetch(`/api/notes/${item.id}`).then(...)
+    setError(null);
 
-    // mock 데이터 사용
     try {
-      // API 호출을 흉내내는 setTimeout
-      setTimeout(() => {
-        setMessageData(mockApiData.data);
-        setIsLoading(false);
-        setShowMessage(true);
-      }, 500); // 0.5초 지연
-    } catch (err) {
-      setError(err);
+      const res = await axios.get(
+        `https://api.ss4u-pin4u.store/api/requests/${slug}/places/notes`,
+        { params: { external_id: item.external_id } } // ?external_id=...
+      );
+      const payload = res?.data?.data;
+      if (!payload) throw new Error("메시지 데이터가 비어 있습니다.");
+
+      setMessageData(payload); // { external_id, place_name, notes: [...] }
+      setShowMessage(true);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "메시지를 불러오지 못했습니다.");
+    } finally {
       setIsLoading(false);
     }
   };
+
+  // 뱃지 숫자: 서버에서 목록을 열기 전엔 모를 수 있으니
+  // item.note_count(있다면) → 열고 나선 messageData.notes.length 표시
+  const noteCount =
+    (typeof item.note_count === "number" ? item.note_count : null) ??
+    messageData?.notes?.length ??
+    0;
 
   return (
     <>
@@ -72,10 +87,7 @@ export default function PlaceDetail({ item, onClose }) {
                 disabled={isLoading}
                 src="/Mail.svg"
               />
-              {/* 메시지 개수 뱃지 추가 */}
-              {mockApiData.data.notes.length > 0 && (
-                <MessageCount>{mockApiData.data.notes.length}</MessageCount>
-              )}
+              {noteCount > 0 && <MessageCount>{noteCount}</MessageCount>}
             </MessageButtonContainer>
             <CloseButton src="/X.svg" onClick={onClose} />
           </HeaderRight>
