@@ -22,7 +22,6 @@ function StepRecommend() {
   // StepLocation에서 선택한 장소들을 localStorage에서 불러오기
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
-
   // 장소별 입력 데이터 저장 (tags, message, image)
   const [placeRecommendations, setPlaceRecommendations] = useState([]);
 
@@ -60,6 +59,8 @@ function StepRecommend() {
         console.error("선택된 장소 정보 로드 실패:", error);
         setSelectedPlaces([]);
         setPlaceRecommendations([]);
+      } finally {
+        // 로딩 완료
       }
     };
 
@@ -245,12 +246,27 @@ function StepRecommend() {
       console.log("StepRecommend: 장소별 추천 데이터:", placeRecommendations);
 
       // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
+      // guest_id 생성 (UUID v4 형식)
+      const generateGuestId = () => {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      };
+
+      const guestId = generateGuestId();
+
       const items = locationsWithDetails.map((location, index) => ({
         external_id: location.external_id,
         recommender_nickname: nickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
+        guest_id: guestId, // guest_id 추가
       }));
 
       console.log("StepRecommend: API 요청 데이터:", { items });
