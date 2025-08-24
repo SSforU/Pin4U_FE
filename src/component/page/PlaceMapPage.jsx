@@ -6,163 +6,167 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PlaceDetail from "../ui/PlaceDetail";
 import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 // 지인 추천 API 데이터 예시 (기존 데이터)
-const friendMockApiData = {
-  result: "success",
-  data: {
-    slug: "abCDef12",
-    station: {
-      code: "7-733",
-      name: "숭실대입구",
-      line: "7",
-      lat: 37.49641,
-      lng: 126.95365,
-    },
-    request_message: "카페 추천 부탁!",
-    items: [
-      {
-        external_id: "kakao:123456789",
-        id: "123456789",
-        place_name: "미학당",
-        category_group_code: "CE7",
-        category_group_name: "카페",
-        category_name: "음식점 > 카페",
-        address_name: "서울 동작구 ㅇㅇ로 12",
-        road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
-        x: "126.95790",
-        y: "37.49611",
-        place_url: "http://place.map.kakao.com/123456789",
-        mock: {
-          rating: 4.6,
-          rating_count: 128,
-          image_urls: ["/picture.png"],
-        },
-        ai: {
-          summary_text: "조용한 분위기 선호 사용자에게 적합한 카페.",
-          tags: ["조용", "카페"],
-        },
-        recommended_count: 2,
-      },
-      {
-        external_id: "kakao:987654321",
-        id: "987654321",
-        place_name: "잔디속에있다고 상상을해",
-        category_group_code: "CE7",
-        category_group_name: "카페",
-        category_name: "음식점 > 카페",
-        address_name: "서울 동작구 ㅇㅇ로 13",
-        road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
-        x: "126.95800",
-        y: "37.49620",
-        place_url: "http://place.map.kakao.com/987654321",
-        mock: {
-          rating: 4.8,
-          rating_count: 99,
-          image_urls: ["/picture.png"],
-        },
-        ai: {
-          summary_text: "야외 정원이 매력적인 카페.",
-          tags: ["야외", "정원"],
-        },
-        recommended_count: 3,
-      },
-      {
-        external_id: "kakao:112233445",
-        id: "112233445",
-        place_name: "콘하스",
-        category_group_code: "CE7",
-        category_group_name: "카페",
-        category_name: "음식점 > 카페",
-        address_name: "서울 동작구 ㅇㅇ로 14",
-        road_address_name: "서울 동작구 ㅇㅇ로 14길 5",
-        x: "126.95810",
-        y: "37.49630",
-        place_url: "http://place.map.kakao.com/112233445",
-        mock: {
-          rating: 4.5,
-          rating_count: 201,
-          image_urls: ["/picture.png"],
-        },
-        ai: {
-          summary_text: "넓고 쾌적한 공간의 인테리어가 좋은 카페.",
-          tags: ["넓은 공간", "인테리어"],
-        },
-        recommended_count: 5,
-      },
-    ],
-  },
-};
+// const friendMockApiData = {
+//   result: "success",
+//   data: {
+//     slug: "abCDef12",
+//     station: {
+//       code: "7-733",
+//       name: "숭실대입구",
+//       line: "7",
+//       lat: 37.49641,
+//       lng: 126.95365,
+//     },
+//     request_message: "카페 추천 부탁!",
+//     items: [
+//       {
+//         external_id: "kakao:123456789",
+//         id: "123456789",
+//         place_name: "미학당",
+//         category_group_code: "CE7",
+//         category_group_name: "카페",
+//         category_name: "음식점 > 카페",
+//         address_name: "서울 동작구 ㅇㅇ로 12",
+//         road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
+//         x: "126.95790",
+//         y: "37.49611",
+//         place_url: "http://place.map.kakao.com/123456789",
+//         mock: {
+//           rating: 4.6,
+//           rating_count: 128,
+//           image_urls: ["/picture.png"],
+//         },
+//         ai: {
+//           summary_text: "조용한 분위기 선호 사용자에게 적합한 카페.",
+//           tags: ["조용", "카페"],
+//         },
+//         recommended_count: 2,
+//       },
+//       {
+//         external_id: "kakao:987654321",
+//         id: "987654321",
+//         place_name: "잔디속에있다고 상상을해",
+//         category_group_code: "CE7",
+//         category_group_name: "카페",
+//         category_name: "음식점 > 카페",
+//         address_name: "서울 동작구 ㅇㅇ로 13",
+//         road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
+//         x: "126.95800",
+//         y: "37.49620",
+//         place_url: "http://place.map.kakao.com/987654321",
+//         mock: {
+//           rating: 4.8,
+//           rating_count: 99,
+//           image_urls: ["/picture.png"],
+//         },
+//         ai: {
+//           summary_text: "야외 정원이 매력적인 카페.",
+//           tags: ["야외", "정원"],
+//         },
+//         recommended_count: 3,
+//       },
+//       {
+//         external_id: "kakao:112233445",
+//         id: "112233445",
+//         place_name: "콘하스",
+//         category_group_code: "CE7",
+//         category_group_name: "카페",
+//         category_name: "음식점 > 카페",
+//         address_name: "서울 동작구 ㅇㅇ로 14",
+//         road_address_name: "서울 동작구 ㅇㅇ로 14길 5",
+//         x: "126.95810",
+//         y: "37.49630",
+//         place_url: "http://place.map.kakao.com/112233445",
+//         mock: {
+//           rating: 4.5,
+//           rating_count: 201,
+//           image_urls: ["/picture.png"],
+//         },
+//         ai: {
+//           summary_text: "넓고 쾌적한 공간의 인테리어가 좋은 카페.",
+//           tags: ["넓은 공간", "인테리어"],
+//         },
+//         recommended_count: 5,
+//       },
+//     ],
+//   },
+// };
 
 // AI 추천 API 데이터 예시 (새로운 데이터)
-const aiMockApiData = {
-  result: "success",
-  data: {
-    items: [
-      {
-        external_id: "kakao:999999999",
-        id: "999999999",
-        place_name: "카페가뜨겁다",
-        category_group_code: "CE7",
-        category_group_name: "카페",
-        category_name: "카페 > 디저트카페",
-        address_name: "서울 동작구 ㅇㅇ로 12",
-        road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
-        x: "126.95790",
-        y: "37.49611",
-        place_url: "http://place.map.kakao.com/999999999",
-        distance_m: 420,
-        mock: {
-          rating: 4.5,
-          rating_count: 87,
-          image_urls: [
-            "/picture.png",
-            "/picture.png",
-            "/picture.png",
-            "/picture.png",
-          ],
-        },
-        ai: {
-          summary_text: "조용한 공부하기 좋은 카페",
-          tags: ["조용", "디저트"],
-        },
-        reason: "사용자 선호(조용/카페)와 유사",
-        recommended_count: 0, // AI 추천 장소는 추천 수 0으로 초기화
-      },
-      {
-        external_id: "kakao:987654321",
-        id: "987654321",
-        place_name: "잔디속에있다고 상상을상해",
-        category_group_code: "CE7",
-        category_group_name: "카페",
-        category_name: "음식점 > 카페",
-        address_name: "서울 동작구 ㅇㅇ로 13",
-        road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
-        x: "126.95800",
-        y: "37.49620",
-        place_url: "http://place.map.kakao.com/987654321",
-        mock: {
-          rating: 4.8,
-          rating_count: 99,
-          image_urls: ["/picture.png"],
-        },
-        ai: {
-          summary_text: "야외 정원이 매력적인 카페.",
-          tags: ["야외", "정원"],
-        },
-        recommended_count: 3,
-      },
-    ],
-  },
-};
+// const aiMockApiData = {
+//   result: "success",
+//   data: {
+//     items: [
+//       {
+//         external_id: "kakao:999999999",
+//         id: "999999999",
+//         place_name: "카페가뜨겁다",
+//         category_group_code: "CE7",
+//         category_group_name: "카페",
+//         category_name: "카페 > 디저트카페",
+//         address_name: "서울 동작구 ㅇㅇ로 12",
+//         road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
+//         x: "126.95790",
+//         y: "37.49611",
+//         place_url: "http://place.map.kakao.com/999999999",
+//         distance_m: 420,
+//         mock: {
+//           rating: 4.5,
+//           rating_count: 87,
+//           image_urls: [
+//             "/picture.png",
+//             "/picture.png",
+//             "/picture.png",
+//             "/picture.png",
+//           ],
+//         },
+//         ai: {
+//           summary_text: "조용한 공부하기 좋은 카페",
+//           tags: ["조용", "디저트"],
+//         },
+//         reason: "사용자 선호(조용/카페)와 유사",
+//         recommended_count: 0, // AI 추천 장소는 추천 수 0으로 초기화
+//       },
+//       {
+//         external_id: "kakao:987654321",
+//         id: "987654321",
+//         place_name: "잔디속에있다고 상상을상해",
+//         category_group_code: "CE7",
+//         category_group_name: "카페",
+//         category_name: "음식점 > 카페",
+//         address_name: "서울 동작구 ㅇㅇ로 13",
+//         road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
+//         x: "126.95800",
+//         y: "37.49620",
+//         place_url: "http://place.map.kakao.com/987654321",
+//         mock: {
+//           rating: 4.8,
+//           rating_count: 99,
+//           image_urls: ["/picture.png"],
+//         },
+//         ai: {
+//           summary_text: "야외 정원이 매력적인 카페.",
+//           tags: ["야외", "정원"],
+//         },
+//         recommended_count: 3,
+//       },
+//     ],
+//   },
+// };
 
 export default function PlaceMapPage() {
   const navigate = useNavigate();
+  const { slug } = useParams(); // /api/requests/{slug} 에서 slug 사용
 
   const [data, setData] = useState(null);
   const [isMemoOpen, setIsMemoOpen] = useState(false); // Memo 상태 추가
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
+  const [error, setError] = useState("");
 
   function goPrev() {
     navigate("/");
@@ -188,27 +192,74 @@ export default function PlaceMapPage() {
   }, [showAiPopup]);
 
   useEffect(() => {
-    // 실제 API 호출 로직은 이 곳에 구현
-    // fetch(`/api/place-map/${slug}`).then(...)
-    // 현재는 목업 데이터 사용
-    const mergedItems = [
-      ...friendMockApiData.data.items.map((item) => ({ ...item, isAI: false })),
-      ...aiMockApiData.data.items.map((item) => ({ ...item, isAI: true })),
-    ];
+    const controller = new AbortController();
 
-    // Map과 PlaceCardList에 각각 필요한 뷰모델을 생성
-    const pinVMs = mergedItems.map((item) => toPinVM(item, item.isAI));
-    const cardVMs = mergedItems.map((item) => toCardVM(item, item.isAI));
+    async function fetchAll() {
+      setError("");
 
-    setData({
-      ...friendMockApiData.data,
-      // 이제 UI 컴포넌트에 직접 뷰모델 데이터를 전달
-      // Map 컴포넌트에는 PinVM 리스트를, PlaceCardList에는 CardVM 리스트를 전달
-      items: mergedItems, // 원본 데이터를 계속 가지고 있음
-      pinVMs,
-      cardVMs,
-    });
-  }, []);
+      try {
+        // 1) 지인 추천(요청 상세) 불러오기: /api/requests/{slug}
+        const reqRes = await axios.get(
+          `https://api.ss4u-pin4u.store/api/requests/${slug}`,
+          {
+            signal: controller.signal,
+          }
+        );
+        const reqData = reqRes?.data?.data;
+        if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
+
+        // 2) AI 추천 불러오기
+        //    백엔드 설계에 맞게 엔드포인트 한 곳만 골라 쓰세요:
+        //    (예시 A) /api/requests/{slug}/ai
+        //    (예시 B) /api/ai-recommendations?slug={slug}
+        let aiItems = [];
+        try {
+          const aiRes = await axios.get(
+            `https://api.ss4u-pin4u.store/api/recommendations/auto?${slug}=&n=5`,
+            {
+              signal: controller.signal,
+            }
+          );
+          aiItems = aiRes?.data?.data?.items ?? [];
+        } catch (e) {
+          // AI가 아직 없거나 실패해도 메인 로딩을 막지 않도록 조용히 넘어감
+          aiItems = [];
+        }
+
+        // 3) 아이템 합치기 + isAI 플래그
+        const friendItems = (reqData.items ?? []).map((it) => ({
+          ...it,
+          isAI: false,
+        }));
+        const aiItemsMarked = aiItems.map((it) => ({ ...it, isAI: true }));
+
+        const mergedItems = [...friendItems, ...aiItemsMarked];
+
+        // 4) 뷰모델 구성
+        const pinVMs = mergedItems.map((item) => toPinVM(item, item.isAI));
+        const cardVMs = mergedItems.map((item) => toCardVM(item, item.isAI));
+
+        // 5) 화면 상태 세팅(기존 형태 유지)
+        setData({
+          ...reqData,
+          items: mergedItems,
+          pinVMs,
+          cardVMs,
+        });
+
+        // AI 결과가 있다면 안내 팝업 잠깐 노출
+        if (aiItemsMarked.length > 0) setShowAiPopup(true);
+      } catch (e) {
+        if (e.name !== "CanceledError") {
+          console.error(e);
+          setError(e.message || "데이터를 불러오지 못했습니다.");
+        }
+      }
+    }
+
+    if (slug) fetchAll();
+    return () => controller.abort();
+  }, [slug]);
 
   const handleCardClick = (item) => {
     console.log(`Card clicked: ${item.place_name}`);
