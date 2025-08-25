@@ -31,8 +31,8 @@ const ImageWrapper = styled.div`
 `;
 
 const PlaceImage = styled.img`
-  width: 90%;
-  height: 90%;
+  width: ${(props) => (props.isDefault ? "60%" : "90%")};
+  height: ${(props) => (props.isDefault ? "60%" : "90%")};
   object-fit: cover;
   border-radius: 8px;
 `;
@@ -78,7 +78,11 @@ const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
   return (
     <StyledCard onClick={onClick}>
       <ImageWrapper>
-        <PlaceImage src={imageUrl} alt="/Pin4U_Logo.png" />
+        <PlaceImage
+          src={imageUrl}
+          alt={placeName}
+          isDefault={imageUrl === "/Pin4U_Logo.png"}
+        />
       </ImageWrapper>
       <ContentWrapper>
         <PlaceName fontSize={fontSize}>{placeName}</PlaceName>

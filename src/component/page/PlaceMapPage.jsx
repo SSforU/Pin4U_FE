@@ -1,164 +1,14 @@
 // PlaceMapPage.jsx
 import React, { useState, useEffect } from "react";
-import Map from "../ui/Map"; // Map 컴포넌트의 경로가 올바른지 확인해주세요
+import Map from "../ui/Map";
 import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PlaceDetail from "../ui/PlaceDetail";
 import LoadingSpinner from "../ui/LoadingSpinner";
-import SkeletonUI from "../ui/SkeletonUI";
 import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-
-// 지인 추천 API 데이터 예시 (기존 데이터)
-// const friendMockApiData = {
-//   result: "success",
-//   data: {
-//     slug: "abCDef12",
-//     station: {
-//       code: "7-733",
-//       name: "숭실대입구",
-//       line: "7",
-//       lat: 37.49641,
-//       lng: 126.95365,
-//     },
-//     request_message: "카페 추천 부탁!",
-//     items: [
-//       {
-//         external_id: "kakao:123456789",
-//         id: "123456789",
-//         place_name: "미학당",
-//         category_group_code: "CE7",
-//         category_group_name: "카페",
-//         category_name: "음식점 > 카페",
-//         address_name: "서울 동작구 ㅇㅇ로 12",
-//         road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
-//         x: "126.95790",
-//         y: "37.49611",
-//         place_url: "http://place.map.kakao.com/123456789",
-//         mock: {
-//           rating: 4.6,
-//           rating_count: 128,
-//           image_urls: ["/picture.png"],
-//         },
-//         ai: {
-//           summary_text: "조용한 분위기 선호 사용자에게 적합한 카페.",
-//           tags: ["조용", "카페"],
-//         },
-//         recommended_count: 2,
-//       },
-//       {
-//         external_id: "kakao:987654321",
-//         id: "987654321",
-//         place_name: "잔디속에있다고 상상을해",
-//         category_group_code: "CE7",
-//         category_group_name: "카페",
-//         category_name: "음식점 > 카페",
-//         address_name: "서울 동작구 ㅇㅇ로 13",
-//         road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
-//         x: "126.95800",
-//         y: "37.49620",
-//         place_url: "http://place.map.kakao.com/987654321",
-//         mock: {
-//           rating: 4.8,
-//           rating_count: 99,
-//           image_urls: ["/picture.png"],
-//         },
-//         ai: {
-//           summary_text: "야외 정원이 매력적인 카페.",
-//           tags: ["야외", "정원"],
-//         },
-//         recommended_count: 3,
-//       },
-//       {
-//         external_id: "kakao:112233445",
-//         id: "112233445",
-//         place_name: "콘하스",
-//         category_group_code: "CE7",
-//         category_group_name: "카페",
-//         category_name: "음식점 > 카페",
-//         address_name: "서울 동작구 ㅇㅇ로 14",
-//         road_address_name: "서울 동작구 ㅇㅇ로 14길 5",
-//         x: "126.95810",
-//         y: "37.49630",
-//         place_url: "http://place.map.kakao.com/112233445",
-//         mock: {
-//           rating: 4.5,
-//           rating_count: 201,
-//           image_urls: ["/picture.png"],
-//         },
-//         ai: {
-//           summary_text: "넓고 쾌적한 공간의 인테리어가 좋은 카페.",
-//           tags: ["넓은 공간", "인테리어"],
-//         },
-//         recommended_count: 5,
-//       },
-//     ],
-//   },
-// };
-
-// AI 추천 API 데이터 예시 (새로운 데이터)
-// const aiMockApiData = {
-//   result: "success",
-//   data: {
-//     items: [
-//       {
-//         external_id: "kakao:999999999",
-//         id: "999999999",
-//         place_name: "카페가뜨겁다",
-//         category_group_code: "CE7",
-//         category_group_name: "카페",
-//         category_name: "카페 > 디저트카페",
-//         address_name: "서울 동작구 ㅇㅇ로 12",
-//         road_address_name: "서울 동작구 ㅇㅇ로 12길 3",
-//         x: "126.95790",
-//         y: "37.49611",
-//         place_url: "http://place.map.kakao.com/999999999",
-//         distance_m: 420,
-//         mock: {
-//           rating: 4.5,
-//           rating_count: 87,
-//           image_urls: [
-//             "/picture.png",
-//             "/picture.png",
-//             "/picture.png",
-//             "/picture.png",
-//           ],
-//         },
-//         ai: {
-//           summary_text: "조용한 공부하기 좋은 카페",
-//           tags: ["조용", "디저트"],
-//         },
-//         reason: "사용자 선호(조용/카페)와 유사",
-//         recommended_count: 0, // AI 추천 장소는 추천 수 0으로 초기화
-//       },
-//       {
-//         external_id: "kakao:987654321",
-//         id: "987654321",
-//         place_name: "잔디속에있다고 상상을상해",
-//         category_group_code: "CE7",
-//         category_group_name: "카페",
-//         category_name: "음식점 > 카페",
-//         address_name: "서울 동작구 ㅇㅇ로 13",
-//         road_address_name: "서울 동작구 ㅇㅇ로 13길 4",
-//         x: "126.95800",
-//         y: "37.49620",
-//         place_url: "http://place.map.kakao.com/987654321",
-//         mock: {
-//           rating: 4.8,
-//           rating_count: 99,
-//           image_urls: ["/picture.png"],
-//         },
-//         ai: {
-//           summary_text: "야외 정원이 매력적인 카페.",
-//           tags: ["야외", "정원"],
-//         },
-//         recommended_count: 3,
-//       },
-//     ],
-//   },
-// };
 
 export default function PlaceMapPage() {
   const navigate = useNavigate();
@@ -202,17 +52,12 @@ export default function PlaceMapPage() {
       setError("");
 
       try {
-        // 1) 지인 추천(요청 상세) 불러오기: /api/requests/{slug}
         const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
           signal: controller.signal,
         });
         const reqData = reqRes?.data?.data;
         if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
 
-        // 2) AI 추천 불러오기
-        //    백엔드 설계에 맞게 엔드포인트 한 곳만 골라 쓰세요:
-        //    (예시 A) /api/requests/{slug}/ai
-        //    (예시 B) /api/ai-recommendations?slug={slug}
         let aiItems = [];
         try {
           const aiRes = await axios.get(
@@ -249,7 +94,6 @@ export default function PlaceMapPage() {
         });
 
         // AI 결과가 있다면 안내 팝업 잠깐 노출
-        if (aiItemsMarked.length > 0) setShowAiPopup(true);
       } catch (e) {
         if (e.name !== "CanceledError") {
           console.error(e);
@@ -263,12 +107,10 @@ export default function PlaceMapPage() {
   }, [slug]);
 
   const handleCardClick = (item) => {
-    console.log(`Card clicked: ${item.place_name}`);
     setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
   };
 
   const handleAiTagClick = (item) => {
-    // This handler is now specifically for the AI tag
     console.log(`AI Tag clicked: ${item.place_name}`);
     setShowAiPopup(true);
   };
@@ -331,7 +173,6 @@ export default function PlaceMapPage() {
           />
         </CardListWrapper>
       )}
-      {/* AI 팝업 렌더링 위치 */}
       {showAiPopup && (
         <MessagePopup>
           김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.
