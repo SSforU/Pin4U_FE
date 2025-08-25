@@ -35,7 +35,7 @@ function StepMemo() {
     <Wrapper>
       <TextBlock>
         <Title>친구들에게 메모를 남겨주세요.</Title>
-        <Detail>친구들이 입력된 메모를 참고해 추천해 줄 수 있어요.</Detail>
+        <Detail>작성해주신 메모를 AI가 참고해 추천해 줄 수 있어요.</Detail>
       </TextBlock>
 
       <MemoContainer>
