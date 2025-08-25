@@ -139,13 +139,6 @@ function MakePlaceLayout() {
       </Top>
 
       <Main>
-        <UserInfoSection>
-          <UserTitle>
-            {userProfile?.nickname || "사용자"}
-            님의 지도 만들기
-          </UserTitle>
-        </UserInfoSection>
-
         {/* 닉네임이 없으면 StepNickname을 보여주고, 있으면 기존 단계들을 보여줌 */}
         {showNickname ? (
           <StepNickname nickname={nickname} setNickname={setNickname} />
