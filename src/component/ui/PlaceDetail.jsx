@@ -48,14 +48,14 @@ export default function PlaceDetail({ item, onClose }) {
 
   // 메시지 보기 버튼 클릭 시: 실제 API 호출
   const handleMessageButtonClick = async () => {
-    if (!item.external_id) return; // 안전장치
+    if (!item.externalId) return; // 안전장치
     setIsLoading(true);
     setError(null);
 
     try {
       const res = await axios.get(
         `${BASE_URL}/api/requests/${slug}/places/notes`,
-        { params: { external_id: item.external_id } } // ?external_id=...
+        { params: { external_id: item.externalId } } // ?external_id=...
       );
       const payload = res?.data?.data;
       if (!payload) throw new Error("메시지 데이터가 비어 있습니다.");
@@ -73,7 +73,9 @@ export default function PlaceDetail({ item, onClose }) {
   // 뱃지 숫자: 서버에서 목록을 열기 전엔 모를 수 있으니
   // item.note_count(있다면) → 열고 나선 messageData.notes.length 표시
   const noteCount =
-    (typeof item.note_count === "number" ? item.note_count : null) ??
+    (typeof item.recommended_count === "number"
+      ? item.recommended_count
+      : null) ??
     messageData?.notes?.length ??
     0;
 
@@ -81,7 +83,7 @@ export default function PlaceDetail({ item, onClose }) {
     <>
       <DetailContainer>
         <Header>
-          <PlaceName>{item.place_name}</PlaceName>
+          <PlaceName>{item.placeName}</PlaceName>
           <HeaderRight>
             <MessageButtonContainer>
               <MessageButton
@@ -111,7 +113,7 @@ export default function PlaceDetail({ item, onClose }) {
           <SectionContent>AI 요약</SectionContent>
         </Section>
         <SummaryContent style={{ marginBottom: "16px" }}>
-          {item.ai.summary_text}
+          {item?.ai?.summary_text}
         </SummaryContent>
 
         <div
@@ -125,22 +127,22 @@ export default function PlaceDetail({ item, onClose }) {
           <MoreButton onClick={() => setShowGallery(true)}>더보기</MoreButton>
         </div>
         <ImageContainer>
-          {item.mock.image_urls.map((url, index) => (
+          {item?.mock?.image_urls.map((url, index) => (
             <PlaceImage key={index} src={url} alt={`${item.place_name} 사진`} />
           ))}
         </ImageContainer>
       </DetailContainer>
       {showMessage && messageData && (
         <RecommendMsg
-          place={messageData.place_name}
+          place={messageData.placeName}
           notes={messageData.notes}
-          placeUrl={item.place_url}
+          placeUrl={item.placeUrl}
           onClose={() => setShowMessage(false)}
         />
       )}
       {showGallery && (
         <PhotoGallery
-          imageUrls={item.mock.image_urls}
+          imageUrls={item?.mock?.image_urls}
           onClose={() => setShowGallery(false)}
         />
       )}

@@ -88,15 +88,15 @@ const LikeCount = styled.span`
 `;
 
 const subwayLineImages = {
-  1: "/1호선.png",
-  2: "/2호선.png",
-  3: "/3호선.png",
-  4: "/4호선.png",
-  5: "/5호선.png",
-  6: "/6호선.png",
-  7: "/7호선.png",
-  8: "/8호선.png",
-  9: "/9호선.png",
+  1: "/subway/1호선.png",
+  2: "/subway/2호선.png",
+  3: "/subway/3호선.png",
+  4: "/subway/4호선.png",
+  5: "/subway/5호선.png",
+  6: "/subway/6호선.png",
+  7: "/subway/7호선.png",
+  8: "/subway/8호선.png",
+  9: "/subway/9호선.png",
 };
 
 const SubwayLineIcon = styled.div`
