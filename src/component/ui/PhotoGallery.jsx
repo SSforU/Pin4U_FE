@@ -66,9 +66,13 @@ export default function PhotoGallery({ imageUrls, onClose }) {
         <HeaderTitle>사진</HeaderTitle>
       </GalleryHeader>
       <ImageGrid>
-        {imageUrls.map((url, index) => (
-          <EnlargedImage key={index} src={url} alt={`사진 ${index + 1}`} />
-        ))}
+        {imageUrls && imageUrls.length > 0 ? (
+          imageUrls.map((url, index) => (
+            <EnlargedImage key={index} src={url} alt={`사진 ${index + 1}`} />
+          ))
+        ) : (
+          <p>사진이 없습니다</p>
+        )}
       </ImageGrid>
     </Overlay>
   );
