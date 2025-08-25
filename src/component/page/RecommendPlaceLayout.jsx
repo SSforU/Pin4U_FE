@@ -1,5 +1,5 @@
 // #1 고정 사용자 조회 API 호출 (props 전달용)
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
@@ -10,6 +10,7 @@ import {
 import styled from "styled-components";
 import ProgressBar from "../ui/ProgressBar";
 import Button from "../ui/Button";
+import StepNickname from "../step/StepNickname";
 import { getResponsiveStyles } from "../../styles/responsive";
 
 const STEPS = ["nickname", "location", "recommend"];
@@ -23,6 +24,13 @@ function RecommendPlaceLayout() {
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
   const [memo, setMemo] = useState("");
+
+  // 닉네임이 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    if (nickname.trim()) {
+      localStorage.setItem("recommendUserNickname", nickname);
+    }
+  }, [nickname]);
 
   // useMatch로 현재 step 추출
   const match = useMatch("/shared-map/:slug/onboarding/:step");
@@ -71,18 +79,22 @@ function RecommendPlaceLayout() {
       </Top>
 
       <Main>
-        <Outlet
-          context={{
-            nickname,
-            setNickname,
-            location,
-            setLocation,
-            memo,
-            setMemo,
-            slug,
-            userProfile, // userProfile을 하위 컴포넌트들에게 전달
-          }}
-        />
+        {stepParam === "nickname" ? (
+          <StepNickname nickname={nickname} setNickname={setNickname} />
+        ) : (
+          <Outlet
+            context={{
+              nickname,
+              setNickname,
+              location,
+              setLocation,
+              memo,
+              setMemo,
+              slug,
+              userProfile, // userProfile을 하위 컴포넌트들에게 전달
+            }}
+          />
+        )}
       </Main>
 
       {stepParam !== "recommend" && (
