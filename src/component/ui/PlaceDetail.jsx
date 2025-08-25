@@ -73,7 +73,7 @@ export default function PlaceDetail({ item, onClose }) {
         <Section>
           <SectionIcon src="/Clock_icon.png" alt="영업시간" />
           {/* 영업시간 정보는 mock 데이터에 없으므로 임의로 추가하거나 비워둡니다 */}
-          <SectionContent>정보 없음</SectionContent>
+          <SectionContent>{item?.mock?.opening_hours}</SectionContent>
         </Section>
         <Section>
           <SectionIcon src="/Marker_icon.png" alt="주소" />
@@ -100,8 +100,12 @@ export default function PlaceDetail({ item, onClose }) {
           <MoreButton onClick={() => setShowGallery(true)}>더보기</MoreButton>
         </div>
         <ImageContainer>
-          {item?.mock?.image_urls.map((url, index) => (
-            <PlaceImage key={index} src={url} alt={`${item.placeName} 사진`} />
+          {(item?.mock?.image_urls || []).map((url, index) => (
+            <PlaceImage
+              key={index}
+              src={url}
+              alt={`${item?.placeName || "장소"} 사진`}
+            />
           ))}
         </ImageContainer>
       </DetailContainer>
