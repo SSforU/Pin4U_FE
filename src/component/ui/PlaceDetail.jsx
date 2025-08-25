@@ -42,8 +42,6 @@ export default function PlaceDetail({ item, onClose }) {
     }
   };
 
-  // 뱃지 숫자: 서버에서 목록을 열기 전엔 모를 수 있으니
-  // item.note_count(있다면) → 열고 나선 messageData.notes.length 표시
   const noteCount = item.isAI
     ? 0
     : (typeof item.recommended_count === "number"

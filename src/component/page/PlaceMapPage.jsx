@@ -1,12 +1,11 @@
 // PlaceMapPage.jsx
 import React, { useState, useEffect } from "react";
-import Map from "../ui/Map"; // Map 컴포넌트의 경로가 올바른지 확인해주세요
+import Map from "../ui/Map";
 import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PlaceDetail from "../ui/PlaceDetail";
 import LoadingSpinner from "../ui/LoadingSpinner";
-import SkeletonUI from "../ui/SkeletonUI";
 import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -53,17 +52,12 @@ export default function PlaceMapPage() {
       setError("");
 
       try {
-        // 1) 지인 추천(요청 상세) 불러오기: /api/requests/{slug}
         const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
           signal: controller.signal,
         });
         const reqData = reqRes?.data?.data;
         if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
 
-        // 2) AI 추천 불러오기
-        //    백엔드 설계에 맞게 엔드포인트 한 곳만 골라 쓰세요:
-        //    (예시 A) /api/requests/{slug}/ai
-        //    (예시 B) /api/ai-recommendations?slug={slug}
         let aiItems = [];
         try {
           const aiRes = await axios.get(
@@ -117,7 +111,6 @@ export default function PlaceMapPage() {
   };
 
   const handleAiTagClick = (item) => {
-    // This handler is now specifically for the AI tag
     console.log(`AI Tag clicked: ${item.place_name}`);
     setShowAiPopup(true);
   };
@@ -180,7 +173,6 @@ export default function PlaceMapPage() {
           />
         </CardListWrapper>
       )}
-      {/* AI 팝업 렌더링 위치 */}
       {showAiPopup && (
         <MessagePopup>
           김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.

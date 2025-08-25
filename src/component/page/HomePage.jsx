@@ -25,16 +25,12 @@ export default function HomePage() {
       setErrorMsg("");
 
       try {
-        // 필요하면 params에 station_code 등 추가
-        // const params = { station_code: "7-733" };
         const { data } = await axios.get(`${BASE_URL}/api/requests`, {
           params: {},
         });
 
-        // 서버 응답 스펙에 맞춰 UI용으로 가볍게 매핑
         const items = data?.data?.items ?? [];
         const mapped = items.map((x, i) => {
-          // station_line: "4·7호선" → [4,7] (원하면 간단 변환)
           const lines =
             typeof x.station_line === "string"
               ? x.station_line
@@ -57,8 +53,6 @@ export default function HomePage() {
 
         setStations(mapped);
       } catch (e) {
-        // 실패 스펙: { result:"error", error:{ code,message } }
-        // axios 에러 객체에서 message 우선 표시
         setErrorMsg(
           e?.response?.data?.error?.message ||
             e?.message ||
