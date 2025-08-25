@@ -82,8 +82,6 @@ export default function HomePage() {
     return stations.filter((s) => s.name.includes(q));
   }, [searchTerm, stations]);
 
-  console.log(">>> stations", stations, filteredStations);
-
   return (
     <PageContainer>
       <TitleBox>

@@ -262,7 +262,6 @@ export default function PlaceMapPage() {
   }, [slug]);
 
   const handleCardClick = (item) => {
-    console.log(`Card clicked: ${item.place_name}`);
     setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
   };
 

@@ -69,12 +69,13 @@ export default function PlaceDetail({ item, onClose }) {
 
   // 뱃지 숫자: 서버에서 목록을 열기 전엔 모를 수 있으니
   // item.note_count(있다면) → 열고 나선 messageData.notes.length 표시
-  const noteCount =
-    (typeof item.recommended_count === "number"
-      ? item.recommended_count
-      : null) ??
-    messageData?.notes?.length ??
-    0;
+  const noteCount = item.isAI
+    ? 0
+    : (typeof item.recommended_count === "number"
+        ? item.recommended_count
+        : null) ??
+      messageData?.notes?.length ??
+      0;
 
   return (
     <>
@@ -82,14 +83,16 @@ export default function PlaceDetail({ item, onClose }) {
         <Header>
           <PlaceName>{item.placeName}</PlaceName>
           <HeaderRight>
-            <MessageButtonContainer>
-              <MessageButton
-                onClick={handleMessageButtonClick}
-                disabled={isLoading}
-                src="/Mail.svg"
-              />
-              {noteCount > 0 && <MessageCount>{noteCount}</MessageCount>}
-            </MessageButtonContainer>
+            {!item.isAI && (
+              <MessageButtonContainer>
+                <MessageButton
+                  onClick={handleMessageButtonClick}
+                  disabled={isLoading}
+                  src="/Mail.svg"
+                />
+                {noteCount > 0 && <MessageCount>{noteCount}</MessageCount>}
+              </MessageButtonContainer>
+            )}
             <CloseButton src="/X.svg" onClick={onClose} />
           </HeaderRight>
         </Header>
