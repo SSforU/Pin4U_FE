@@ -7,31 +7,6 @@ import PhotoGallery from "./PhotoGallery";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-// mockApiData를 PlaceDetail 컴포넌트 내부로 이동
-// const mockApiData = {
-//   result: "success",
-//   data: {
-//     external_id: "kakao:123456789",
-//     place_name: "장소이름예시",
-//     notes: [
-//       {
-//         nickname: "민수",
-//         recommend_message: "평일 저녁 조용",
-//         image_url: "/picture.png",
-//         tags: ["분위기 맛집"],
-//         created_at: "2025-08-16T00:01:00Z",
-//       },
-//       {
-//         nickname: "지은",
-//         recommend_message: "단체 4~6명 OK",
-//         image_url: "/picture.png",
-//         tags: ["힐링 스팟"],
-//         created_at: "2025-08-16T00:02:00Z",
-//       },
-//     ],
-//   },
-// };
-
 export default function PlaceDetail({ item, onClose }) {
   const { slug } = useParams(); // /api/requests/{slug}/... 에 사용
   const [showMessage, setShowMessage] = useState(false);
@@ -105,7 +80,7 @@ export default function PlaceDetail({ item, onClose }) {
         <Section>
           <SectionIcon src="/Marker_icon.png" alt="주소" />
           <SectionContent>
-            {item.road_address_name || item.address_name}
+            {item.roadAddressName || item.addressName}
           </SectionContent>
         </Section>
         <Section>
@@ -128,7 +103,7 @@ export default function PlaceDetail({ item, onClose }) {
         </div>
         <ImageContainer>
           {item?.mock?.image_urls.map((url, index) => (
-            <PlaceImage key={index} src={url} alt={`${item.place_name} 사진`} />
+            <PlaceImage key={index} src={url} alt={`${item.placeName} 사진`} />
           ))}
         </ImageContainer>
       </DetailContainer>
