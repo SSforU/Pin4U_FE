@@ -172,7 +172,7 @@ function StepStation() {
       const stations = filteredStations.map((station) => ({
         id: station.code,
         title: station.name,
-        subtitle: `${station.line}호선`,
+        subtitle: station.line,
         code: station.code,
         line: station.line,
         lat: station.lat,
