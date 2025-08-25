@@ -38,7 +38,6 @@ export default function PlaceDetail({ item, onClose }) {
   const [showGallery, setShowGallery] = useState(false); // 갤러리 상태 추가
   const [messageData, setMessageData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -50,7 +49,6 @@ export default function PlaceDetail({ item, onClose }) {
   const handleMessageButtonClick = async () => {
     if (!item.externalId) return; // 안전장치
     setIsLoading(true);
-    setError(null);
 
     try {
       const res = await axios.get(
@@ -64,7 +62,6 @@ export default function PlaceDetail({ item, onClose }) {
       setShowMessage(true);
     } catch (e) {
       console.error(e);
-      setError(e.message || "메시지를 불러오지 못했습니다.");
     } finally {
       setIsLoading(false);
     }
