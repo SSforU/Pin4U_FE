@@ -34,7 +34,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
+  height: 60px;
   width: 110%;
   padding: 20px 10px;
   background-color: #fff;
@@ -79,7 +79,7 @@ const LikeGroup = styled.div`
   align-items: center;
   color: #f44336;
   position: relative;
-  top: 20px;
+  top: 16px;
 `;
 
 const LikeCount = styled.span`
