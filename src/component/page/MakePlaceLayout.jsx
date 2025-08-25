@@ -43,7 +43,8 @@ function MakePlaceLayout() {
   const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
-  const currentStep = currentIndex + FLOW_OFFSET;
+  // showNickname이 true일 때는 1단계부터, false일 때는 2단계부터 시작
+  const currentStep = showNickname ? 1 : currentIndex + FLOW_OFFSET;
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled = showNickname
