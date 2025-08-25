@@ -5,6 +5,8 @@ import axios from "axios";
 import "./App.css";
 import AppShell from "./AppShell.jsx";
 import GlobalStyle from "./styles/GlobalStyle.js";
+import LoadingSpinner from "./component/ui/LoadingSpinner";
+import PulseLoader from "./component/ui/PulseLoader";
 import styled from "styled-components";
 
 function App() {
@@ -51,7 +53,9 @@ function App() {
     return (
       <AppShell>
         <GlobalStyle />
-        <Loading>로딩 중...</Loading>
+        <PageContainer>
+          <LoadingSpinner size="large" text="사용자 정보를 불러오는 중..." />
+        </PageContainer>
       </AppShell>
     );
   }
@@ -71,12 +75,9 @@ function App() {
 export default App;
 
 //styled-components
-const Loading = styled.div`
+const PageContainer = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   height: 100vh;
-  font-family: "Pretendard, sans-serif";
-  font-size: 18px;
-  color: #585858;
+  background-color: #ffffff;
 `;

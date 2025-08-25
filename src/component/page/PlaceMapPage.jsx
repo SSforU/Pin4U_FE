@@ -5,6 +5,8 @@ import PlaceCardList from "../list/PlaceCardList";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PlaceDetail from "../ui/PlaceDetail";
+import LoadingSpinner from "../ui/LoadingSpinner";
+import SkeletonUI from "../ui/SkeletonUI";
 import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -272,8 +274,24 @@ export default function PlaceMapPage() {
   };
 
   if (!data) {
-    return <div>로딩 중...</div>;
+    return (
+      <PageContainer>
+        <LoadingSpinner size="large" text="지도 정보를 불러오는 중..." />
+      </PageContainer>
+    );
   }
+
+  // 2) API가 "7", 7, "7호선", "4,7" 등 무엇을 주든 첫 번째 라인 번호만 추출
+  const getLineKey = (line) => {
+    if (line == null) return "";
+    // 문자열로 만들고, "호선" 제거, 콤마/공백 기준 첫 토큰만 사용, 숫자만 남기기
+    const first = String(line).split(",")[0].trim().replace("호선", "");
+    const digits = first.match(/\d+/)?.[0] ?? "";
+    return digits;
+  };
+
+  const lineKey = getLineKey(data?.station?.line);
+  const lineSrc = subwayLineImages[lineKey];
 
   return (
     <PageContainer>
@@ -281,7 +299,7 @@ export default function PlaceMapPage() {
         <StationWrapper>
           <PrevButton src="/PrevButton.png" alt="뒤로가기" onClick={goPrev} />
           <StationName>{data.station.name}역</StationName>
-          <SubwayLineIcon $imageUrl={subwayLineImages[data.station.line]} />
+          <SubwayLineIcon $imageUrl={lineSrc} />
         </StationWrapper>
         <MapMemoBtnImage
           onClick={() => setIsMemoOpen(!isMemoOpen)}
@@ -372,15 +390,15 @@ const PrevButton = styled.img`
 `;
 
 const subwayLineImages = {
-  1: "/1호선.png",
-  2: "/2호선.png",
-  3: "/3호선.png",
-  4: "/4호선.png",
-  5: "/5호선.png",
-  6: "/6호선.png",
-  7: "/7호선.png",
-  8: "/8호선.png",
-  9: "/9호선.png",
+  1: "/subway/1호선.png",
+  2: "/subway/2호선.png",
+  3: "/subway/3호선.png",
+  4: "/subway/4호선.png",
+  5: "/subway/5호선.png",
+  6: "/subway/6호선.png",
+  7: "/subway/7호선.png",
+  8: "/subway/8호선.png",
+  9: "/subway/9호선.png",
 };
 
 const SubwayLineIcon = styled.div`
