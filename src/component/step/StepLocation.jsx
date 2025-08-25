@@ -132,8 +132,7 @@ function StepLocation() {
     );
     if (!isAlreadySelected) {
       const newSelectedLocations = [...selectedLocations, item];
-      console.log("StepLocation: 선택된 장소 추가:", item);
-      console.log("StepLocation: 전체 선택된 장소들:", newSelectedLocations);
+
       setSelectedLocations(newSelectedLocations);
 
       // 부모 컴포넌트에 배열로 전달 (다음 버튼 활성화를 위해)
@@ -158,11 +157,6 @@ function StepLocation() {
         JSON.stringify(locationsWithDetails)
       );
 
-      console.log("StepLocation: localStorage에 저장 완료");
-      console.log(
-        "StepLocation: 부모 location state 업데이트:",
-        newSelectedLocations
-      );
       setQuery(""); // 검색어 초기화
     }
   };
@@ -172,7 +166,6 @@ function StepLocation() {
       (loc) => loc.id !== locationId
     );
     setSelectedLocations(newSelectedLocations);
-
     // 부모 컴포넌트 state 업데이트
     setLocation(newSelectedLocations.length > 0 ? newSelectedLocations : null);
 
@@ -201,11 +194,6 @@ function StepLocation() {
       // 장소가 없으면 localStorage에서 제거
       localStorage.removeItem("selectedLocationsWithDetails");
     }
-
-    console.log(
-      "StepLocation: 장소 제거 후 location state:",
-      newSelectedLocations
-    );
   };
 
   return (
