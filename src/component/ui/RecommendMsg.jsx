@@ -213,7 +213,10 @@ export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
           <SectionTitle>
             <TagImg src={"/Tag.svg"} />
             {currentNote.tags.map((tag, tagIndex) => (
-              <span key={tagIndex}>{tag}</span>
+              <span key={tagIndex}>
+                {tag}
+                {tagIndex < currentNote.tags.length - 1 && ", "}
+              </span>
             ))}
           </SectionTitle>
         )}

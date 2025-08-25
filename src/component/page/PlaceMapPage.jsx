@@ -249,7 +249,6 @@ export default function PlaceMapPage() {
         });
 
         // AI 결과가 있다면 안내 팝업 잠깐 노출
-        if (aiItemsMarked.length > 0) setShowAiPopup(true);
       } catch (e) {
         if (e.name !== "CanceledError") {
           console.error(e);

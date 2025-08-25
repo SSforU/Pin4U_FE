@@ -5,8 +5,6 @@ import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import HomeSearchBox from "../ui/HomeSearchBox";
-import LoadingSpinner from "../ui/LoadingSpinner";
-import SkeletonUI from "../ui/SkeletonUI";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
 
