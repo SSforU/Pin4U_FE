@@ -127,8 +127,7 @@ const PageTitle = styled.h1`
 `;
 
 const ContentContainer = styled.div`
-  width: 100%;
-  max-width: 400px;
+  width: 90%;
   flex: 1 1 auto;
 
   overflow-y: auto;

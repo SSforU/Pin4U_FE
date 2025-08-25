@@ -2,7 +2,7 @@
 // (기존 PlaceMapPage.jsx의 items[]와 AI 추천 API의 items[] 모두 동일하다고 가정)
 export const toPinVM = (item, isAI = false) => ({
   id: item.id,
-  name: item.place_name,
+  name: item.placeName,
   lng: parseFloat(item.x),
   lat: parseFloat(item.y),
   count: item.recommended_count,
@@ -11,7 +11,7 @@ export const toPinVM = (item, isAI = false) => ({
 
 export const toCardVM = (item, isAI = false) => ({
   id: item.id,
-  name: item.place_name,
+  name: item.placeName,
   imageUrl: item.mock?.image_urls?.[0],
   isAI: isAI, // AI 추천 여부 플래그 추가
 });

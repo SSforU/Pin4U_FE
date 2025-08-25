@@ -78,7 +78,7 @@ const PlaceCard = ({ placeName, imageUrl, onClick, isAI, onAiTagClick }) => {
   return (
     <StyledCard onClick={onClick}>
       <ImageWrapper>
-        <PlaceImage src={imageUrl} alt={placeName} />
+        <PlaceImage src={imageUrl} alt="/Pin4U_Logo.png" />
       </ImageWrapper>
       <ContentWrapper>
         <PlaceName fontSize={fontSize}>{placeName}</PlaceName>

@@ -242,6 +242,7 @@ function StepRecommend() {
 
       console.log("StepRecommend: 완료 처리 시작");
       console.log("StepRecommend: 닉네임:", nickname);
+      console.log(nickname.length);
       console.log("StepRecommend: 선택된 장소들:", locationsWithDetails);
       console.log("StepRecommend: 장소별 추천 데이터:", placeRecommendations);
 
@@ -261,12 +262,12 @@ function StepRecommend() {
       const guestId = generateGuestId();
 
       const items = locationsWithDetails.map((location, index) => ({
-        externalId: location.external_id,
-        recommendeNickname: nickname,
-        recommendMessage: placeRecommendations[index]?.message || "",
-        imageUrl: placeRecommendations[index]?.image || null,
+        external_id: location.external_id,
+        recommender_nickname: nickname,
+        recommend_message: placeRecommendations[index]?.message || "",
+        image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
-        guestId: guestId, // guest_id 추가
+        guest_id: guestId, // guest_id 추가
       }));
 
       console.log("StepRecommend: API 요청 데이터:", { items });

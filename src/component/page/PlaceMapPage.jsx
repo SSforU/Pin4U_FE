@@ -292,7 +292,7 @@ export default function PlaceMapPage() {
       <MapWrapper>
         {isMemoOpen && (
           <MapMemo>
-            <MemoText>{data.request_message}</MemoText>
+            <MemoText>{data.requestMessage}</MemoText>
           </MapMemo>
         )}
         <Map

@@ -222,7 +222,7 @@ export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
         )}
         <MessageContentBorder>
           <MessageContentInner>
-            <MessageText>{currentNote.recommend_message}</MessageText>
+            <MessageText>{currentNote.recommendMessage}</MessageText>
           </MessageContentInner>
         </MessageContentBorder>
 
