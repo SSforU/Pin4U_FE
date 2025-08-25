@@ -25,6 +25,10 @@ function RecommendPlaceLayout() {
   const [location, setLocation] = useState(null);
   const [memo, setMemo] = useState("");
 
+  // 오류 발생 시 모달 상태
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   // 닉네임이 변경될 때마다 localStorage에 저장
   useEffect(() => {
     if (nickname.trim()) {
@@ -49,11 +53,28 @@ function RecommendPlaceLayout() {
     navigate(`/shared-map/${slug}/onboarding/${STEPS[safe]}`);
   }
 
-  function goNext() {
-    if (stepParam === "nickname") {
-      goToStep(currentIndex + 1);
-    } else if (stepParam === "location") {
-      goToStep(currentIndex + 1);
+  async function goNext() {
+    try {
+      if (stepParam === "nickname") {
+        goToStep(currentIndex + 1);
+      } else if (stepParam === "location") {
+        goToStep(currentIndex + 1);
+      }
+    } catch (error) {
+      console.error("오류 발생:", error);
+
+      let message = "오류가 발생했습니다.";
+
+      if (error.response?.status === 500) {
+        message = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+      } else if (error.response?.status === 400) {
+        message = "잘못된 요청입니다.";
+      } else if (!error.response) {
+        message = "서버에 연결할 수 없습니다.";
+      }
+
+      setErrorMessage(message);
+      setShowErrorModal(true);
     }
   }
 
@@ -105,6 +126,19 @@ function RecommendPlaceLayout() {
           </Button>
         </Bottom>
       )}
+
+      {/* 오류 발생 시 에러 모달 */}
+      {showErrorModal && (
+        <ErrorModal>
+          <ErrorContent>
+            <ErrorTitle>오류가 발생하였습니다!</ErrorTitle>
+            <ErrorMessage>{errorMessage}</ErrorMessage>
+            <ErrorButton onClick={() => setShowErrorModal(false)}>
+              확인
+            </ErrorButton>
+          </ErrorContent>
+        </ErrorModal>
+      )}
     </Wrapper>
   );
 }
@@ -139,4 +173,56 @@ const PrevButtonWrapper = styled.img`
 
 const Bottom = styled.div`
   padding: 40px;
+`;
+
+// 오류 발생 시 에러 모달 스타일
+const ErrorModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ErrorContent = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 300px;
+  width: 90%;
+  text-align: center;
+`;
+
+const ErrorTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #333;
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+`;
+
+const ErrorButton = styled.button`
+  background-color: #ff7e74;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #ff6b61;
+  }
 `;
