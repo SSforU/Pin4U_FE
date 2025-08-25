@@ -7,6 +7,9 @@ import { getResponsiveStyles } from "../../styles/responsive";
 import { useOutletContext } from "react-router-dom";
 import Message from "../ui/Message";
 import Button from "../ui/Button";
+import LoadingSpinner from "../ui/LoadingSpinner";
+import PulseLoader from "../ui/PulseLoader";
+import SkeletonUI from "../ui/SkeletonUI";
 import axios from "axios";
 
 function StepRecommend() {
@@ -14,6 +17,7 @@ function StepRecommend() {
   const [content, setContent] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [IMAGE_FILE, setImageFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { slug } = useParams();
 
@@ -29,6 +33,7 @@ function StepRecommend() {
   useEffect(() => {
     const loadSelectedLocations = () => {
       try {
+        setIsLoading(true);
         // selectedLocationsWithDetails에서 데이터 로드
         const savedLocationsWithDetails = localStorage.getItem(
           "selectedLocationsWithDetails"
@@ -61,6 +66,7 @@ function StepRecommend() {
         setPlaceRecommendations([]);
       } finally {
         // 로딩 완료
+        setTimeout(() => setIsLoading(false), 800); // 자연스러운 로딩을 위해 약간의 지연
       }
     };
 
@@ -337,8 +343,32 @@ function StepRecommend() {
   );
 
   // 안전한 렌더링을 위한 체크
+  if (isLoading) {
+    return (
+      <Wrapper>
+        <ContentSection>
+          <TextBlock>
+            <Title>장소 정보를 불러오는 중...</Title>
+            <Detail>잠시만 기다려주세요.</Detail>
+          </TextBlock>
+          <PulseLoader size="large" color="#ff7e74" />
+        </ContentSection>
+      </Wrapper>
+    );
+  }
+
   if (!selectedPlaces || selectedPlaces.length === 0) {
-    return <div>장소 정보를 불러오는 중...</div>;
+    return (
+      <Wrapper>
+        <ContentSection>
+          <TextBlock>
+            <Title>장소 정보를 불러오는 중...</Title>
+            <Detail>잠시만 기다려주세요.</Detail>
+          </TextBlock>
+          <SkeletonUI type="card" count={3} />
+        </ContentSection>
+      </Wrapper>
+    );
   }
 
   return (

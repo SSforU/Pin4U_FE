@@ -32,7 +32,7 @@ function CompleteMakePlace() {
       });
     } else {
       // 링크가 생성되지 않았으면 에러 처리
-      console.error(
+      alert.error(
         "링크가 생성되지 않았습니다. StepMemo에서 먼저 링크를 생성해주세요."
       );
     }
