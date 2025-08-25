@@ -7,7 +7,6 @@ import { getResponsiveStyles } from "../../styles/responsive";
 import { useOutletContext } from "react-router-dom";
 import Message from "../ui/Message";
 import Button from "../ui/Button";
-import LoadingSpinner from "../ui/LoadingSpinner";
 import PulseLoader from "../ui/PulseLoader";
 import SkeletonUI from "../ui/SkeletonUI";
 import axios from "axios";
@@ -40,7 +39,6 @@ function StepRecommend() {
         );
         if (savedLocationsWithDetails) {
           const locationsWithDetails = JSON.parse(savedLocationsWithDetails);
-          console.log("StepRecommend: 로드된 장소들:", locationsWithDetails);
 
           // 각 장소별로 기본 데이터 구조 초기화 (기존 데이터 유지)
           const initialRecommendations = locationsWithDetails.map(
@@ -53,12 +51,8 @@ function StepRecommend() {
 
           setSelectedPlaces(locationsWithDetails);
           setPlaceRecommendations(initialRecommendations);
-          console.log(
-            "StepRecommend: 초기화된 추천 데이터:",
-            initialRecommendations
-          );
         } else {
-          console.log("StepRecommend: localStorage에 선택된 장소가 없습니다.");
+          // localStorage에 선택된 장소가 없습니다.
         }
       } catch (error) {
         console.error("선택된 장소 정보 로드 실패:", error);
@@ -245,13 +239,6 @@ function StepRecommend() {
       const locationsWithDetails = JSON.parse(
         localStorage.getItem("selectedLocationsWithDetails") || "[]"
       );
-
-      console.log("StepRecommend: 완료 처리 시작");
-      console.log("StepRecommend: 닉네임:", nickname);
-      console.log(nickname.length);
-      console.log("StepRecommend: 선택된 장소들:", locationsWithDetails);
-      console.log("StepRecommend: 장소별 추천 데이터:", placeRecommendations);
-
       // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
       // guest_id 생성 (UUID v4 형식)
       const generateGuestId = () => {
