@@ -9,22 +9,21 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import styled from "styled-components";
-import ProgressBar from "../ui/ProgressBar";
-import Button from "../ui/Button";
-import StepNickname from "../step/StepNickname";
+import ProgressBar from "../../component/ui/ProgressBar";
+import Button from "../../component/ui/Button";
 import { getResponsiveStyles } from "../../styles/responsive";
 
-const STEPS = ["station", "memo"];
-const FLOW_OFFSET = 2; // 이 레이아웃은 2단계부터 시작
-const TOTAL_STEPS = 3; // 전체 단계 수
+const STEPS = ["nickname", "maptype", "group-profile", "station", "memo"];
+const TOTAL_STEPS = 5;
 
 function MakePlaceLayout() {
   const navigate = useNavigate();
   const { userProfile } = useOutletContext();
+  const [mapType, setMapType] = useState(null);
+  const [groupProfile, setGroupProfile] = useState(null);
   const [nickname, setNickname] = useState("");
   const [station, setStation] = useState(null);
   const [memo, setMemo] = useState("");
-  const [showNickname, setShowNickname] = useState(false);
 
   // 오류 발생 시 모달 상태
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -32,29 +31,21 @@ function MakePlaceLayout() {
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-  // localStorage에서 첫 방문자 여부 확인
-  useEffect(() => {
-    const isFirstTimeUser = localStorage.getItem("isFirstTimeUser");
-    if (isFirstTimeUser) {
-      setShowNickname(false); // 첫 방문자가 아니면 기존 단계들 보여줌
-    } else {
-      setShowNickname(true); // 첫 방문자면 닉네임 입력 단계 보여줌
-    }
-  }, []);
-
   // useMatch로 현재 step 추출
   const match = useMatch("/make-place/:step");
   const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
-  // showNickname이 true일 때는 1단계부터, false일 때는 2단계부터 시작
-  const currentStep = showNickname ? 1 : currentIndex + FLOW_OFFSET;
+  const currentStep = currentIndex + 1;
 
   // 다음 버튼 비활성화 조건
-  const isNextDisabled = showNickname
-    ? !nickname.trim() || nickname.length < 2 // 닉네임 단계에서는 2자 이상이어야 활성화
-    : (stepParam === "station" && !station) ||
-      (stepParam === "memo" && !memo.trim());
+  const isNextDisabled =
+    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
+    (stepParam === "maptype" && !mapType) ||
+    (stepParam === "group-profile" &&
+      (!groupProfile?.name || groupProfile.name.length < 2)) ||
+    (stepParam === "station" && !station) ||
+    (stepParam === "memo" && !memo.trim());
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -62,36 +53,57 @@ function MakePlaceLayout() {
   }
 
   async function goNext() {
-    if (showNickname) {
-      // 닉네임 단계에서는 닉네임 입력 완료 처리
-      handleNicknameComplete(nickname);
+    if (stepParam === "nickname") {
+      goToStep(currentIndex + 1);
+    } else if (stepParam === "maptype") {
+      if (mapType === "self") {
+        navigate("/make-place/station");
+      } else if (mapType === "group") {
+        navigate("/make-place/group-profile");
+      }
+    } else if (stepParam === "group-profile") {
+      navigate("/make-place/station");
     } else if (stepParam === "station") {
       goToStep(currentIndex + 1);
     } else if (stepParam === "memo") {
       // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
       try {
-        // localStorage에서 데이터 가져오기
-        const selectedStation = localStorage.getItem("selectedStation");
-        const requestMessage = localStorage.getItem("requestMessage");
-
-        // 백엔드에 링크 생성 요청
-        const response = await axios.post(`${BASE_URL}/api/requests`, {
+        let requestData = {
           owner_nickname: userProfile?.nickname,
-          station_code: selectedStation,
-          request_message: requestMessage,
-        });
+          station_code: station?.code,
+          request_message: memo,
+        };
+
+        // 그룹 지도인 경우 그룹 생성 먼저
+        if (mapType === "group") {
+          // 1단계: 그룹 생성
+          const groupResponse = await axios.post(`${BASE_URL}/api/groups`, {
+            group_name: groupProfile?.name,
+            group_description: groupProfile?.description,
+            owner_nickname: userProfile?.nickname,
+          });
+
+          if (groupResponse.data.result === "success") {
+            const { group_slug } = groupResponse.data.data.group;
+            requestData.group_slug = group_slug;
+          } else {
+            throw new Error("그룹 생성에 실패했습니다.");
+          }
+        }
+
+        // 2단계: 요청 생성
+        const response = await axios.post(
+          `${BASE_URL}/api/requests`,
+          requestData
+        );
 
         if (response.data.result === "success") {
-          // 백엔드에서 생성된 slug를 localStorage에 저장
           const { slug } = response.data.data.request;
           localStorage.setItem("createdSlug", slug);
-
-          // CompleteMakePlace로 이동
           navigate("/complete");
         }
       } catch (error) {
         console.error("오류 발생:", error);
-
         let message = "오류가 발생했습니다.";
 
         if (error.response?.status === 500) {
@@ -116,15 +128,6 @@ function MakePlaceLayout() {
     }
   }
 
-  // 닉네임 입력 완료 시 호출되는 함수
-  const handleNicknameComplete = (inputNickname) => {
-    setNickname(inputNickname);
-    localStorage.setItem("isFirstTimeUser", "true"); // 첫 방문자 구분용으로 저장
-    setShowNickname(false);
-    // station 단계로 이동
-    navigate("/make-place/station");
-  };
-
   return (
     <Wrapper>
       <Top>
@@ -139,22 +142,21 @@ function MakePlaceLayout() {
       </Top>
 
       <Main>
-        {/* 닉네임이 없으면 StepNickname을 보여주고, 있으면 기존 단계들을 보여줌 */}
-        {showNickname ? (
-          <StepNickname nickname={nickname} setNickname={setNickname} />
-        ) : (
-          <Outlet
-            context={{
-              nickname,
-              setNickname,
-              station,
-              setStation,
-              memo,
-              setMemo,
-              userProfile,
-            }}
-          />
-        )}
+        <Outlet
+          context={{
+            nickname,
+            setNickname,
+            mapType,
+            setMapType,
+            groupProfile,
+            setGroupProfile,
+            station,
+            setStation,
+            memo,
+            setMemo,
+            userProfile,
+          }}
+        />
       </Main>
 
       <Bottom>

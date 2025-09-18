@@ -2,10 +2,10 @@
 // #1 고정 사용자 조회 API 연동
 // #5 역 주변 반경 장소 검색 API 연동
 import React from "react";
-import SearchBox from "../ui/SearchBox";
+import SearchBox from "../component/ui/SearchBox";
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../styles/responsive";
 import { useOutletContext, useParams } from "react-router-dom";
 import axios from "axios";
 

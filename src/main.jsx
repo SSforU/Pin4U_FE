@@ -1,20 +1,22 @@
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import HomePage from "./component/page/HomePage";
-import MakePlaceLayout from "./component/page/MakePlaceLayout";
-import PlaceMapPage from "./component/page/PlaceMapPage";
+import HomePage from "./page/HomePage/HomePage";
+import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout";
+import PlaceMapPage from "./page/HomePage/Components/PlaceMapPage";
 import { Navigate } from "react-router-dom";
-import StepStation from "./component/step/StepStation";
-import StepMemo from "./component/step/StepMemo";
-import CompleteMakePlace from "./component/page/CompleteMakePlace";
-import StepNickname from "./component/step/StepNickname";
-import CompleteRecommend from "./component/page/CompleteRecommend";
-import RecommendPlaceLayout from "./component/page/RecommendPlaceLayout";
-import StepLocation from "./component/step/StepLocation";
-import StepRecommend from "./component/step/StepRecommend";
-import StartRecommend from "./component/page/StartRecommend";
-import StartMakePlace from "./component/page/StartMakePlace";
+import StepStation from "./step/StepStation";
+import StepMemo from "./step/StepMemo";
+import StepSelectMapType from "./step/StepSelectMapType";
+import StepGroupProfile from "./step/StepGroupProfile";
+import CompleteMakePlace from "./page/MakePlaceFlow/CompleteMakePlace";
+import StepNickname from "./step/StepNickname";
+import CompleteRecommend from "./page/RecommendFlow/CompleteRecommend";
+import RecommendPlaceLayout from "./page/RecommendFlow/RecommendPlaceLayout";
+import StepLocation from "./step/StepLocation";
+import StepRecommend from "./step/StepRecommend";
+import StartRecommend from "./page/RecommendFlow/StartRecommend";
+import StartMakePlace from "./page/MakePlaceFlow/StartMakePlace";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +35,10 @@ const router = createBrowserRouter([
         path: "make-place",
         element: <MakePlaceLayout />, // 공통 레이아웃 + 상태
         children: [
-          { index: true, element: <Navigate to="station" replace /> },
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "maptype", element: <StepSelectMapType /> },
+          { path: "group-profile", element: <StepGroupProfile /> },
           { path: "station", element: <StepStation /> },
           { path: "memo", element: <StepMemo /> },
         ],

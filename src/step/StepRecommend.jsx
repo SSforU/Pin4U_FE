@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../styles/responsive";
 import { useOutletContext } from "react-router-dom";
-import Message from "../ui/Message";
-import Button from "../ui/Button";
-import PulseLoader from "../ui/PulseLoader";
-import SkeletonUI from "../ui/SkeletonUI";
+import Message from "../component/ui/Message";
+import Button from "../component/ui/Button";
+import PulseLoader from "../component/ui/PulseLoader";
+import SkeletonUI from "../component/ui/SkeletonUI";
 import axios from "axios";
 
 function StepRecommend() {
