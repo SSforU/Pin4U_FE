@@ -2,9 +2,9 @@
 // 고정 사용자가 작성한 memo localStorage에 저장
 import { React, useState, useEffect } from "react";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../styles/responsive";
 import { useOutletContext } from "react-router-dom";
-import Memo from "../ui/Memo";
+import Memo from "../component/ui/Memo";
 
 function StepMemo() {
   const { memo, setMemo } = useOutletContext();

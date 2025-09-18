@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import Button from "../ui/Button";
+import Button from "../../component/ui/Button";
 
 function StartMakePlace({ onComplete }) {
   const navigate = useNavigate();

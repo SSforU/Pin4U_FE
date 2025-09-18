@@ -2,7 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../styles/responsive";
 import { useOutletContext, useNavigate } from "react-router-dom";
 
 function StepSelectMapType() {

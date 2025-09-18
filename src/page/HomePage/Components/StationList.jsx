@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import StationListItem from "./StationListItem";
-import SearchBox from "../ui/SearchBox";
-import LoadingSpinner from "../ui/LoadingSpinner";
-import SkeletonUI from "../ui/SkeletonUI";
+import SearchBox from "../../../component/ui/SearchBox";
+import LoadingSpinner from "../../../component/ui/LoadingSpinner";
+import SkeletonUI from "../../../component/ui/SkeletonUI";
 
 const ListContainer = styled.div`
   padding: 15px;

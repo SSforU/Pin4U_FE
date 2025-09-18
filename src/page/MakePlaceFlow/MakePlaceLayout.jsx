@@ -8,8 +8,8 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import styled from "styled-components";
-import ProgressBar from "../ui/ProgressBar";
-import Button from "../ui/Button";
+import ProgressBar from "../../component/ui/ProgressBar";
+import Button from "../../component/ui/Button";
 import { getResponsiveStyles } from "../../styles/responsive";
 
 const STEPS = ["nickname", "maptype", "group-profile", "station", "memo"];
