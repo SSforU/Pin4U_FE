@@ -3,8 +3,12 @@
 // 닉네임 localStorage에 저장
 import React from "react";
 import styled from "styled-components";
+import { useOutletContext } from "react-router-dom";
 
-function StepNickname({ nickname, setNickname }) {
+function StepNickname(props) {
+  const outlet = useOutletContext?.() || {};
+  const nickname = outlet.nickname ?? props.nickname ?? "";
+  const setNickname = outlet.setNickname ?? props.setNickname ?? (() => {});
   const handleNicknameChange = (e) => {
     const newNickname = e.target.value;
     if (newNickname.length <= 10) {

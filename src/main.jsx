@@ -15,6 +15,8 @@ import StepLocation from "./component/step/StepLocation";
 import StepRecommend from "./component/step/StepRecommend";
 import StartRecommend from "./component/page/StartRecommend";
 import StartMakePlace from "./component/page/StartMakePlace";
+import StepSelectMapType from "./component/step/StepSelectMapType";
+import StepGroupProfile from "./component/step/StepGroupProfile";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +35,10 @@ const router = createBrowserRouter([
         path: "make-place",
         element: <MakePlaceLayout />, // 공통 레이아웃 + 상태
         children: [
-          { index: true, element: <Navigate to="station" replace /> },
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "maptype", element: <StepSelectMapType /> },
+          { path: "group-profile", element: <StepGroupProfile /> },
           { path: "station", element: <StepStation /> },
           { path: "memo", element: <StepMemo /> },
         ],
