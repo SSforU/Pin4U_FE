@@ -1,6 +1,5 @@
-// #1 고정 사용자 조회 API 호출 + props 전달
-// #4 URL 생성(slug) API 연동 (완료 버튼 누르면 링크 생성)
-import React, { useState, useEffect } from "react";
+// 개인 지도 생성 레이아웃
+import React, { useState } from "react";
 import axios from "axios";
 import {
   Outlet,
@@ -11,6 +10,7 @@ import {
 import styled from "styled-components";
 import ProgressBar from "../../component/ui/ProgressBar";
 import Button from "../../component/ui/Button";
+import StepNickname from "../step/StepNickname";
 import { getResponsiveStyles } from "../../styles/responsive";
 
 const STEPS = ["nickname", "maptype", "group-profile", "station", "memo"];
