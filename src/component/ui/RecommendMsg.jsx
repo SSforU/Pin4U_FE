@@ -221,7 +221,7 @@ export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
           </SectionTitle>
         )}
         {currentNote.image_url && (
-          <MessageImage src={currentNote.image_url} alt="추천 사진" />
+          <MessageImage src={currentNote.imageUrl} alt="추천 사진" />
         )}
         <MessageContentBorder>
           <MessageContentInner>
