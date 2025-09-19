@@ -3,12 +3,11 @@ import React from "react";
 import { useState } from "react";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../styles/responsive.js";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 
 function StepSelectMapType() {
   const outlet = useOutletContext?.() || {};
   const { mapType, setMapType, userProfile } = outlet;
-  const navigate = useNavigate();
 
   const [selectedType, setSelectedType] = useState(mapType || null);
 
@@ -16,15 +15,6 @@ function StepSelectMapType() {
     setSelectedType(type);
     if (typeof setMapType === "function") {
       setMapType(type);
-    }
-
-    // mapType에 따라 다른 경로로 이동
-    if (type === "self") {
-      // 개인 지도: station으로 이동
-      navigate("/make-place/station");
-    } else if (type === "group") {
-      // 그룹 지도: group-profile로 이동
-      navigate("/make-place/group-profile");
     }
   }
 

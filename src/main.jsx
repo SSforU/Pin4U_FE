@@ -3,6 +3,8 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import HomePage from "./page/HomePage/HomePage.jsx";
 import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout.jsx";
+import MakePersonalPlaceLayout from "./page/MakePlaceFlow/MakePersonalPlaceLayout.jsx";
+import MakeGroupPlaceLayout from "./page/MakePlaceFlow/MakeGroupPlaceLayout.jsx";
 import PlaceMapPage from "./page/PlaceMapPage/PlaceMapPage.jsx";
 import { Navigate } from "react-router-dom";
 import StepStation from "./step/StepStation.jsx";
@@ -33,7 +35,27 @@ const router = createBrowserRouter([
 
       {
         path: "make-place",
-        element: <MakePlaceLayout />, // 공통 레이아웃 + 상태
+        element: <MakePlaceLayout />, // 지도 유형 선택 레이아웃
+        children: [
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "maptype", element: <StepSelectMapType /> },
+        ],
+      },
+      {
+        path: "make-place/personal",
+        element: <MakePersonalPlaceLayout />, // 개인 지도 레이아웃
+        children: [
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "maptype", element: <StepSelectMapType /> },
+          { path: "station", element: <StepStation /> },
+          { path: "memo", element: <StepMemo /> },
+        ],
+      },
+      {
+        path: "make-place/group",
+        element: <MakeGroupPlaceLayout />, // 그룹 지도 레이아웃
         children: [
           { index: true, element: <Navigate to="nickname" replace /> },
           { path: "nickname", element: <StepNickname /> },
