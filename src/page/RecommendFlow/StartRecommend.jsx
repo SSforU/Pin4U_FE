@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
-import Button from "../../component/ui/Button";
+import { getResponsiveStyles } from "../../styles/responsive.js";
+import Button from "../../component/ui/Button.jsx";
 import axios from "axios";
 
 function StartRecommend() {

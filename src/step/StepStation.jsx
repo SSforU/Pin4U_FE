@@ -2,10 +2,10 @@
 // #3 지하철역 검색 API 연동
 // 고정 사용자가 선택한 역 localStorage에 저장
 import React from "react";
-import SearchBox from "../component/ui/SearchBox";
+import SearchBox from "../component/ui/SearchBox.jsx";
 import { useState } from "react";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../styles/responsive";
+import { getResponsiveStyles } from "../styles/responsive.js";
 import { useOutletContext } from "react-router-dom";
 // TODO: API 연동 시 아래 주석 해제
 // import axios from "axios";

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../../styles/responsive.js";
 
 function CompleteMakePlace() {
   const navigate = useNavigate();

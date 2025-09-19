@@ -1,12 +1,12 @@
 // PlaceMapPage.jsx
 import React, { useState, useEffect } from "react";
-import Map from "../../../component/ui/Map";
-import PlaceCardList from "../HomePage/List/PlaceCardList";
+import Map from "./Component/Map.jsx";
+import PlaceCardList from "./PlaceCardList.jsx";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import PlaceDetail from "../../component/ui/PlaceDetail";
-import LoadingSpinner from "../../component/ui/LoadingSpinner";
-import { toPinVM, toCardVM } from "../../viewModels/placeVMs";
+import PlaceDetail from "./DetailPage/PlaceDetail.jsx";
+import LoadingSpinner from "../../component/ui/LoadingSpinner.jsx";
+import { toPinVM, toCardVM } from "../../viewModels/placeVMs.js";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 

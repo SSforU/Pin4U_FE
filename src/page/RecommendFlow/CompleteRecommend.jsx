@@ -2,7 +2,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useOutletContext } from "react-router-dom";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../../styles/responsive.js";
 
 function CompleteRecommend() {
   const { userProfile } = useOutletContext();
