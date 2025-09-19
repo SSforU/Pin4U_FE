@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import StationList from "./Components/StationList";
+import StationList from "./List/StationList";
 import Button from "../../component/ui/Button";
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
-import HomeSearchBox from "../../component/ui/HomeSearchBox";
+import HomeSearchBox from "./Component/HomeSearchBox";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
 

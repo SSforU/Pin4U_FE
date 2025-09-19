@@ -4,7 +4,7 @@ import axios from "axios";
 import "./App.css";
 import AppShell from "./AppShell.jsx";
 import GlobalStyle from "./styles/GlobalStyle.js";
-import LoadingSpinner from "./component/ui/LoadingSpinner";
+import LoadingSpinner from "./component/ui/LoadingSpinner.jsx";
 import styled from "styled-components";
 
 function App() {
