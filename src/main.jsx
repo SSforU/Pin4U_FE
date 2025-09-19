@@ -3,7 +3,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import HomePage from "./page/HomePage/HomePage";
 import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout";
-import PlaceMapPage from "./page/HomePage/Components/PlaceMapPage";
+import PlaceMapPage from "./page/PlaceMapPage/PlaceMapPage";
 import { Navigate } from "react-router-dom";
 import StepStation from "./step/StepStation";
 import StepMemo from "./step/StepMemo";
