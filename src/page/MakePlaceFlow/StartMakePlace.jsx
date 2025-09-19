@@ -1,19 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import Button from "../../component/ui/Button.jsx";
 
-function StartMakePlace({ onComplete }) {
-  const navigate = useNavigate();
-
-  const handleSubmit = () => {
-    // onComplete 호출하여 App.jsx의 isFirstVisit을 false로 변경
-    onComplete();
-    console.log("onComplete 호출됨 - isFirstVisit을 false로 변경");
-    // MakePlaceLayout으로 이동
-    navigate("/make-place");
-  };
-
+function StartMakePlace() {
   return (
     <Wrapper>
       <ContentContainer>
@@ -33,7 +22,7 @@ function StartMakePlace({ onComplete }) {
         </TextSection>
 
         <ButtonSection>
-          <Button onClick={handleSubmit}>나만의 지도 만들러 가기</Button>
+          <Button>나만의 지도 만들러 가기</Button>
         </ButtonSection>
       </ContentContainer>
     </Wrapper>
