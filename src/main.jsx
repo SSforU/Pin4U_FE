@@ -1,22 +1,22 @@
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import App from "./App";
-import HomePage from "./page/HomePage/HomePage";
-import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout";
-import PlaceMapPage from "./page/PlaceMapPage/PlaceMapPage";
+import App from "./App.jsx";
+import HomePage from "./page/HomePage/HomePage.jsx";
+import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout.jsx";
+import PlaceMapPage from "./page/PlaceMapPage/PlaceMapPage.jsx";
 import { Navigate } from "react-router-dom";
-import StepStation from "./step/StepStation";
-import StepMemo from "./step/StepMemo";
-import CompleteMakePlace from "./page/MakePlaceFlow/CompleteMakePlace";
-import StepNickname from "./step/StepNickname";
-import StepSelectMapType from "./step/StepSelectMapType";
-import StepGroupProfile from "./step/StepGroupProfile";
-import CompleteRecommend from "./page/RecommendFlow/CompleteRecommend";
-import RecommendPlaceLayout from "./page/RecommendFlow/RecommendPlaceLayout";
-import StepLocation from "./step/StepLocation";
-import StepRecommend from "./step/StepRecommend";
-import StartRecommend from "./page/RecommendFlow/StartRecommend";
-import StartMakePlace from "./page/MakePlaceFlow/StartMakePlace";
+import StepStation from "./step/StepStation.jsx";
+import StepMemo from "./step/StepMemo.jsx";
+import CompleteMakePlace from "./page/MakePlaceFlow/CompleteMakePlace.jsx";
+import StepNickname from "./step/StepNickname.jsx";
+import StepSelectMapType from "./step/StepSelectMapType.jsx";
+import StepGroupProfile from "./step/StepGroupProfile.jsx";
+import CompleteRecommend from "./page/RecommendFlow/CompleteRecommend.jsx";
+import RecommendPlaceLayout from "./page/RecommendFlow/RecommendPlaceLayout.jsx";
+import StepLocation from "./step/StepLocation.jsx";
+import StepRecommend from "./step/StepRecommend.jsx";
+import StartRecommend from "./page/RecommendFlow/StartRecommend.jsx";
+import StartMakePlace from "./page/MakePlaceFlow/StartMakePlace.jsx";
 
 const router = createBrowserRouter([
   {

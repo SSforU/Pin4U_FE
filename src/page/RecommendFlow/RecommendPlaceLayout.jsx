@@ -8,10 +8,10 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import styled from "styled-components";
-import ProgressBar from "../../component/ui/ProgressBar";
-import Button from "../../component/ui/Button";
-import StepNickname from "../../step/StepNickname";
-import { getResponsiveStyles } from "../../styles/responsive";
+import ProgressBar from "../../component/ui/ProgressBar.jsx";
+import Button from "../../component/ui/Button.jsx";
+import StepNickname from "../../step/StepNickname.jsx";
+import { getResponsiveStyles } from "../../styles/responsive.js";
 
 const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작

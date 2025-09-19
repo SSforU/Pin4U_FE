@@ -1,7 +1,7 @@
 // PlaceCardList.jsx
 import React from "react";
 import styled from "styled-components";
-import PlaceCard from "./PlaceCard";
+import PlaceCard from "./PlaceCard.jsx";
 
 const ListContainer = styled.div`
   display: flex;

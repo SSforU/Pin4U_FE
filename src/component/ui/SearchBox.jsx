@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive";
+import { getResponsiveStyles } from "../../styles/responsive.js";
 import { useEffect } from "react";
 
 function SearchBox({

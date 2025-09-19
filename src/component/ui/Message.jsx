@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Memo from "./Memo";
+import Memo from "./Memo.jsx";
 
 function Message({
   value = "",
