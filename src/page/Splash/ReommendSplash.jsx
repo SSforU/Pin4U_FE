@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import Button from "../../component/ui/Button.jsx";
 
-function StartMakePlace() {
+function SplashPage() {
+  const navigate = useNavigate();
+  const { slug } = useParams();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // 현재 URL에서 /splash를 제거하고 추천 페이지로 이동
+      const currentPath = window.location.pathname;
+      const targetPath = currentPath.replace("/splash", "");
+      navigate(targetPath);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigate, slug]);
+
   return (
     <Wrapper>
       <ContentContainer>
@@ -20,16 +34,12 @@ function StartMakePlace() {
             지금 Pin4U에서 알아보세요!
           </Detail>
         </TextSection>
-
-        <ButtonSection>
-          <Button>나만의 지도 만들러 가기</Button>
-        </ButtonSection>
       </ContentContainer>
     </Wrapper>
   );
 }
 
-export default StartMakePlace;
+export default SplashPage;
 
 // styled-components
 const Wrapper = styled.div`
@@ -39,6 +49,18 @@ const Wrapper = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 1.5s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
 const ContentContainer = styled.div`
@@ -49,6 +71,9 @@ const ContentContainer = styled.div`
   justify-content: center;
   padding: 0 20px;
   gap: 60px;
+  transition: transform 0.5s ease-in-out;
+  transform: ${(props) =>
+    props.$showLogin ? "translateY(-80px)" : "translateY(0)"};
 `;
 
 const LogoContainer = styled.div`
@@ -97,11 +122,4 @@ const Detail = styled.p`
   line-height: 18px;
   color: #585858;
   margin: 0;
-`;
-
-const ButtonSection = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 0 20px;
 `;
