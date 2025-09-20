@@ -65,7 +65,7 @@ function MakePersonalPlaceLayout() {
           request_message: memo,
         };
 
-        // 요청 생성
+        // 요청 생성(API 연동)
         const response = await axios.post(
           `${BASE_URL}/api/requests`,
           requestData

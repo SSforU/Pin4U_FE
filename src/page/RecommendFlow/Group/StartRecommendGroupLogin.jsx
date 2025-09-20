@@ -5,7 +5,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
-import Button from "../../../component/ui/Button.jsx";
 import axios from "axios";
 
 function StartRecommendGroup() {
@@ -14,6 +13,11 @@ function StartRecommendGroup() {
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  const handleKakaoLogin = () => {
+    // 카카오 로그인 처리 후 request 페이지로 이동
+    navigate(`/shared-map/group/${slug}/request`);
+  };
 
   // API에서 받아온 데이터 상태
   const [locationData, setLocationData] = useState({
@@ -54,19 +58,16 @@ function StartRecommendGroup() {
     }
   }, [slug, BASE_URL]);
 
-  const handleGoRecommend = () => {
-    navigate(`/shared-map/group/${slug}/onboarding/nickname`);
-  };
-
   return (
     <Wrapper>
       <Main>
         <ImageContainer>
-          <PlaneImage src="/Pin4U_Logo.png" alt="Pin4U 로고" />
+          <Image src="/Pin4U_Logo.png" alt="그룹 프로필" />
         </ImageContainer>
         <Content>
           <Title>
-            {userProfile?.nickname || "사용자"} 님을 위한
+            {/* 그룹명 변수로 바꿔야함(백엔드) */}[
+            {userProfile?.nickname || "사용자"}]을 위한
             <br />
             장소를 추천해주세요!
           </Title>
@@ -90,9 +91,17 @@ function StartRecommendGroup() {
         </InfoSection>
       </Main>
 
-      <Bottom>
-        <Button onClick={handleGoRecommend}>장소 추천하러 가기</Button>
-      </Bottom>
+      <LoginSection>
+        <KakaoLoginButton onClick={handleKakaoLogin}>
+          <KakaoLoginImage src="/Kakao_Login.png" alt="카카오 로그인" />
+        </KakaoLoginButton>
+        <LoginText>
+          이미 계정이 있나요?{" "}
+          <span className="login-link" onClick={handleKakaoLogin}>
+            로그인
+          </span>
+        </LoginText>
+      </LoginSection>
     </Wrapper>
   );
 }
@@ -107,7 +116,6 @@ const Wrapper = styled.div`
 `;
 
 const Main = styled.main`
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -146,8 +154,13 @@ const ImageContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  max-width: 160px;
+  width: 120px;
+  height: 120px;
+  background-color: #f7f7f7;
+  border-radius: 50%;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 
   @media (max-width: 768px) {
     max-width: 250px;
@@ -158,15 +171,11 @@ const ImageContainer = styled.div`
   }
 `;
 
-const PlaneImage = styled.img`
+const Image = styled.img`
   width: 100%;
-  max-width: 160px;
+  max-width: 70px;
   height: auto;
   object-fit: contain;
-`;
-
-const Bottom = styled.div`
-  padding: 20px;
 `;
 
 const InfoSection = styled.div`
@@ -208,5 +217,87 @@ const InfoText = styled.p`
 
   @media (max-width: 480px) {
     font-size: 14px;
+  }
+`;
+
+const LoginSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+  animation: slideUp 0.5s ease-out;
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+`;
+
+const KakaoLoginImage = styled.img`
+  width: 350px;
+  height: 100%;
+`;
+
+const KakaoLoginButton = styled.button`
+  width: 350px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    max-width: 350px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 480px) {
+    width: 300px;
+
+    img {
+      max-width: 300px;
+    }
+  }
+`;
+
+const LoginText = styled.div`
+  margin-top: 20px;
+  text-align: center;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  color: #666666;
+
+  .login-link {
+    color: #ff7e74;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      color: #ff7e74;
+    }
   }
 `;

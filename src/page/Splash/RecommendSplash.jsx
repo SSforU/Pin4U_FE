@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-function SplashPage() {
+function RecommendSplash() {
   const navigate = useNavigate();
   const { slug } = useParams();
 
@@ -10,8 +10,16 @@ function SplashPage() {
     const timer = setTimeout(() => {
       // 현재 URL에서 /splash를 제거하고 추천 페이지로 이동
       const currentPath = window.location.pathname;
-      const targetPath = currentPath.replace("/splash", "");
-      navigate(targetPath);
+
+      if (currentPath.includes("/group/")) {
+        // 그룹 지도인 경우: splash -> login -> request 순서
+        const targetPath = currentPath.replace("/splash", "/login");
+        navigate(targetPath);
+      } else {
+        // 개인 지도인 경우: splash -> personal 페이지로 직접 이동
+        const targetPath = currentPath.replace("/splash", "");
+        navigate(targetPath);
+      }
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -39,7 +47,7 @@ function SplashPage() {
   );
 }
 
-export default SplashPage;
+export default RecommendSplash;
 
 // styled-components
 const Wrapper = styled.div`
