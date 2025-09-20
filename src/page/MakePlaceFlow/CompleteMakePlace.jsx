@@ -24,8 +24,15 @@ function CompleteMakePlace() {
   // 링크 복사 함수
   const handleCopyLink = () => {
     if (createdSlug) {
-      // 올바른 경로로 링크 생성 (/shared-map/:slug)
-      const shareUrl = `${window.location.origin}/shared-map/${createdSlug}`;
+      // 지도 타입에 따라 다른 링크 생성
+      const mapType = localStorage.getItem("mapType");
+      const shareUrl =
+        mapType === "personal"
+          ? `${window.location.origin}/shared-map/personal/${createdSlug}/splash`
+          : mapType === "group"
+          ? `${window.location.origin}/shared-map/group/${createdSlug}/splash`
+          : `${window.location.origin}/shared-map/${createdSlug}`; // 기본값
+
       navigator.clipboard.writeText(shareUrl).then(() => {
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 3000);
