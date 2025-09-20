@@ -6,10 +6,11 @@ import LoadingSpinner from "../../../component/ui/LoadingSpinner.jsx";
 import SkeletonUI from "../../../component/ui/SkeletonUI.jsx";
 
 const ListContainer = styled.div`
-  padding: 15px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
 `;
 
 function StationList({ stations, loading = false }) {

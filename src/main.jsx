@@ -23,6 +23,7 @@ import StartRecommendGroupLogin from "./page/RecommendFlow/Group/StartRecommendG
 import StartRecommendGroupReqeust from "./page/RecommendFlow/Group/StartRecommendGroupReqeust.jsx";
 import StartMakePlace from "./page/Splash/StartMakePlaceSplash.jsx";
 import RecommendSplash from "./page/Splash/RecommendSplash.jsx";
+import StationPage from "./page/HomePage/StationPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
+      { path: "station/:slug", element: <StationPage /> },
 
       {
         path: "start-make-place",
