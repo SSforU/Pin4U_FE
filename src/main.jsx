@@ -14,11 +14,14 @@ import StepNickname from "./step/StepNickname.jsx";
 import StepSelectMapType from "./step/StepSelectMapType.jsx";
 import StepGroupProfile from "./step/StepGroupProfile.jsx";
 import CompleteRecommend from "./page/RecommendFlow/CompleteRecommend.jsx";
-import RecommendPlaceLayout from "./page/RecommendFlow/RecommendPlaceLayout.jsx";
+import RecommendPersonalPlaceLayout from "./page/RecommendFlow/Personal/RecommendPersonalPlaceLayout.jsx";
+import RecommendGroupPlaceLayout from "./page/RecommendFlow/Group/RecommendGroupPlaceLayout.jsx";
 import StepLocation from "./step/StepLocation.jsx";
 import StepRecommend from "./step/StepRecommend.jsx";
-import StartRecommend from "./page/RecommendFlow/StartRecommend.jsx";
-import StartMakePlace from "./page/MakePlaceFlow/StartMakePlace.jsx";
+import StartRecommendPersonal from "./page/RecommendFlow/Personal/StartRecommendPersonal.jsx";
+import StartRecommendGroup from "./page/RecommendFlow/Group/StartRecommendGroup.jsx";
+import StartMakePlace from "./page/Splash/StartMakePlaceSplash.jsx";
+import RecommendSplash from "./page/Splash/ReommendSplash.jsx";
 
 const router = createBrowserRouter([
   {
@@ -67,12 +70,34 @@ const router = createBrowserRouter([
       },
       { path: "complete", element: <CompleteMakePlace /> },
       {
-        path: "shared-map/:slug",
-        element: <StartRecommend />,
+        path: "shared-map/personal/:slug/splash",
+        element: <RecommendSplash />,
       },
       {
-        path: "shared-map/:slug/onboarding",
-        element: <RecommendPlaceLayout />,
+        path: "shared-map/group/:slug/splash",
+        element: <RecommendSplash />,
+      },
+      {
+        path: "shared-map/personal/:slug",
+        element: <StartRecommendPersonal />,
+      },
+      {
+        path: "shared-map/group/:slug",
+        element: <StartRecommendGroup />,
+      },
+      {
+        path: "shared-map/personal/:slug/onboarding",
+        element: <RecommendPersonalPlaceLayout />,
+        children: [
+          { index: true, element: <Navigate to="nickname" replace /> },
+          { path: "nickname", element: <StepNickname /> },
+          { path: "location", element: <StepLocation /> },
+          { path: "recommend", element: <StepRecommend /> },
+        ],
+      },
+      {
+        path: "shared-map/group/:slug/onboarding",
+        element: <RecommendGroupPlaceLayout />,
         children: [
           { index: true, element: <Navigate to="nickname" replace /> },
           { path: "nickname", element: <StepNickname /> },
