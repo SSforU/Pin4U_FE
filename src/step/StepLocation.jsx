@@ -199,18 +199,6 @@ function StepLocation() {
   return (
     <Wrapper>
       <ContentSection>
-        <TextBlock>
-          <Title>
-            {userProfile?.nickname || "사용자"} 님에게 추천하고 싶은
-            <br />
-            장소를 입력해주세요.
-          </Title>
-          <Detail>
-            {userProfile?.nickname || "사용자"}님이 설정한 역 반경 800m 안에서
-            추천이 가능해요.
-          </Detail>
-        </TextBlock>
-
         {/* 역과 메모 정보 표시 */}
         {stationInfo && (
           <InfoSection>
@@ -287,7 +275,7 @@ const ContentSection = styled.div`
   flex-direction: column;
   align-items: stretch;
   gap: 15px;
-  padding: 24px 20px;
+  padding: 0px;
   height: 100%;
   justify-content: flex-start;
 `;

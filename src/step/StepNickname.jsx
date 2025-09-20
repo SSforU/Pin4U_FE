@@ -9,6 +9,9 @@ function StepNickname(props) {
   const outlet = useOutletContext?.() || {};
   const nickname = outlet.nickname ?? props.nickname ?? "";
   const setNickname = outlet.setNickname ?? props.setNickname ?? (() => {});
+  const detailText =
+    props.detailText ?? "내 지도를 공유받은 친구들에게 공개돼요.";
+
   const handleNicknameChange = (e) => {
     const newNickname = e.target.value;
     if (newNickname.length <= 10) {
@@ -21,8 +24,9 @@ function StepNickname(props) {
     <Wrapper>
       <Container>
         <TextBlock>
-          <Title>닉네임을 입력해주세요</Title>
-          <Detail>나만의 지도에 표시될 닉네임을 입력해주세요.</Detail>
+          <Title>안녕하세요!</Title>
+          <SubTitle>닉네임을 입력해주세요</SubTitle>
+          <Detail>{detailText}</Detail>
         </TextBlock>
 
         <InputContainer>
@@ -67,7 +71,7 @@ const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 4px;
 `;
 
 const Title = styled.div`
@@ -77,6 +81,17 @@ const Title = styled.div`
   line-height: 1.35;
   letter-spacing: -0.2px;
   color: #000000;
+  margin: 0;
+`;
+
+const SubTitle = styled.div`
+  font-family: "Pretendard", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.2px;
+  color: #000000;
+  margin-bottom: 4px;
 `;
 
 const Detail = styled.div`
@@ -86,7 +101,6 @@ const Detail = styled.div`
   font-weight: 500;
   line-height: 16px;
   margin: 0;
-  padding-left: 5px;
 `;
 
 const InputContainer = styled.div`
