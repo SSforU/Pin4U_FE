@@ -11,6 +11,7 @@ import styled from "styled-components";
 import ProgressBar from "../../../component/ui/ProgressBar.jsx";
 import Button from "../../../component/ui/Button.jsx";
 import StepNickname from "../../../step/StepNickname.jsx";
+import StepLocation from "../../../step/StepLocation.jsx";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
 
 const STEPS = ["nickname", "location", "recommend"];
@@ -119,7 +120,26 @@ function RecommendPersonalPlaceLayout() {
 
       <Main>
         {stepParam === "nickname" ? (
-          <StepNickname nickname={nickname} setNickname={setNickname} />
+          <StepNickname
+            nickname={nickname}
+            setNickname={setNickname}
+            detailText="내 추천 장소를 공유받는 친구들에게 공개돼요."
+          />
+        ) : stepParam === "location" ? (
+          <ContentSection>
+            <TextBlock>
+              <Title>
+                [{userProfile?.nickname || "사용자"}] 에게 추천하고 싶은
+                <br /> 장소를 입력해주세요.
+              </Title>
+              <Detail>
+                {userProfile?.nickname || "사용자"}님이 설정한 역 반경{" "}
+                <span style={{ color: "#ff7e74" }}>800m</span>안에서 추천이
+                가능해요.
+              </Detail>
+            </TextBlock>
+            <StepLocation />
+          </ContentSection>
         ) : (
           <Outlet
             context={{
@@ -243,4 +263,43 @@ const ErrorButton = styled.button`
   &:hover {
     background-color: #ff6b61;
   }
+`;
+
+const TextBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  text-align: left;
+  margin-bottom: 24px;
+`;
+
+const ContentSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 15px;
+  padding: 24px 20px;
+  height: 100%;
+  justify-content: flex-start;
+`;
+
+const Title = styled.h1`
+  font-family: "Pretendard", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.2px;
+  color: #333;
+  margin: 0;
+`;
+
+const Detail = styled.p`
+  font-family: "Pretendard", sans-serif;
+  color: #585858;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  margin: 0;
+  padding-left: 5px;
 `;
