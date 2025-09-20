@@ -8,16 +8,16 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import styled from "styled-components";
-import ProgressBar from "../../component/ui/ProgressBar.jsx";
-import Button from "../../component/ui/Button.jsx";
-import StepNickname from "../../step/StepNickname.jsx";
-import { getResponsiveStyles } from "../../styles/responsive.js";
+import ProgressBar from "../../../component/ui/ProgressBar.jsx";
+import Button from "../../../component/ui/Button.jsx";
+import StepNickname from "../../../step/StepNickname.jsx";
+import { getResponsiveStyles } from "../../../styles/responsive.js";
 
 const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
 
-function RecommendPlaceLayout() {
+function RecommendPersonalPlaceLayout() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
@@ -37,7 +37,7 @@ function RecommendPlaceLayout() {
   }, [nickname]);
 
   // useMatch로 현재 step 추출
-  const match = useMatch("/shared-map/:slug/onboarding/:step");
+  const match = useMatch("/shared-map/personal/:slug/onboarding/:step");
   const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
@@ -50,7 +50,16 @@ function RecommendPlaceLayout() {
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
-    navigate(`/shared-map/${slug}/onboarding/${STEPS[safe]}`);
+    // 현재 경로를 확인하여 적절한 경로로 이동
+    const currentPath = window.location.pathname;
+    if (currentPath.includes("/personal/")) {
+      navigate(`/shared-map/personal/${slug}/onboarding/${STEPS[safe]}`);
+    } else if (currentPath.includes("/group/")) {
+      navigate(`/shared-map/group/${slug}/onboarding/${STEPS[safe]}`);
+    } else {
+      // 기본값 (fallback)
+      navigate(`/shared-map/${slug}/onboarding/${STEPS[safe]}`);
+    }
   }
 
   async function goNext() {
@@ -82,7 +91,16 @@ function RecommendPlaceLayout() {
     if (currentIndex > 0) {
       goToStep(currentIndex - 1);
     } else {
-      navigate(`/shared-map/${slug}`);
+      // 현재 경로를 확인하여 적절한 추천 페이지로 이동
+      const currentPath = window.location.pathname;
+      if (currentPath.includes("/personal/")) {
+        navigate(`/shared-map/personal/${slug}`);
+      } else if (currentPath.includes("/group/")) {
+        navigate(`/shared-map/group/${slug}`);
+      } else {
+        // 기본값 (fallback)
+        navigate(`/shared-map/${slug}`);
+      }
     }
   }
 
@@ -143,7 +161,7 @@ function RecommendPlaceLayout() {
   );
 }
 
-export default RecommendPlaceLayout;
+export default RecommendPersonalPlaceLayout;
 
 // styled-components (MakePlaceLayout과 동일)
 const Wrapper = styled.div`

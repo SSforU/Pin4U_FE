@@ -1,13 +1,14 @@
+// 그룹 지도용 추천 시작 페이지
 // 링크로 접속한 사용자가 station과 memo 정보를 조회
 // #7 A-지도화면 API 연동
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
-import { getResponsiveStyles } from "../../styles/responsive.js";
-import Button from "../../component/ui/Button.jsx";
+import { getResponsiveStyles } from "../../../styles/responsive.js";
+import Button from "../../../component/ui/Button.jsx";
 import axios from "axios";
 
-function StartRecommend() {
+function StartRecommendGroup() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
@@ -54,7 +55,7 @@ function StartRecommend() {
   }, [slug, BASE_URL]);
 
   const handleGoRecommend = () => {
-    navigate(`/shared-map/${slug}/onboarding/nickname`);
+    navigate(`/shared-map/group/${slug}/onboarding/nickname`);
   };
 
   return (
@@ -96,8 +97,7 @@ function StartRecommend() {
   );
 }
 
-export default StartRecommend;
-
+export default StartRecommendGroup;
 // styled-components
 const Wrapper = styled.div`
   ${getResponsiveStyles("layout")}

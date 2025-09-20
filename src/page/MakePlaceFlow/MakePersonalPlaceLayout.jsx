@@ -18,7 +18,7 @@ const TOTAL_STEPS = 4;
 function MakePersonalPlaceLayout() {
   const navigate = useNavigate();
   const { userProfile } = useOutletContext();
-  const [mapType, setMapType] = useState("self"); // 개인 지도로 고정
+  const [mapType, setMapType] = useState("personal"); // 개인 지도로 고정
   const [nickname, setNickname] = useState("");
   const [station, setStation] = useState(null);
   const [memo, setMemo] = useState("");
@@ -74,18 +74,28 @@ function MakePersonalPlaceLayout() {
         if (response.data.result === "success") {
           const { slug } = response.data.data.request;
           localStorage.setItem("createdSlug", slug);
+          localStorage.setItem("mapType", "personal"); // 개인 지도 타입 저장
           navigate("/complete");
         }
       } catch (error) {
         console.error("오류 발생:", error);
+
+        // 백엔드가 구현되지 않았을 때 임시 slug 생성
+        if (error.response?.status === 404 || !error.response) {
+          console.log("백엔드가 구현되지 않음. 임시 slug 생성");
+          const tempSlug = `temp-personal-${Date.now()}`;
+          localStorage.setItem("createdSlug", tempSlug);
+          localStorage.setItem("mapType", "personal");
+          navigate("/complete");
+          return;
+        }
+
         let message = "오류가 발생했습니다.";
 
         if (error.response?.status === 500) {
           message = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
         } else if (error.response?.status === 400) {
           message = "잘못된 요청입니다.";
-        } else if (!error.response) {
-          message = "서버에 연결할 수 없습니다.";
         }
 
         setErrorMessage(message);
