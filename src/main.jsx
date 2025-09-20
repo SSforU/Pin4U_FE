@@ -19,9 +19,10 @@ import RecommendGroupPlaceLayout from "./page/RecommendFlow/Group/RecommendGroup
 import StepLocation from "./step/StepLocation.jsx";
 import StepRecommend from "./step/StepRecommend.jsx";
 import StartRecommendPersonal from "./page/RecommendFlow/Personal/StartRecommendPersonal.jsx";
-import StartRecommendGroup from "./page/RecommendFlow/Group/StartRecommendGroup.jsx";
+import StartRecommendGroupLogin from "./page/RecommendFlow/Group/StartRecommendGroupLogin.jsx";
+import StartRecommendGroupReqeust from "./page/RecommendFlow/Group/StartRecommendGroupReqeust.jsx";
 import StartMakePlace from "./page/Splash/StartMakePlaceSplash.jsx";
-import RecommendSplash from "./page/Splash/ReommendSplash.jsx";
+import RecommendSplash from "./page/Splash/RecommendSplash.jsx";
 
 const router = createBrowserRouter([
   {
@@ -82,8 +83,16 @@ const router = createBrowserRouter([
         element: <StartRecommendPersonal />,
       },
       {
+        path: "shared-map/group/:slug/login",
+        element: <StartRecommendGroupLogin />,
+      },
+      {
+        path: "shared-map/group/:slug/request",
+        element: <StartRecommendGroupReqeust />,
+      },
+      {
         path: "shared-map/group/:slug",
-        element: <StartRecommendGroup />,
+        element: <StartRecommendGroupReqeust />,
       },
       {
         path: "shared-map/personal/:slug/onboarding",
