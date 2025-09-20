@@ -109,20 +109,6 @@ const Main = styled.main`
   overflow: auto;
 `;
 
-const UserInfoSection = styled.div`
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const UserTitle = styled.h1`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.3;
-  color: #000000;
-  margin: 0;
-`;
-
 const PrevButtonContainer = styled.div`
   ${getResponsiveStyles("layout")}
   margin-top: 40px;
