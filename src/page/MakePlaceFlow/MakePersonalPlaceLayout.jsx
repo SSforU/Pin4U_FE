@@ -6,20 +6,23 @@ import {
   useNavigate,
   useMatch,
   useOutletContext,
+  useLocation,
 } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../../component/ui/ProgressBar.jsx";
 import Button from "../../component/ui/Button.jsx";
 import { getResponsiveStyles } from "../../styles/responsive.js";
 
-const PERSONAL_STEPS = ["nickname", "maptype", "station", "memo"];
-const TOTAL_STEPS = 4;
+const PERSONAL_STEPS = ["station", "memo"];
+const TOTAL_STEPS = 4; // 전체 단계 수는 유지 (MakePlaceLayout의 2단계 + Personal의 2단계)
 
 function MakePersonalPlaceLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { userProfile } = useOutletContext();
-  const [mapType, setMapType] = useState("personal"); // 개인 지도로 고정
-  const [nickname, setNickname] = useState("");
+
+  // MakePlaceLayout에서 전달받은 데이터
+  const { nickname, mapType } = location.state || {};
   const [station, setStation] = useState(null);
   const [memo, setMemo] = useState("");
 
@@ -34,12 +37,10 @@ function MakePersonalPlaceLayout() {
   const stepParam = match?.params?.step || PERSONAL_STEPS[0];
 
   const currentIndex = Math.max(0, PERSONAL_STEPS.indexOf(stepParam));
-  const currentStep = currentIndex + 1;
+  const currentStep = currentIndex + 3; // MakePlaceLayout의 2단계 + 현재 인덱스 + 1
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
-    (stepParam === "maptype" && !mapType) ||
     (stepParam === "station" && !station) ||
     (stepParam === "memo" && !memo.trim());
 
@@ -49,18 +50,13 @@ function MakePersonalPlaceLayout() {
   }
 
   async function goNext() {
-    if (stepParam === "nickname") {
-      goToStep(currentIndex + 1);
-    } else if (stepParam === "maptype") {
-      // 개인 지도는 바로 station으로 이동
-      navigate("/make-place/personal/station");
-    } else if (stepParam === "station") {
+    if (stepParam === "station") {
       goToStep(currentIndex + 1);
     } else if (stepParam === "memo") {
       // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
       try {
         const requestData = {
-          owner_nickname: userProfile?.nickname,
+          owner_nickname: nickname || userProfile?.nickname,
           station_code: station?.code,
           request_message: memo,
         };
@@ -108,7 +104,8 @@ function MakePersonalPlaceLayout() {
     if (currentIndex > 0) {
       goToStep(currentIndex - 1);
     } else {
-      navigate("/");
+      // 첫 번째 단계에서 뒤로가기 시 MakePlaceLayout으로 돌아가기
+      navigate("/make-place/maptype");
     }
   }
 
@@ -129,9 +126,7 @@ function MakePersonalPlaceLayout() {
         <Outlet
           context={{
             nickname,
-            setNickname,
             mapType,
-            setMapType,
             station,
             setStation,
             memo,
@@ -179,20 +174,6 @@ const Top = styled.div`
 const Main = styled.main`
   padding: 20px;
   overflow: auto;
-`;
-
-const UserInfoSection = styled.div`
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const UserTitle = styled.h1`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.3;
-  color: #000000;
-  margin: 0;
 `;
 
 const PrevButtonContainer = styled.div`

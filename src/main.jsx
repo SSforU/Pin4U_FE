@@ -52,9 +52,7 @@ const router = createBrowserRouter([
         path: "make-place/personal",
         element: <MakePersonalPlaceLayout />, // 개인 지도 레이아웃
         children: [
-          { index: true, element: <Navigate to="nickname" replace /> },
-          { path: "nickname", element: <StepNickname /> },
-          { path: "maptype", element: <StepSelectMapType /> },
+          { index: true, element: <Navigate to="station" replace /> },
           { path: "station", element: <StepStation /> },
           { path: "memo", element: <StepMemo /> },
         ],
@@ -63,9 +61,7 @@ const router = createBrowserRouter([
         path: "make-place/group",
         element: <MakeGroupPlaceLayout />, // 그룹 지도 레이아웃
         children: [
-          { index: true, element: <Navigate to="nickname" replace /> },
-          { path: "nickname", element: <StepNickname /> },
-          { path: "maptype", element: <StepSelectMapType /> },
+          { index: true, element: <Navigate to="group-profile" replace /> },
           { path: "group-profile", element: <StepGroupProfile /> },
           { path: "station", element: <StepStation /> },
           { path: "memo", element: <StepMemo /> },

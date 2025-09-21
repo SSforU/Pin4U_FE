@@ -48,7 +48,7 @@ function RecommendGroupPlaceLayout() {
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && !nickname.trim()) ||
+    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
     (stepParam === "location" && !location);
 
   function goToStep(index) {
