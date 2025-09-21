@@ -186,6 +186,7 @@ export default function HomePage() {
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   height: 100vh;
   background: #fff;
 `;
@@ -194,12 +195,13 @@ const TitleBox = styled.div`
   /* width: 90%;
   display: flex;
   padding: 15px 20px; */
-  padding: 16px 30px;
-  height: calc(100dvh * 140 / 844);
+  width: 100%;
+  padding: 16px 35px;
+  height: calc(100dvh * 90 / 844);
   border-bottom: 1px solid #ffffff;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: start;
 `;
 
 const PageTitle = styled.h1`

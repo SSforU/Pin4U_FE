@@ -118,7 +118,7 @@ const PageContainer = styled.div`
 
 const Header = styled.div`
   padding: 16px 20px;
-  height: calc(100dvh * 140 / 844);
+  height: calc(100dvh * 90 / 844);
   border-bottom: 1px solid #ffffff;
   display: flex;
   align-items: flex-end;
@@ -142,7 +142,7 @@ const PrevButton = styled.img`
 const StationName = styled.h2`
   margin: 0;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const SubwayLineIcon = styled.div`

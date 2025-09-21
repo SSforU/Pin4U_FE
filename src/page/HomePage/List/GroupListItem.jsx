@@ -66,7 +66,7 @@ const ThumbFallback = styled.span`
 
 const Title = styled.div`
   font-size: 12px;
-  font-weight: mideum;
+  font-weight: 500;
   color: #333;
   line-height: 1.2;
 `;
@@ -82,7 +82,7 @@ const MetaRow = styled.div`
 const StationName = styled.span`
   color: #8f8f8f;
   font-size: 10px;
-  font-size: 500;
+  font-size: 600;
 `;
 
 const subwayLineImages = {
