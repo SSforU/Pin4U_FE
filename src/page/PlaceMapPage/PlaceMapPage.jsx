@@ -19,9 +19,43 @@ export default function PlaceMapPage() {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
   const [error, setError] = useState("");
-
+  const [copySuccess, setCopySuccess] = useState(false); // 복사 성공 상태 추가
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const USE_MOCK = true; // 목업으로 실행하려면 true
+
+  // 링크 복사 함수
+  const handleCopyLink = async () => {
+    // 라우트 파라미터 우선, 없으면 로드된 데이터의 slug 사용
+    const s = slug || data?.slug;
+    if (!s) {
+      window.alert("공유할 링크의 slug가 없습니다.");
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}/shared-map/personal/${s}/splash`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
+    } catch (err) {
+      try {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
+      } catch (err) {
+        window.prompt(
+          "복사에 실패했어요. 아래 링크를 수동으로 복사해 주세요:",
+          shareUrl
+        );
+      }
+    }
+  };
 
   function goPrev() {
     navigate("/");
@@ -344,11 +378,25 @@ export default function PlaceMapPage() {
           <StationName>{data.station.name}역</StationName>
           <SubwayLineIcon $imageUrl={lineSrc} />
         </StationWrapper>
-        <MapMemoBtnImage
-          onClick={() => setIsMemoOpen(!isMemoOpen)}
-          src={isMemoOpen ? "/MapMemoBtn-On.png" : "/MapMemoBtn-Off.png"}
-          alt="지도 메모 버튼"
-        />
+        <ActionsRight>
+          <CopyLinkBtnImage
+            onClick={handleCopyLink}
+            src="/Link_Horizontal.svg" // 아이콘 경로(원하는 이미지로 교체 가능)
+            alt="링크 복사"
+            title="링크 복사"
+            style={{ border: "1px solid #383838" }}
+          />
+          <MapMemoBtnImage
+            onClick={() => setIsMemoOpen(!isMemoOpen)}
+            src={isMemoOpen ? "/MapMemoBtn-On.svg" : "/MapMemoBtn-Off.svg"}
+            alt="지도 메모 버튼"
+            style={
+              isMemoOpen
+                ? { border: "1px solid #FF7E74" }
+                : { border: "1px solid #383838" }
+            }
+          />
+        </ActionsRight>
       </Header>
       <MapWrapper>
         {isMemoOpen && (
@@ -379,6 +427,7 @@ export default function PlaceMapPage() {
           김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.
         </MessagePopup>
       )}
+      {copySuccess && <CopyToast>링크가 복사되었어요!</CopyToast>}
     </PageContainer>
   );
 }
@@ -456,6 +505,8 @@ const MapMemoBtnImage = styled.img`
   width: 25px;
   height: 25px;
   cursor: pointer;
+  padding: 2.5px;
+  border-radius: 999px;
 `;
 
 const MapMemo = styled.div`
@@ -488,4 +539,33 @@ const MessagePopup = styled.div`
   font-size: 14px;
   z-index: 1000;
   white-space: nowrap;
+`;
+
+const ActionsRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const CopyLinkBtnImage = styled.img`
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2.5px;
+  border-radius: 999px;
+`;
+
+const CopyToast = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 18px; /* iOS 홈인디케이터 위로 살짝 */
+  transform: translateX(-50%);
+  background: #ffefed;
+  color: #585858;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  z-index: 1200;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 `;
