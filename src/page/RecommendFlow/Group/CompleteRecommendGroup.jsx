@@ -1,49 +1,25 @@
-// 최초 앱 접속자 온보딩
-// 저장했던 메모, 역 정보 백엔드에 전달(POST)
-import React, { useState, useEffect } from "react";
+// #1 고정 사용자 조회 API 호출
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { getResponsiveStyles } from "../../styles/responsive.js";
+import { getResponsiveStyles } from "../../../styles/responsive.js";
 
-function CompleteMakePlace() {
+function CompleteRecommendGroup() {
   const navigate = useNavigate();
   const { userProfile } = useOutletContext();
   const [copySuccess, setCopySuccess] = useState(false);
-  const [createdSlug, setCreatedSlug] = useState(null);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-  // StepMemo에서 이미 생성된 링크 정보 가져오기
-  useEffect(() => {
-    const slug = localStorage.getItem("createdSlug");
-    if (slug) {
-      setCreatedSlug(slug);
-    }
-  }, []);
-
-  // 링크 복사 함수
+  // 링크 복사 함수 - CompleteMakePlace에서 생성된 링크 그대로 사용
   const handleCopyLink = () => {
-    if (createdSlug) {
-      // 지도 타입에 따라 다른 링크 생성
-      const mapType = localStorage.getItem("mapType");
-      const shareUrl =
-        mapType === "personal"
-          ? `${window.location.origin}/shared-map/personal/${createdSlug}/splash`
-          : mapType === "group"
-          ? `${window.location.origin}/shared-map/group/${createdSlug}/splash`
-          : `${window.location.origin}/shared-map/${createdSlug}`; // 기본값
-
-      navigator.clipboard.writeText(shareUrl).then(() => {
+    const savedLink = localStorage.getItem("savedShareLink");
+    if (savedLink) {
+      navigator.clipboard.writeText(savedLink).then(() => {
         setCopySuccess(true);
-        // 링크를 localStorage에 저장 (CompleteRecommendGroup에서 사용)
-        localStorage.setItem("savedShareLink", shareUrl);
         setTimeout(() => setCopySuccess(false), 3000);
       });
     } else {
-      // 링크가 생성되지 않았으면 에러 처리
-      alert.error(
-        "링크가 생성되지 않았습니다. StepMemo에서 먼저 링크를 생성해주세요."
-      );
+      // 링크가 저장되지 않았으면 에러 처리
+      alert("저장된 링크가 없습니다.");
     }
   };
 
@@ -55,23 +31,26 @@ function CompleteMakePlace() {
     <Wrapper>
       <Main>
         <ImageContainer>
-          <LogoImage src="/Pin4U_Logo.png" alt="비행기" />
+          <PlaneImage src="/Recommend_Plane.png" alt="비행기" />
         </ImageContainer>
         <Content>
           <Title>
             {userProfile?.nickname || "사용자"} 님을 위한
             <br />
-            지도가 완성되었어요!
+            장소 추천을 완료했어요!
           </Title>
-          <Detail>친구들과 공유해 숨겨진 장소를 알아보세요.</Detail>
+          <Detail>
+            {localStorage.getItem("recommendUserNickname") || "친구"}님을 위한
+            지도도 생성해보세요!
+          </Detail>
         </Content>
       </Main>
 
       <Bottom>
         <ActionButtons>
           <CopyLinkButton onClick={handleCopyLink}>
-            <LinkIcon src="/Link_Horizontal.png" alt="링크" />내 지도 링크
-            복사하기
+            <LinkIcon src="/Link_Horizontal.png" alt="링크" />
+            그룹 지도 링크 복사하기
           </CopyLinkButton>
           <CompleteButton onClick={handleComplete}>완료하기</CompleteButton>
         </ActionButtons>
@@ -88,46 +67,65 @@ function CompleteMakePlace() {
   );
 }
 
-export default CompleteMakePlace;
+export default CompleteRecommendGroup;
 
 // styled-components
 const Wrapper = styled.div`
-  ${getResponsiveStyles("search")}
-  width: 100%;
-  min-height: 100dvh;
+  ${getResponsiveStyles("layout")}
   display: grid;
   grid-template-rows: 1fr auto;
-  margin: 0 auto;
-  padding: 24px 20px 0;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  position: relative;
+  height: 100%;
 `;
 
-const Main = styled.div`
+const Main = styled.main`
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 35px;
-  width: 100%;
+  justify-content: center;
+  gap: 40px;
+  text-align: center;
 `;
 
-// 버튼쪽 영역
-const Bottom = styled.div`
-  width: 100%;
-  padding: 20px;
-  margin-bottom: 20px;
-  /* flex-wrap: wrap; */
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  max-width: 400px;
+`;
+
+const Title = styled.h1`
+  font-family: "Pretendard", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.3;
+  color: #000000;
+  margin: 0;
 
   @media (max-width: 768px) {
-    padding: 16px 10px;
-    margin-bottom: 16px;
+    font-size: 24px;
   }
 
   @media (max-width: 480px) {
-    padding: 14px 5px;
-    margin-bottom: 14px;
+    font-size: 22px;
+  }
+`;
+
+const Detail = styled.p`
+  font-family: "Pretendard", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #585858;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 14px;
   }
 `;
 
@@ -147,42 +145,29 @@ const ImageContainer = styled.div`
   }
 `;
 
-const LogoImage = styled.img`
+const PlaneImage = styled.img`
   width: 100%;
   max-width: 160px;
   height: auto;
   object-fit: contain;
 `;
 
-const Content = styled.div`
-  text-align: center;
-  padding: 0 60px;
+// 버튼쪽 영역
+const Bottom = styled.div`
+  width: 100%;
+  padding: 20px;
+  margin-bottom: 20px;
+  /* flex-wrap: wrap; */
 
   @media (max-width: 768px) {
-    padding: 0 40px;
+    padding: 16px 10px;
+    margin-bottom: 16px;
   }
 
   @media (max-width: 480px) {
-    padding: 0 20px;
+    padding: 14px 5px;
+    margin-bottom: 14px;
   }
-`;
-
-const Title = styled.h1`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 26px;
-  color: #000000;
-  margin-bottom: 14px;
-`;
-
-const Detail = styled.p`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 18px;
-  color: #585858;
-  margin: 0;
 `;
 
 const ActionButtons = styled.div`

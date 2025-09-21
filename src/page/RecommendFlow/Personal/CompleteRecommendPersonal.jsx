@@ -1,12 +1,17 @@
 // #1 고정 사용자 조회 API 호출
 import React from "react";
 import styled from "styled-components";
-import { useOutletContext } from "react-router-dom";
-import { getResponsiveStyles } from "../../styles/responsive.js";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { getResponsiveStyles } from "../../../styles/responsive.js";
+import Button from "../../../component/ui/Button.jsx";
 
 function CompleteRecommend() {
   const { userProfile } = useOutletContext();
+  const navigate = useNavigate();
 
+  const handleGoMakePlace = () => {
+    navigate("/");
+  };
   return (
     <Wrapper>
       <Main>
@@ -25,6 +30,10 @@ function CompleteRecommend() {
           </Detail>
         </Content>
       </Main>
+
+      <Bottom>
+        <Button onClick={handleGoMakePlace}>장소 추천하러 가기</Button>
+      </Bottom>
     </Wrapper>
   );
 }
@@ -112,4 +121,8 @@ const PlaneImage = styled.img`
   max-width: 160px;
   height: auto;
   object-fit: contain;
+`;
+
+const Bottom = styled.div`
+  padding: 20px;
 `;

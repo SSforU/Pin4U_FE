@@ -260,6 +260,7 @@ function StepRecommend() {
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
+        is_private: placeRecommendations[index]?.isPrivate || false, // 비공개 상태 추가
         guest_id: guestId, // guest_id 추가
       }));
 
@@ -409,10 +410,26 @@ function StepRecommend() {
               placeholder="메시지 입력"
               maxLength={120}
               onImageChange={handleImageChange}
+              onPrivateChange={(isPrivate) => {
+                // 현재 장소의 비공개 상태 업데이트
+                setPlaceRecommendations((prev) => {
+                  const copy = [...prev];
+                  copy[currentPlaceIndex] = {
+                    ...copy[currentPlaceIndex],
+                    isPrivate,
+                  };
+                  return copy;
+                });
+              }}
+              isPrivate={
+                placeRecommendations[currentPlaceIndex]?.isPrivate || false
+              }
+              userProfile={userProfile}
             />
             <CharCount>{content.length}/120</CharCount>
           </InputContainer>
         </InputSection>
+
         {/* 진행 표시기 - 별도 섹션으로 분리 */}
         <ProgressSection>
           <ArrowButton
@@ -445,11 +462,12 @@ function StepRecommend() {
             />
           </ArrowButton>
         </ProgressSection>
-        {/* 진행 버튼: 모든 장소 입력 완료 시에만 표시 */}
-        <ButtonSection className={!isAllCompleted ? "hidden" : ""}>
-          <Button onClick={handleComplete}>완료하기</Button>
-        </ButtonSection>
       </ContentSection>
+
+      {/* 진행 버튼: 모든 장소 입력 완료 시에만 표시 */}
+      <ButtonSection className={!isAllCompleted ? "hidden" : ""}>
+        <Button onClick={handleComplete}>완료하기</Button>
+      </ButtonSection>
     </Wrapper>
   );
 }
@@ -486,6 +504,7 @@ const TextBlock = styled.div`
   align-items: flex-start;
   gap: 5px;
   text-align: left;
+  padding-bottom: 3px;
 `;
 
 const Title = styled.h1`
@@ -509,11 +528,12 @@ const Title = styled.h1`
 const Detail = styled.p`
   font-family: "Pretendard", sans-serif;
   color: #585858;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
   padding-left: 0;
+  padding-bottom: 5px;
 
   @media (max-width: 768px) {
     font-size: 13px;
@@ -555,40 +575,6 @@ const PlaceDisplay = styled.div`
 
   @media (max-width: 480px) {
     font-size: 15px;
-  }
-`;
-
-const PlaceAddress = styled.div`
-  font-family: "Pretendard", sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #888888;
-  margin: 0px;
-  line-height: 1.3;
-
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 12px;
-  }
-`;
-
-const PlaceDistance = styled.div`
-  font-family: "Pretendard", sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: #ff7e74;
-  margin: 0px;
-  line-height: 1.3;
-
-  @media (max-width: 768px) {
-    font-size: 12px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 11px;
   }
 `;
 
