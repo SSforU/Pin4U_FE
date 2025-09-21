@@ -58,7 +58,6 @@ export default function Map({ station, items, selectedItemId, onMarkerClick }) {
             map: map,
             position: markerPosition,
             title: item.name,
-            image: blurredImage, // 초기에는 흐릿한 이미지 설정
           });
 
           markersRef.current[item.id] = { marker, clearImage, blurredImage };

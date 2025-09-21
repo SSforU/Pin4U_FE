@@ -66,9 +66,9 @@ export default function HomePage() {
   const MOCK_GROUPS = [
     {
       id: "g1",
-      name: "그룹명",
+      name: "일이삼사",
       thumbnail: "", // 이미지 없으면 이니셜 fallback
-      stationName: "숭실대입구역",
+      stationName: "홍대입구역",
       lines: [7],
     },
     {
@@ -186,6 +186,7 @@ export default function HomePage() {
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   height: 100vh;
   background: #fff;
 `;
@@ -194,12 +195,13 @@ const TitleBox = styled.div`
   /* width: 90%;
   display: flex;
   padding: 15px 20px; */
-  padding: 16px 30px;
-  height: calc(100dvh * 140 / 844);
+  width: 100%;
+  padding: 16px 35px;
+  height: calc(100dvh * 90 / 844);
   border-bottom: 1px solid #ffffff;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: start;
 `;
 
 const PageTitle = styled.h1`
@@ -250,9 +252,8 @@ const ButtonContainer = styled.div`
   max-width: 400px;
   display: flex;
   justify-content: center;
-  padding: 20px 15px;
+  padding: 10px 15px 20px;
   box-sizing: border-box;
-
   position: sticky;
   bottom: 0;
   background: linear-gradient(#fff 60%, rgba(255, 255, 255, 0));

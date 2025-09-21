@@ -33,7 +33,6 @@ export default function GroupListItem({
 
 const ItemWrap = styled.div`
   width: 80px;
-
   margin-left: 15px;
   flex: 0 0 auto;
   display: flex;
@@ -44,11 +43,11 @@ const ItemWrap = styled.div`
 `;
 
 const Thumb = styled.div`
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
   background: #f6f6f6;
-  border: 3px solid #e28a81; /* 코럴 느낌 */
+  border: 2px solid #e28a81; /* 코럴 느낌 */
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -66,7 +65,7 @@ const ThumbFallback = styled.span`
 `;
 
 const Title = styled.div`
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 500;
   color: #333;
   line-height: 1.2;
@@ -83,7 +82,7 @@ const MetaRow = styled.div`
 const StationName = styled.span`
   color: #8f8f8f;
   font-size: 10px;
-  font-size: 500;
+  font-size: 600;
 `;
 
 const subwayLineImages = {
