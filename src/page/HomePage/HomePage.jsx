@@ -66,9 +66,9 @@ export default function HomePage() {
   const MOCK_GROUPS = [
     {
       id: "g1",
-      name: "그룹명",
+      name: "일이삼사",
       thumbnail: "", // 이미지 없으면 이니셜 fallback
-      stationName: "숭실대입구역",
+      stationName: "홍대입구역",
       lines: [7],
     },
     {
@@ -250,9 +250,8 @@ const ButtonContainer = styled.div`
   max-width: 400px;
   display: flex;
   justify-content: center;
-  padding: 20px 15px;
+  padding: 10px 15px 20px;
   box-sizing: border-box;
-
   position: sticky;
   bottom: 0;
   background: linear-gradient(#fff 60%, rgba(255, 255, 255, 0));

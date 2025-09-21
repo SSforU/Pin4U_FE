@@ -24,7 +24,7 @@ const SearchBoxContainer = styled.div`
   background-color: #f7f7f7;
   border: 1px solid #bababa;
   border-radius: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   height: 50px;
   width: 100%;
   display: flex;
