@@ -1,10 +1,23 @@
 // src/page/StationPage/components/MemoItem.jsx
 import styled from "styled-components";
 
-export default function MemoListItem({ item, onClick }) {
+export default function MemoListItem({
+  item,
+  onClick,
+  isEditing,
+  selected,
+  toggleSelect,
+}) {
   return (
-    <Item role="button" onClick={() => onClick?.(item)}>
+    <Item $isEditing={isEditing} onClick={() => !isEditing && onClick?.(item)}>
       <Left>
+        {isEditing && (
+          <StyledCheckbox
+            checked={selected}
+            onChange={toggleSelect}
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
         <img
           src="/Recommend_Memo.png"
           style={{ width: "20px", height: "20px" }}
@@ -27,15 +40,18 @@ const Item = styled.div`
   border-bottom: 1px solid #f1f1f1;
   cursor: pointer;
 
-  &:hover {
-    background-color: #f5f5f5; /* 마우스를 올렸을 때 배경색 변경 */
-  }
-
-  &:active {
-    background-color: #e0e0e0; /* 클릭했을 때 배경색 변경 */
-    transform: scale(0.98); /* 클릭했을 때 약간 작아지는 효과 추가 */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 클릭했을 때 그림자 효과 변경 */
-  }
+  ${(p) =>
+    !p.$isEditing &&
+    `
+    &:hover {
+      background-color: #f5f5f5;
+    }
+    &:active {
+      background-color: #e0e0e0;
+      transform: scale(0.98);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+  `}
 `;
 
 const Left = styled.div`
@@ -62,5 +78,22 @@ const Right = styled.div`
   color: #585858;
 `;
 
-const PinIcon = styled.span``;
 const Count = styled.span``;
+
+const StyledCheckbox = styled.input.attrs({ type: "checkbox" })`
+  appearance: none; /* 기본 체크박스 제거 */
+  width: 18px;
+  height: 18px;
+  border: 2px solid #838383;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:checked {
+    background-color: #ffefed;
+    border-color: #838383;
+    background-image: url("/check-icon.svg"); /* 체크 표시 아이콘 */
+    background-size: 24px 24px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+`;
