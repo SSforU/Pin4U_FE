@@ -12,7 +12,7 @@ import Button from "../../component/ui/Button.jsx";
 import { getResponsiveStyles } from "../../styles/responsive.js";
 
 const STEPS = ["nickname", "maptype"];
-const TOTAL_STEPS = 2;
+const TOTAL_STEPS = 4;
 
 function MakePlaceLayout() {
   const navigate = useNavigate();
@@ -42,9 +42,13 @@ function MakePlaceLayout() {
       goToStep(currentIndex + 1);
     } else if (stepParam === "maptype") {
       if (mapType === "self") {
-        navigate("/make-place/personal/station");
+        navigate("/make-place/personal/station", {
+          state: { nickname, mapType },
+        });
       } else if (mapType === "group") {
-        navigate("/make-place/group/group-profile");
+        navigate("/make-place/group/group-profile", {
+          state: { nickname, mapType },
+        });
       }
     }
   }

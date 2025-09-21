@@ -6,21 +6,24 @@ import {
   useNavigate,
   useMatch,
   useOutletContext,
+  useLocation,
 } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../../component/ui/ProgressBar.jsx";
 import Button from "../../component/ui/Button.jsx";
 import { getResponsiveStyles } from "../../styles/responsive.js";
 
-const GROUP_STEPS = ["nickname", "maptype", "group-profile", "station", "memo"];
-const TOTAL_STEPS = 5;
+const GROUP_STEPS = ["group-profile", "station", "memo"];
+const TOTAL_STEPS = 5; // 전체 단계 수는 유지 (MakePlaceLayout의 2단계 + Group의 3단계)
 
 function MakeGroupPlaceLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { userProfile } = useOutletContext();
-  const [mapType, setMapType] = useState("group"); // 그룹 지도로 고정
+
+  // MakePlaceLayout에서 전달받은 데이터
+  const { nickname, mapType } = location.state || {};
   const [groupProfile, setGroupProfile] = useState(null);
-  const [nickname, setNickname] = useState("");
   const [station, setStation] = useState(null);
   const [memo, setMemo] = useState("");
 
@@ -35,12 +38,10 @@ function MakeGroupPlaceLayout() {
   const stepParam = match?.params?.step || GROUP_STEPS[0];
 
   const currentIndex = Math.max(0, GROUP_STEPS.indexOf(stepParam));
-  const currentStep = currentIndex + 1;
+  const currentStep = currentIndex + 3; // MakePlaceLayout의 2단계 + 현재 인덱스 + 1
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
-    (stepParam === "maptype" && !mapType) ||
     (stepParam === "group-profile" &&
       (!groupProfile?.name || groupProfile.name.length < 2)) ||
     (stepParam === "station" && !station) ||
@@ -52,12 +53,7 @@ function MakeGroupPlaceLayout() {
   }
 
   async function goNext() {
-    if (stepParam === "nickname") {
-      goToStep(currentIndex + 1);
-    } else if (stepParam === "maptype") {
-      // 그룹 지도는 group-profile로 이동
-      navigate("/make-place/group/group-profile");
-    } else if (stepParam === "group-profile") {
+    if (stepParam === "group-profile") {
       navigate("/make-place/group/station");
     } else if (stepParam === "station") {
       goToStep(currentIndex + 1);
@@ -65,7 +61,7 @@ function MakeGroupPlaceLayout() {
       // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
       try {
         let requestData = {
-          owner_nickname: userProfile?.nickname,
+          owner_nickname: nickname || userProfile?.nickname,
           station_code: station?.code,
           request_message: memo,
         };
@@ -74,7 +70,7 @@ function MakeGroupPlaceLayout() {
         const groupResponse = await axios.post(`${BASE_URL}/api/groups`, {
           group_name: groupProfile?.name,
           group_description: groupProfile?.description,
-          owner_nickname: userProfile?.nickname,
+          owner_nickname: nickname || userProfile?.nickname,
         });
 
         if (groupResponse.data.result === "success") {
@@ -127,7 +123,8 @@ function MakeGroupPlaceLayout() {
     if (currentIndex > 0) {
       goToStep(currentIndex - 1);
     } else {
-      navigate("/");
+      // 첫 번째 단계에서 뒤로가기 시 MakePlaceLayout으로 돌아가기
+      navigate("/make-place/maptype");
     }
   }
 
@@ -148,9 +145,7 @@ function MakeGroupPlaceLayout() {
         <Outlet
           context={{
             nickname,
-            setNickname,
             mapType,
-            setMapType,
             groupProfile,
             setGroupProfile,
             station,
@@ -200,20 +195,6 @@ const Top = styled.div`
 const Main = styled.main`
   padding: 20px;
   overflow: auto;
-`;
-
-const UserInfoSection = styled.div`
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const UserTitle = styled.h1`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  line-height: 1.3;
-  color: #000000;
-  margin: 0;
 `;
 
 const PrevButtonContainer = styled.div`
