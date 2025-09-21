@@ -13,7 +13,8 @@ import CompleteMakePlace from "./page/MakePlaceFlow/CompleteMakePlace.jsx";
 import StepNickname from "./step/StepNickname.jsx";
 import StepSelectMapType from "./step/StepSelectMapType.jsx";
 import StepGroupProfile from "./step/StepGroupProfile.jsx";
-import CompleteRecommend from "./page/RecommendFlow/CompleteRecommend.jsx";
+import CompleteRecommendPersonal from "./page/RecommendFlow/Personal/CompleteRecommendPersonal.jsx";
+import CompleteRecommendGroup from "./page/RecommendFlow/Group/CompleteRecommendGroup.jsx";
 import RecommendPersonalPlaceLayout from "./page/RecommendFlow/Personal/RecommendPersonalPlaceLayout.jsx";
 import RecommendGroupPlaceLayout from "./page/RecommendFlow/Group/RecommendGroupPlaceLayout.jsx";
 import StepLocation from "./step/StepLocation.jsx";
@@ -113,8 +114,12 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "shared-map/:slug/complete",
-        element: <CompleteRecommend />,
+        path: "shared-map/personal/:slug/complete",
+        element: <CompleteRecommendPersonal />,
+      },
+      {
+        path: "shared-map/group/:slug/complete",
+        element: <CompleteRecommendGroup />,
       },
     ],
   },
