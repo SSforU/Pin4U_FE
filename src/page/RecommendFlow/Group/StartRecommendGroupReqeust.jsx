@@ -456,12 +456,6 @@ const RequestSuccessContent = styled.div`
   text-align: center;
 `;
 
-const CheckIcon = styled.img`
-  width: 24px;
-  height: 24px;
-  filter: brightness(0) invert(1);
-`;
-
 const ButtonCheckIcon = styled.img`
   width: 16px;
   height: 16px;

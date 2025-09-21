@@ -113,7 +113,3 @@ const PlaneImage = styled.img`
   height: auto;
   object-fit: contain;
 `;
-
-const Bottom = styled.div`
-  padding: 20px;
-`;
