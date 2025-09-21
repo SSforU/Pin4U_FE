@@ -6,7 +6,7 @@ import PlaceCard from "./PlaceCard.jsx";
 const ListContainer = styled.div`
   display: flex;
   gap: 16px;
-  height: 200px;
+  height: 210px;
   padding-top: 20px;
   padding-bottom: 30px;
   padding-left: 30px;
