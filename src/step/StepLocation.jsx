@@ -10,7 +10,7 @@ import { useOutletContext, useParams } from "react-router-dom";
 import axios from "axios";
 
 function StepLocation() {
-  const { location, setLocation, userProfile } = useOutletContext();
+  const { location, setLocation } = useOutletContext();
   const { slug } = useParams(); // slug 파라미터 가져오기
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,10 @@ function StepLocation() {
           setRequestMemo(requestResponse.data.data.requestMessage);
         }
       } catch (error) {
-        console.error("데이터 조회 실패:", error);
+        console.error("요청 정보 조회 실패:", error);
+        // 에러 시 기본값 설정
+        setStationInfo({ name: "정보를 불러올 수 없습니다" });
+        setRequestMemo("정보를 불러올 수 없습니다");
       }
     };
 
@@ -200,23 +203,19 @@ function StepLocation() {
     <Wrapper>
       <ContentSection>
         {/* 역과 메모 정보 표시 */}
-        {stationInfo && (
-          <InfoSection>
-            {/* 역 정보 */}
-            <InfoItem>
-              <InfoIcon src="/Pin.png" alt="위치" />
-              <InfoText>{stationInfo.name}</InfoText>
-            </InfoItem>
+        <InfoSection>
+          {/* 역 정보 */}
+          <InfoItem>
+            <InfoIcon src="/Pin.png" alt="위치" />
+            <InfoText>{stationInfo?.name || "로딩 중..."}</InfoText>
+          </InfoItem>
 
-            {/* 메모 정보 */}
-            {requestMemo && (
-              <InfoItem>
-                <InfoIcon src="/Recommend_Memo.png" alt="메모" />
-                <InfoText>{requestMemo}</InfoText>
-              </InfoItem>
-            )}
-          </InfoSection>
-        )}
+          {/* 메모 정보 */}
+          <InfoItem>
+            <InfoIcon src="/Recommend_Memo.png" alt="메모" />
+            <InfoText>{requestMemo || "로딩 중..."}</InfoText>
+          </InfoItem>
+        </InfoSection>
 
         <SearchSection>
           <SearchBox
