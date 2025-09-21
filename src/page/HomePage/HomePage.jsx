@@ -66,6 +66,7 @@ export default function HomePage() {
   const MOCK_GROUPS = [
     {
       id: "g1",
+      slug: "group-1",
       name: "일이삼사",
       thumbnail: "", // 이미지 없으면 이니셜 fallback
       stationName: "홍대입구역",
@@ -73,6 +74,7 @@ export default function HomePage() {
     },
     {
       id: "g2",
+      slug: "group-2",
       name: "친구들 모임",
       thumbnail: "",
       stationName: "강남역",
@@ -80,6 +82,7 @@ export default function HomePage() {
     },
     {
       id: "g3",
+      slug: "group-3",
       name: "동아리",
       thumbnail: "",
       stationName: "홍대입구역",
@@ -87,6 +90,7 @@ export default function HomePage() {
     },
     {
       id: "g1",
+      slug: "group-4",
       name: "그룹명",
       thumbnail: "", // 이미지 없으면 이니셜 fallback
       stationName: "숭실대입구역",
@@ -94,6 +98,7 @@ export default function HomePage() {
     },
     {
       id: "g2",
+      slug: "group-5",
       name: "친구들 모임",
       thumbnail: "",
       stationName: "강남역",
@@ -174,7 +179,7 @@ export default function HomePage() {
       <GroupList
         title="그룹 지도"
         groups={MOCK_GROUPS}
-        onItemClick={(g) => navigate(`/group/${g.id}`)}
+        onItemClick={(g) => navigate(`/group-place-map/${g.slug}`)}
       />
       <ButtonContainer>
         <Button onClick={handleAddMapClick}>나만의 지도 추가하기</Button>

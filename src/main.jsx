@@ -25,6 +25,7 @@ import StartRecommendGroupReqeust from "./page/RecommendFlow/Group/StartRecommen
 import StartMakePlace from "./page/Splash/StartMakePlaceSplash.jsx";
 import RecommendSplash from "./page/Splash/RecommendSplash.jsx";
 import StationPage from "./page/HomePage/StationPage.jsx";
+import GroupPlaceMapPage from "./page/PlaceMapPage/GroupPlaceMapPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
       { path: "station/:slug", element: <StationPage /> },
+      { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> }, // /station 으로 바로 접근시 홈으로
 
       {
         path: "start-make-place",
