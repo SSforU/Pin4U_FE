@@ -25,13 +25,14 @@ export default function StationPage() {
   }, [station, navigate]);
 
   const [q, setQ] = useState("");
+  const [items, setItems] = useState(MOCK_MEMOS);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const filtered = useMemo(() => {
     const keyword = q.trim();
-    return keyword
-      ? MOCK_MEMOS.filter((m) => m.text.includes(keyword))
-      : MOCK_MEMOS;
-  }, [q]);
+    return keyword ? items.filter((m) => m.text.includes(keyword)) : items;
+  }, [q, items]);
 
   if (!station) return null;
 
@@ -43,26 +44,33 @@ export default function StationPage() {
     return first.match(/\d+/)?.[0] ?? "";
   };
 
-  const subwayLineImages = {
-    1: "/subway/1호선.png",
-    2: "/subway/2호선.png",
-    3: "/subway/3호선.png",
-    4: "/subway/4호선.png",
-    5: "/subway/5호선.png",
-    6: "/subway/6호선.png",
-    7: "/subway/7호선.png",
-    8: "/subway/8호선.png",
-    9: "/subway/9호선.png",
-  };
-
   const lineKey = getLineKey(station.lines);
   const lineSrc = subwayLineImages[lineKey];
 
   const goPrev = () => navigate(-1);
 
-  const handleMemoClick = () => {
-    // 메모를 누르면 해당 역의 지도 페이지로 이동
-    navigate(`/place-map/${station.slug}`);
+  const handleMemoClick = (memo) => {
+    if (!isEditing) {
+      navigate(`/place-map/${station.slug}`);
+    } else {
+      // 편집 모드에서는 클릭시 아무 동작 안함
+    }
+  };
+
+  const toggleEdit = () => {
+    setIsEditing(true);
+    setSelectedIds([]);
+  };
+
+  const handleDelete = () => {
+    setItems((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
+    setSelectedIds([]);
+    setIsEditing(false);
+  };
+
+  const handleDone = () => {
+    setIsEditing(false);
+    setSelectedIds([]);
   };
 
   return (
@@ -74,14 +82,27 @@ export default function StationPage() {
           <StationName>{station.name}</StationName>
           {!!lineSrc && <SubwayLineIcon $imageUrl={lineSrc} />}
         </StationWrapper>
-        {/* 우측 자리는 비워둠(필요 시 알림/편집 아이콘 넣기) */}
-        <Spacer />
+
+        {!isEditing ? (
+          <EditButton onClick={toggleEdit}>편집</EditButton>
+        ) : (
+          <div style={{ display: "flex", gap: "8px" }}>
+            <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+            <DoneButton onClick={handleDone}>완료</DoneButton>
+          </div>
+        )}
       </Header>
 
       {/* --- 컨텐츠: HomePage처럼 검색 + 스크롤 영역 --- */}
       <ContentContainer>
         <HomeSearchBox onSearch={setQ} />
-        <MemoList items={filtered} onItemClick={handleMemoClick} />
+        <MemoList
+          items={filtered}
+          onItemClick={handleMemoClick}
+          isEditing={isEditing}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+        />
       </ContentContainer>
     </PageContainer>
   );
@@ -134,9 +155,31 @@ const SubwayLineIcon = styled.div`
   background-image: ${(p) => `url('${p.$imageUrl}')`};
 `;
 
-const Spacer = styled.div`
-  width: 25px;
-  height: 25px;
+const EditButton = styled.button`
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: #585858;
+  cursor: pointer;
+`;
+
+const DeleteButton = styled.button`
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: #ff7e74;
+  cursor: pointer;
+`;
+
+const DoneButton = styled.button`
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: #585858;
+  cursor: pointer;
 `;
 
 const ContentContainer = styled.div`
@@ -170,3 +213,15 @@ const ContentContainer = styled.div`
     opacity: 1;
   }
 `;
+
+const subwayLineImages = {
+  1: "/subway/1호선.png",
+  2: "/subway/2호선.png",
+  3: "/subway/3호선.png",
+  4: "/subway/4호선.png",
+  5: "/subway/5호선.png",
+  6: "/subway/6호선.png",
+  7: "/subway/7호선.png",
+  8: "/subway/8호선.png",
+  9: "/subway/9호선.png",
+};
