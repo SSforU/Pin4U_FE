@@ -6,7 +6,7 @@ const StationListItem = ({ station }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/place-map/${station.slug}`);
+    navigate(`/station/${station.slug}`, { state: { station } });
   };
 
   return (
@@ -21,7 +21,10 @@ const StationListItem = ({ station }) => {
         <Address>{station.address}</Address>
       </StationInfo>
       <LikeGroup>
-        <img src="Pin.png" style={{ width: "16px", height: "16px" }} />
+        <img
+          src="/Recommend_Memo.png"
+          style={{ width: "16px", height: "16px" }}
+        />
         <LikeCount>{station.recommended_counts}</LikeCount>
       </LikeGroup>
     </Container>
@@ -35,7 +38,7 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 60px;
-  width: 110%;
+  width: 100%;
   padding: 20px 10px;
   background-color: #fff;
   border-bottom: 2px solid #e7e7e7;
@@ -77,14 +80,13 @@ const Address = styled.p`
 const LikeGroup = styled.div`
   display: flex;
   align-items: center;
-  color: #f44336;
   position: relative;
-  top: 16px;
 `;
 
 const LikeCount = styled.span`
   font-size: 14px;
   margin-left: 4px;
+  color: #585858;
 `;
 
 const subwayLineImages = {
