@@ -5,7 +5,10 @@ export default function MemoListItem({ item, onClick }) {
   return (
     <Item role="button" onClick={() => onClick?.(item)}>
       <Left>
-        <Square>▢</Square>
+        <img
+          src="/Recommend_Memo.png"
+          style={{ width: "20px", height: "20px" }}
+        />
         <Text>{item.text}</Text>
       </Left>
       <Right>
@@ -20,9 +23,19 @@ const Item = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 10px;
+  padding: 20px 10px;
   border-bottom: 1px solid #f1f1f1;
   cursor: pointer;
+
+  &:hover {
+    background-color: #f5f5f5; /* 마우스를 올렸을 때 배경색 변경 */
+  }
+
+  &:active {
+    background-color: #e0e0e0; /* 클릭했을 때 배경색 변경 */
+    transform: scale(0.98); /* 클릭했을 때 약간 작아지는 효과 추가 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 클릭했을 때 그림자 효과 변경 */
+  }
 `;
 
 const Left = styled.div`

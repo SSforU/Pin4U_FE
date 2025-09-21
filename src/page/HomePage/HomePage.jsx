@@ -186,16 +186,20 @@ export default function HomePage() {
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
   height: 100vh;
-  box-sizing: border-box;
+  background: #fff;
 `;
 
 const TitleBox = styled.div`
-  width: 90%;
+  /* width: 90%;
   display: flex;
-  padding: 15px 20px;
+  padding: 15px 20px; */
+  padding: 16px 30px;
+  height: calc(100dvh * 140 / 844);
+  border-bottom: 1px solid #ffffff;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
 `;
 
 const PageTitle = styled.h1`
