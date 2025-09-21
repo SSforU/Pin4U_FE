@@ -43,8 +43,8 @@ const ItemWrap = styled.div`
 `;
 
 const Thumb = styled.div`
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 999px;
   background: #f6f6f6;
   border: 2px solid #e28a81; /* 코럴 느낌 */
