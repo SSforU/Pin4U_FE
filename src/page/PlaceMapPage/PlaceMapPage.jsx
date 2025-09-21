@@ -21,6 +21,7 @@ export default function PlaceMapPage() {
   const [error, setError] = useState("");
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const USE_MOCK = true; // 목업으로 실행하려면 true
 
   function goPrev() {
     navigate("/");
@@ -52,6 +53,206 @@ export default function PlaceMapPage() {
       setError("");
 
       try {
+        if (USE_MOCK) {
+          const BASE_LAT = 37.4969;
+          const BASE_LNG = 126.9575;
+          const jitter = (n) => (Math.random() - 0.5) * n;
+
+          const station = {
+            code: "SSU-710",
+            name: "숭실대입구",
+            line: "7호선",
+            lat: BASE_LAT,
+            lng: BASE_LNG,
+          };
+
+          // /api/request/{slug} 목업 (친구 추천)
+          const requestResp = {
+            result: "ok",
+            data: {
+              slug: slug || "soongsil-univ",
+              station,
+              requestMessage:
+                "학교 주변에서 브런치나 디저트 먹기 좋은 아늑한 곳 추천해줘!",
+              items: [
+                {
+                  externalId: "kakao_1001",
+                  id: "f-101",
+                  placeName: "카페 이층양옥",
+                  categoryGroupCode: "CE7",
+                  categoryGroupName: "카페",
+                  categoryName: "브런치 카페",
+                  addressName: "서울 동작구 상도로 369",
+                  roadAddressName: "서울 동작구 상도로 369",
+                  x: String(BASE_LNG + jitter(0.004)), // lng
+                  y: String(BASE_LAT + jitter(0.004)), // lat
+                  distanceM: 240,
+                  placeUrl: "https://place.map.kakao.com/1001",
+                  mock: {
+                    rating: 4.6,
+                    ratingCount: 183,
+                    imageUrls: ["/mock/cafe_1.jpg"],
+                    openingHours: ["월-일 10:00-22:00"],
+                  },
+                  ai: {
+                    summaryText:
+                      "빈티지 감성, 브런치·디저트가 안정적인 카페. 친구와 수다 떨기 좋아요.",
+                    evidence: "인근 후기 요약",
+                    updatedAt: new Date().toISOString(),
+                  },
+                  recommended_count: 12,
+                },
+                {
+                  externalId: "kakao_1002",
+                  id: "f-102",
+                  placeName: "평양냉면 수풀",
+                  categoryGroupCode: "FD6",
+                  categoryGroupName: "음식점",
+                  categoryName: "한식",
+                  addressName: "서울 동작구 상도로 411",
+                  roadAddressName: "서울 동작구 상도로 411",
+                  x: String(BASE_LNG + jitter(0.004)),
+                  y: String(BASE_LAT + jitter(0.004)),
+                  distanceM: 430,
+                  placeUrl: "https://place.map.kakao.com/1002",
+                  mock: {
+                    rating: 4.4,
+                    ratingCount: 96,
+                    imageUrls: ["/mock/noodle_1.jpg"],
+                    openingHours: ["화-일 11:00-21:00", "월 휴무"],
+                  },
+                  ai: {
+                    summaryText:
+                      "담백한 평냉과 수육이 인기. 시원한 점심으로 가볍게 좋아요.",
+                    evidence: "블로그·리뷰 요약",
+                    updatedAt: new Date().toISOString(),
+                  },
+                  recommended_count: 8,
+                },
+                {
+                  externalId: "kakao_1003",
+                  id: "f-103",
+                  placeName: "리틀모닝",
+                  categoryGroupCode: "FD6",
+                  categoryGroupName: "음식점",
+                  categoryName: "브런치",
+                  addressName: "서울 동작구 상도로 285",
+                  roadAddressName: "서울 동작구 상도로 285",
+                  x: String(BASE_LNG + jitter(0.004)),
+                  y: String(BASE_LAT + jitter(0.004)),
+                  distanceM: 350,
+                  placeUrl: "https://place.map.kakao.com/1003",
+                  mock: {
+                    rating: 4.5,
+                    ratingCount: 142,
+                    imageUrls: ["/mock/brunch_1.jpg"],
+                    openingHours: ["월-일 10:00-16:00"],
+                  },
+                  ai: {
+                    summaryText:
+                      "전체적으로 밝고 포근한 분위기. 달걀요리·팬케이크 평이 좋아요.",
+                    evidence: "포토리뷰 요약",
+                    updatedAt: new Date().toISOString(),
+                  },
+                  recommended_count: 10,
+                },
+              ],
+            },
+            error: null,
+            timestamp: new Date().toISOString(),
+          };
+
+          // /api/recommendation/auto 목업 (AI 추천)
+          const autoResp = {
+            result: "ok",
+            data: {
+              slug: slug || "soongsil-univ",
+              station,
+              requestMessage: requestResp.data.requestMessage,
+              items: [
+                {
+                  externalId: "kakao_2001",
+                  id: "a-201",
+                  placeName: "버터필름",
+                  categoryGroupCode: "FD6",
+                  categoryGroupName: "음식점",
+                  categoryName: "베이커리",
+                  addressName: "서울 동작구 상도로 190",
+                  roadAddressName: "서울 동작구 상도로 190",
+                  x: String(BASE_LNG + jitter(0.005)),
+                  y: String(BASE_LAT + jitter(0.005)),
+                  distanceM: 510,
+                  placeUrl: "https://place.map.kakao.com/2001",
+                  mock: {
+                    rating: 4.7,
+                    ratingCount: 220,
+                    imageUrls: ["/mock/bakery_1.jpg"],
+                    openingHours: ["화-일 10:00-21:00", "월 휴무"],
+                  },
+                  ai: {
+                    summaryText:
+                      "버터 풍미 진한 페이스트리와 시즌 크루아상이 강점.",
+                    evidence: "AI 추천 모델",
+                    updatedAt: new Date().toISOString(),
+                  },
+                  recommended_count: 0,
+                },
+                {
+                  externalId: "kakao_2002",
+                  id: "a-202",
+                  placeName: "스테이션버거",
+                  categoryGroupCode: "FD6",
+                  categoryGroupName: "음식점",
+                  categoryName: "수제버거",
+                  addressName: "서울 동작구 상도로 201",
+                  roadAddressName: "서울 동작구 상도로 201",
+                  x: String(BASE_LNG + jitter(0.005)),
+                  y: String(BASE_LAT + jitter(0.005)),
+                  distanceM: 580,
+                  placeUrl: "https://place.map.kakao.com/2002",
+                  mock: {
+                    rating: 4.3,
+                    ratingCount: 74,
+                    imageUrls: ["/mock/burger_1.jpg"],
+                    openingHours: ["월-일 11:30-21:30"],
+                  },
+                  ai: {
+                    summaryText:
+                      "빵이 달지 않고 패티가 촉촉—감자튀김까지 균형 좋음.",
+                    evidence: "AI 추천 모델",
+                    updatedAt: new Date().toISOString(),
+                  },
+                  recommended_count: 0,
+                },
+              ],
+            },
+            error: null,
+            timestamp: new Date().toISOString(),
+          };
+
+          const friend = requestResp.data.items.map((it) => ({
+            ...it,
+            isAI: false,
+          }));
+          const ai = autoResp.data.items.map((it) => ({ ...it, isAI: true }));
+          const merged = [...friend, ...ai];
+
+          const pinVMs = merged.map((it) => toPinVM(it, it.isAI));
+          const cardVMs = merged.map((it) => toCardVM(it, it.isAI));
+
+          setData({
+            id: `req-${requestResp.data.slug}`,
+            slug: requestResp.data.slug,
+            requestMessage: requestResp.data.requestMessage,
+            station: requestResp.data.station,
+            items: merged,
+            pinVMs,
+            cardVMs,
+          });
+          return;
+        }
+
+        // 실제 API 모드
         const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
           signal: controller.signal,
         });
@@ -102,7 +303,7 @@ export default function PlaceMapPage() {
       }
     }
 
-    if (slug) fetchAll();
+    if (slug || USE_MOCK) fetchAll();
     return () => controller.abort();
   }, [slug]);
 
