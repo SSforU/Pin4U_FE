@@ -42,11 +42,11 @@ const Text = styled.div`
 `;
 
 const Right = styled.div`
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #fe7350;
-  font-weight: 600;
+  color: #585858;
 `;
 
 const PinIcon = styled.span``;
