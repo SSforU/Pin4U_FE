@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
       { path: "station/:slug", element: <StationPage /> },
-      { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> }, // /station 으로 바로 접근시 홈으로
+      { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> },
 
       {
         path: "start-make-place",
