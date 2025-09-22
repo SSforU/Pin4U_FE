@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { KAKAO_AUTH_URL } from "../../utils/oauth";
 
 function StartMakePlace() {
   const [showLogin, setShowLogin] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -14,9 +13,11 @@ function StartMakePlace() {
     return () => clearTimeout(timer);
   }, []);
 
+  // 인가코드 추출
   const handleKakaoLogin = () => {
-    // 카카오 로그인 처리 후 지도 만들기 페이지로 이동
-    navigate("/make-place");
+    // 출발점 정보를 localStorage에 저장
+    localStorage.setItem("kakaoLoginFrom", "make-place");
+    window.location.href = KAKAO_AUTH_URL;
   };
 
   return (

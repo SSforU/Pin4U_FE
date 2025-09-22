@@ -2,21 +2,22 @@
 // 링크로 접속한 사용자가 station과 memo 정보를 조회
 // #7 A-지도화면 API 연동
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useOutletContext } from "react-router-dom";
+import { useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
+import { KAKAO_AUTH_URL } from "../../../utils/oauth";
 import axios from "axios";
 
 function StartRecommendGroup() {
-  const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const handleKakaoLogin = () => {
-    // 카카오 로그인 처리 후 request 페이지로 이동
-    navigate(`/shared-map/group/${slug}/request`);
+    // 출발점 정보를 localStorage에 저장
+    localStorage.setItem("kakaoLoginFrom", `group-request-${slug}`);
+    window.location.href = KAKAO_AUTH_URL;
   };
 
   // API에서 받아온 데이터 상태

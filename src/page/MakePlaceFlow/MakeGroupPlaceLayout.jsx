@@ -167,7 +167,6 @@ function MakeGroupPlaceLayout() {
       {showErrorModal && (
         <ErrorModal>
           <ErrorContent>
-            <ErrorTitle>오류가 발생하였습니다!</ErrorTitle>
             <ErrorMessage>{errorMessage}</ErrorMessage>
             <ErrorButton onClick={() => setShowErrorModal(false)}>
               확인
@@ -234,18 +233,11 @@ const ErrorContent = styled.div`
   text-align: center;
 `;
 
-const ErrorTitle = styled.h3`
+const ErrorMessage = styled.p`
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 16px 0;
   color: #333;
-`;
-
-const ErrorMessage = styled.p`
-  font-size: 14px;
-  color: #666;
-  margin: 0 0 20px 0;
-  line-height: 1.5;
 `;
 
 const ErrorButton = styled.button`

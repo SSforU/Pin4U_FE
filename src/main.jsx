@@ -22,9 +22,10 @@ import StepRecommend from "./step/StepRecommend.jsx";
 import StartRecommendPersonal from "./page/RecommendFlow/Personal/StartRecommendPersonal.jsx";
 import StartRecommendGroupLogin from "./page/RecommendFlow/Group/StartRecommendGroupLogin.jsx";
 import StartRecommendGroupReqeust from "./page/RecommendFlow/Group/StartRecommendGroupReqeust.jsx";
-import StartMakePlace from "./page/Splash/StartMakePlaceSplash.jsx";
+import StartMakePlaceSplash from "./page/Splash/StartMakePlaceSplash.jsx";
 import RecommendSplash from "./page/Splash/RecommendSplash.jsx";
 import StationPage from "./page/HomePage/StationPage.jsx";
+import KakaoCallback from "./page/Auth/KakaoCallback.jsx";
 import GroupPlaceMapPage from "./page/PlaceMapPage/GroupPlaceMapPage.jsx";
 
 const router = createBrowserRouter([
@@ -39,7 +40,7 @@ const router = createBrowserRouter([
 
       {
         path: "start-make-place",
-        element: <StartMakePlace />,
+        element: <StartMakePlaceSplash />,
       },
 
       {
@@ -122,6 +123,11 @@ const router = createBrowserRouter([
       {
         path: "shared-map/group/:slug/complete",
         element: <CompleteRecommendGroup />,
+      },
+      // 카카오 로그인
+      {
+        path: "oauth/callback/kakao",
+        element: <KakaoCallback />,
       },
     ],
   },
