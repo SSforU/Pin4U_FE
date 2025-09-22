@@ -56,7 +56,6 @@ function MakePersonalPlaceLayout() {
       // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
       try {
         const requestData = {
-          owner_nickname: nickname || userProfile?.nickname,
           station_code: station?.code,
           request_message: memo,
         };
@@ -64,7 +63,8 @@ function MakePersonalPlaceLayout() {
         // 요청 생성(API 연동)
         const response = await axios.post(
           `${BASE_URL}/api/requests`,
-          requestData
+          requestData,
+          { withCredentials: true }
         );
 
         if (response.data.result === "success") {
