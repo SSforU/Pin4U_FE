@@ -6,11 +6,13 @@ import SearchBox from "../component/ui/SearchBox.jsx";
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../styles/responsive.js";
-import { useOutletContext, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
-function StepLocation() {
-  const { location, setLocation } = useOutletContext();
+function StepLocation(props) {
+  // props로 상태 주입 (필수)
+  const location = props?.location;
+  const setLocation = props?.setLocation;
   const { slug } = useParams(); // slug 파라미터 가져오기
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,13 +51,9 @@ function StepLocation() {
           setRequestMemo(requestResponse.data.data.requestMessage);
         }
       } catch (error) {
-        console.error("요청 정보 조회 실패:", error);
-        // 에러 시 기본값 설정
-        setStationInfo({ name: "정보를 불러올 수 없습니다" });
-        setRequestMemo("정보를 불러올 수 없습니다");
+        console.error("데이터 조회 실패:", error);
       }
     };
-
     fetchData();
   }, [slug, BASE_URL]);
 
@@ -139,7 +137,9 @@ function StepLocation() {
       setSelectedLocations(newSelectedLocations);
 
       // 부모 컴포넌트에 배열로 전달 (다음 버튼 활성화를 위해)
-      setLocation(newSelectedLocations);
+      if (typeof setLocation === "function") {
+        setLocation(newSelectedLocations);
+      }
 
       // localStorage에 기본 구조로 저장 (API 명세에 맞게)
       const locationsWithDetails = newSelectedLocations.map((location) => ({
@@ -170,7 +170,11 @@ function StepLocation() {
     );
     setSelectedLocations(newSelectedLocations);
     // 부모 컴포넌트 state 업데이트
-    setLocation(newSelectedLocations.length > 0 ? newSelectedLocations : null);
+    if (typeof setLocation === "function") {
+      setLocation(
+        newSelectedLocations.length > 0 ? newSelectedLocations : null
+      );
+    }
 
     // localStorage에 저장
     localStorage.setItem(

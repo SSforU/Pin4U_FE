@@ -142,7 +142,7 @@ function RecommendGroupPlaceLayout() {
                 가능해요.
               </Detail>
             </TextBlock>
-            <StepLocation />
+            <StepLocation location={location} setLocation={setLocation} />
           </ContentSection>
         ) : (
           <Outlet
