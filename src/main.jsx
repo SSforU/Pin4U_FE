@@ -28,6 +28,7 @@ import StationPage from "./page/HomePage/StationPage.jsx";
 import KakaoCallback from "./page/Auth/KakaoCallback.jsx";
 import GroupPlaceMapPage from "./page/PlaceMapPage/GroupPlaceMapPage.jsx";
 import AlarmPage from "./page/HomePage/AlarmPage.jsx";
+import LogoutSplash from "./page/Splash/LogoutSplash.jsx";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: "station/:slug", element: <StationPage /> },
       { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> },
       { path: "notifications", element: <AlarmPage /> },
+      { path: "logout-splash", element: <LogoutSplash /> },
 
       {
         path: "start-make-place",
