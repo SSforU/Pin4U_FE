@@ -269,7 +269,8 @@ function StepRecommend() {
       // 3. API 호출 - 추천 장소 최종 제출
       const response = await axios.post(
         `${BASE_URL}/api/requests/${slug}/recommendations`,
-        { items: items }
+        { items: items },
+        { withCredentials: true }
       );
 
       if (response.data.result === "success") {
