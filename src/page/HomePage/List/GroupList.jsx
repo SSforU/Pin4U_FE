@@ -33,9 +33,8 @@ const Section = styled.section`
   align-items: flex-start;
   width: 100%;
   box-sizing: border-box;
-  margin-top: 14px;
-  padding: 16px 0 6px;
-  border-top: 10px solid #f3f3f3; /* 섹션 구분띠(스크린샷 느낌) */
+  padding: 14px 0 6px;
+  border-top: 7px solid #f3f3f3; /* 섹션 구분띠(스크린샷 느낌) */
 `;
 
 const SectionHead = styled.h2`
@@ -49,7 +48,7 @@ const Scroller = styled.div`
   width: 100%;
   display: flex;
   gap: 0;
-  padding: 0 2px 6px;
+  padding: 0 2px 0px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 

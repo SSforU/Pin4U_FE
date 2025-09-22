@@ -26,6 +26,7 @@ import StartMakePlaceSplash from "./page/Splash/StartMakePlaceSplash.jsx";
 import RecommendSplash from "./page/Splash/RecommendSplash.jsx";
 import StationPage from "./page/HomePage/StationPage.jsx";
 import KakaoCallback from "./page/Auth/KakaoCallback.jsx";
+import GroupPlaceMapPage from "./page/PlaceMapPage/GroupPlaceMapPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
       { path: "station/:slug", element: <StationPage /> },
+      { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> },
 
       {
         path: "start-make-place",

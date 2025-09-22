@@ -10,7 +10,7 @@ import { toPinVM, toCardVM } from "../../viewModels/placeVMs.js";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-export default function PlaceMapPage() {
+export default function GroupPlaceMapPage() {
   const navigate = useNavigate();
   const { slug } = useParams(); // /api/requests/{slug} 에서 slug 사용
 
@@ -20,19 +20,18 @@ export default function PlaceMapPage() {
   const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
   const [error, setError] = useState("");
   const [copySuccess, setCopySuccess] = useState(false); // 복사 성공 상태 추가
+
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const USE_MOCK = true; // 목업으로 실행하려면 true
 
   // 링크 복사 함수
   const handleCopyLink = async () => {
-    // 라우트 파라미터 우선, 없으면 로드된 데이터의 slug 사용
-    const s = slug || data?.slug;
-    if (!s) {
+    if (!slug) {
       window.alert("공유할 링크의 slug가 없습니다.");
       return;
     }
 
-    const shareUrl = `${window.location.origin}/shared-map/personal/${s}/splash`;
+    const shareUrl = `${window.location.origin}/shared-map/group/${slug}/splash`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopySuccess(true);
@@ -55,6 +54,14 @@ export default function PlaceMapPage() {
         );
       }
     }
+  };
+
+  const handleAddPlace = () => {
+    if (!slug) {
+      window.alert("그룹 slug가 없어요.");
+      return;
+    }
+    navigate(`/shared-map/group/${slug}/onbording/location`); // <StartRecommendGroupReqeust /> 라우트로
   };
 
   function goPrev() {
@@ -287,7 +294,7 @@ export default function PlaceMapPage() {
         }
 
         // 실제 API 모드
-        const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
+        const reqRes = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
           signal: controller.signal,
         });
         const reqData = reqRes?.data?.data;
@@ -346,7 +353,7 @@ export default function PlaceMapPage() {
   };
 
   const handleAiTagClick = (item) => {
-    console.log(`AI Tag clicked: ${item.place_name}`);
+    console.log(`AI Tag clicked: ${item.placeName}`);
     setShowAiPopup(true);
   };
 
@@ -420,6 +427,21 @@ export default function PlaceMapPage() {
             onCardClick={handleCardClick}
             onAiTagClick={handleAiTagClick}
           />
+
+          {/* 👉 카드 오른쪽 고정 도크 */}
+          <GroupInfoDock>
+            <GroupThumb
+              src={data.group?.image_url || "/Pin4U_Logo.png"}
+              alt={`${data.group?.name ?? "그룹"} 썸네일`}
+              onError={(e) => {
+                e.currentTarget.src = "/mock/group_default_thumb.png";
+              }}
+            />
+            <GroupText>{data.group?.name ?? "그룹명"}</GroupText>
+            <AddPlaceButton onClick={handleAddPlace}>
+              장소 추가하기
+            </AddPlaceButton>
+          </GroupInfoDock>
         </CardListWrapper>
       )}
       {showAiPopup && (
@@ -470,6 +492,8 @@ const StationWrapper = styled.div`
 
 const CardListWrapper = styled.div`
   height: 220px;
+  position: relative;
+  padding-left: 120px;
 `;
 
 const PrevButton = styled.img`
@@ -568,4 +592,47 @@ const CopyToast = styled.div`
   font-size: 13px;
   z-index: 1200;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+`;
+
+/* 오른쪽 고정 도크 */
+const GroupInfoDock = styled.div`
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  bottom: 12px;
+  width: 98px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 1;
+`;
+
+const GroupThumb = styled.img`
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+`;
+
+const GroupText = styled.div`
+  font-size: 12px;
+  color: #8a8a8a;
+  text-align: center;
+`;
+
+const AddPlaceButton = styled.button`
+  appearance: none;
+  border: 1px solid #ff7e74;
+  background: #fff;
+  color: #ff7e74;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
 `;
