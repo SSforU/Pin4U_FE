@@ -3,7 +3,7 @@ import styled from "styled-components";
 import StationList from "./List/StationList.jsx";
 import Button from "../../component/ui/Button.jsx";
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import HomeSearchBox from "./Component/HomeSearchBox.jsx";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
@@ -15,10 +15,28 @@ export default function HomePage() {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+  const actionsRef = useRef(null); // 아이콘 영역
+  const menuRef = useRef(null); // 드롭다운
 
   const { userProfile } = useOutletContext();
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  // 타이틀에 쓸 표시용 닉네임(저장 성공 전엔 기존 값 유지)
+  const [displayNickname, setDisplayNickname] = useState(
+    userProfile?.nickname ?? ""
+  );
+
+  // 닉네임 편집 시트 상태
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState(
+    userProfile?.nickname ?? ""
+  );
+  const [saving, setSaving] = useState(false);
+  const [nickError, setNickError] = useState("");
 
   const MOCK_ITEMS = [
     {
@@ -159,6 +177,125 @@ export default function HomePage() {
     navigate(`/make-place`);
   };
 
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (!isMenuOpen) return;
+      const inActions = actionsRef.current?.contains(e.target);
+      const inMenu = menuRef.current?.contains(e.target);
+      if (!inActions && !inMenu) setIsMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [isMenuOpen]);
+
+  const handleSettingsClick = () => setIsMenuOpen((v) => !v);
+  const handleBellClick = () => {
+    // TODO: 알림 페이지로 이동하거나 드로어 열기
+    navigate("/notifications");
+  };
+
+  // “닉네임 변경” 메뉴 클릭 → 시트 열기
+  const handleOpenEditNickname = () => {
+    setIsMenuOpen(false);
+    setNicknameInput(userProfile?.nickname ?? "");
+    setNickError("");
+    setIsEditOpen(true);
+  };
+
+  const closeEdit = () => {
+    setIsEditOpen(false);
+    setNickError("");
+    setNicknameInput(userProfile?.nickname ?? "");
+  };
+
+  const validateNickname = (v) => {
+    // 2~16자 제약(한글/영문/숫자/공백 허용 예시)
+    if (!v || v.trim().length < 2) return "닉네임은 2자 이상이어야 해요.";
+    if (v.trim().length > 16) return "닉네임은 16자 이하여야 해요.";
+    return "";
+  };
+
+  const saveNickname = async () => {
+    const err = validateNickname(nicknameInput);
+    if (err) {
+      setNickError(err);
+      return;
+    }
+    setSaving(true);
+    try {
+      // 쿠키(uid) 인증 필요하므로 withCredentials 권장
+      await axios.patch(
+        `${BASE_URL}/api/me`,
+        { nickname: nicknameInput.trim() },
+        { withCredentials: true }
+      );
+      // 화면 표시용 닉네임 갱신
+      setDisplayNickname(nicknameInput.trim());
+      setIsEditOpen(false);
+    } catch (e) {
+      setNickError(
+        e?.response?.data?.error?.message ||
+          e?.message ||
+          "닉네임을 저장하지 못했어요."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePlan = () => {
+    setIsMenuOpen(false);
+    navigate("/billing"); // 요금제 관리 라우트 예시
+  };
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    setIsLogoutOpen(true);
+  };
+
+  const cancelLogout = () => setIsLogoutOpen(false);
+  const confirmLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      // 쿠키(uid) 기반 인증이므로 반드시 withCredentials:true
+      await axios.post(`${BASE_URL}/api/auth/logout`, null, {
+        withCredentials: true,
+      });
+
+      // 필요하다면 사용자 프로필/전역 상태도 초기화(예시)
+      // setUserProfile?.(null);
+
+      setIsLogoutOpen(false);
+      navigate("/login", { replace: true });
+    } catch (e) {
+      // 401/403이면 이미 로그아웃 상태로 간주하고 그냥 진행해도 괜찮음
+      const status = e?.response?.status;
+      if (status === 401 || status === 403) {
+        setIsLogoutOpen(false);
+        navigate("/login", { replace: true });
+        return;
+      }
+      alert(
+        e?.response?.data?.error?.message ||
+          e?.message ||
+          "로그아웃에 실패했어요."
+      );
+    } finally {
+      setLoggingOut(false);
+    }
+    navigate("/login");
+  };
+
+  // ESC로 닫기
+  useEffect(() => {
+    if (!isLogoutOpen) return;
+    const onKeyDown = (e) => e.key === "Escape" && cancelLogout();
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isLogoutOpen]);
+
   const filteredStations = useMemo(() => {
     const q = searchTerm.trim();
     if (!q) return stations;
@@ -168,7 +305,32 @@ export default function HomePage() {
   return (
     <PageContainer>
       <TitleBox>
-        <PageTitle>{userProfile?.nickname} 님의 지도</PageTitle>
+        <PageTitle>
+          {displayNickname || userProfile?.nickname} 님의 지도
+        </PageTitle>
+        <RightActions ref={actionsRef}>
+          <IconButton aria-label="알림" onClick={handleBellClick} title="알림">
+            <img src="/Bell.svg" alt="알림" width={24} height={24} />
+          </IconButton>
+
+          <IconButton
+            aria-label="설정"
+            onClick={handleSettingsClick}
+            title="설정"
+          >
+            <img src="/Settings.svg" alt="설정" width={24} height={24} />
+          </IconButton>
+
+          {isMenuOpen && (
+            <Menu ref={menuRef} role="menu" aria-label="설정 메뉴">
+              <MenuItem onClick={handleOpenEditNickname}>닉네임 변경</MenuItem>
+              <MenuItem onClick={handlePlan}>요금제 관리</MenuItem>
+              <MenuItem danger onClick={handleLogout}>
+                로그아웃
+              </MenuItem>
+            </Menu>
+          )}
+        </RightActions>
       </TitleBox>
 
       <ContentContainer>
@@ -184,6 +346,68 @@ export default function HomePage() {
       <ButtonContainer>
         <Button onClick={handleAddMapClick}>나만의 지도 추가하기</Button>
       </ButtonContainer>
+      {isEditOpen && (
+        <Dimmed onClick={closeEdit}>
+          <TopSheet
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <NameRow>
+              <NameInput
+                autoFocus
+                value={nicknameInput}
+                onChange={(e) => {
+                  setNicknameInput(e.target.value);
+                  if (nickError) setNickError("");
+                }}
+                placeholder="닉네임 (2~16자)"
+                maxLength={24}
+                spellCheck={false}
+                autoComplete="off"
+                aria-label="닉네임 입력"
+              />
+
+              <TextButton type="button" onClick={closeEdit}>
+                취소
+              </TextButton>
+              <PrimaryTextButton
+                type="button"
+                onClick={saveNickname}
+                disabled={saving}
+              >
+                {saving ? "저장 중..." : "저장"}
+              </PrimaryTextButton>
+            </NameRow>
+
+            {nickError && <ErrorText>{nickError}</ErrorText>}
+          </TopSheet>
+        </Dimmed>
+      )}
+      {isLogoutOpen && (
+        <ConfirmBackdrop onClick={cancelLogout}>
+          <ConfirmCard
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ConfirmTitle id="logout-title">로그아웃 하시겠어요?</ConfirmTitle>
+            <ConfirmActions>
+              <ConfirmButton type="button" onClick={cancelLogout}>
+                아니오
+              </ConfirmButton>
+              <ConfirmPrimary
+                type="button"
+                onClick={confirmLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? "로그아웃 중..." : "네"}
+              </ConfirmPrimary>
+            </ConfirmActions>
+          </ConfirmCard>
+        </ConfirmBackdrop>
+      )}
     </PageContainer>
   );
 }
@@ -197,16 +421,13 @@ const PageContainer = styled.div`
 `;
 
 const TitleBox = styled.div`
-  /* width: 90%;
-  display: flex;
-  padding: 15px 20px; */
   width: 100%;
   padding: 16px 35px;
   height: calc(100dvh * 90 / 844);
   border-bottom: 1px solid #ffffff;
   display: flex;
   align-items: flex-end;
-  justify-content: start;
+  justify-content: space-between;
 `;
 
 const PageTitle = styled.h1`
@@ -214,6 +435,179 @@ const PageTitle = styled.h1`
   font-weight: 500;
   color: #000;
   margin: 0;
+`;
+
+const RightActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative; /* 드롭다운 기준 */
+`;
+
+const IconButton = styled.button`
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  &:hover {
+    background: #f2f2f2;
+  }
+  &:active {
+    background: #e9e9e9;
+  }
+`;
+
+const Menu = styled.div`
+  position: absolute;
+  top: 40px;
+  right: 0;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  z-index: 10;
+`;
+
+const MenuItem = styled.button`
+  all: unset;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: ${(p) => (p.danger ? "#d64545" : "#222")};
+  cursor: pointer;
+  &:hover {
+    background: #f7f7f7;
+  }
+`;
+
+const Dimmed = styled.div`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+`;
+
+const TopSheet = styled.div`
+  position: static;
+  top: 0;
+  background: #fff;
+  z-index: 60;
+  padding: 44px 28px 5px 30px;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+/* 한 줄: [이름 입력칸] [취소] [저장] */
+const NameRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 16px;
+`;
+
+const NameInput = styled.input`
+  min-width: 0;
+  width: 100%;
+  font-size: 24px; /* 시안처럼 굵고 크게 */
+  font-weight: 700;
+  line-height: 1.2;
+  border: none;
+  outline: none;
+  padding: 6px 2px 10px;
+  border-bottom: 1px solid #eee;
+  &:focus {
+    border-bottom-color: #ddd;
+  }
+`;
+
+const TextButton = styled.button`
+  all: unset;
+  cursor: pointer;
+  padding: 6px 4px;
+  color: #666;
+  font-size: 15px;
+`;
+
+const PrimaryTextButton = styled(TextButton)`
+  color: #e57368; /* 코랄 톤 */
+  font-weight: 700;
+  opacity: ${(p) => (p.disabled ? 0.6 : 1)};
+  pointer-events: ${(p) => (p.disabled ? "none" : "auto")};
+`;
+
+const ErrorText = styled.p`
+  margin: 6px 2px 0;
+  font-size: 13px;
+  color: #d64545;
+`;
+
+const ConfirmBackdrop = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100; /* 닉네임 시트보다 위 */
+`;
+
+const ConfirmCard = styled.div`
+  width: 84%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  padding: 22px 20px 12px;
+  text-align: center;
+`;
+
+const ConfirmTitle = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 12px;
+`;
+
+const ConfirmActions = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding-top: 8px;
+`;
+
+const ConfirmButton = styled.button`
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: #f3f3f3;
+  color: #333;
+  font-size: 15px;
+  cursor: pointer;
+  &:active {
+    transform: translateY(1px);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const ConfirmPrimary = styled(ConfirmButton)`
+  background: #ffebe8; /* 연한 코랄 톤 */
+  color: #d05b51; /* 텍스트 코랄 */
+  font-weight: 700;
 `;
 
 const ContentContainer = styled.div`
