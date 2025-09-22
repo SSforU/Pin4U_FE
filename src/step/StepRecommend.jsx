@@ -300,8 +300,16 @@ function StepRecommend() {
 
         console.log("추천 제출 완료:", finalData);
 
-        // 5. CompleteRecommend로 이동
-        navigate(`/shared-map/${slug}/complete`);
+        // 5. CompleteRecommend로 이동 (현재 경로 기준으로 personal/group 분기)
+        const currentPath = window.location.pathname;
+        if (currentPath.includes("/shared-map/personal/")) {
+          navigate(`/shared-map/personal/${slug}/complete`);
+        } else if (currentPath.includes("/shared-map/group/")) {
+          navigate(`/shared-map/group/${slug}/complete`);
+        } else {
+          // 안전장치: 기본값은 personal로 처리
+          navigate(`/shared-map/personal/${slug}/complete`);
+        }
       }
     } catch (error) {
       console.error("추천 제출 실패:", error);
