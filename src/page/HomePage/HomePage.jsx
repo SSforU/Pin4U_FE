@@ -152,16 +152,24 @@ export default function HomePage() {
           ? data.data.groups
           : [];
 
-        // 전체 장소 저장
-        setAllPlaces(items);
+        // 그룹 slug 집합 만들기
+        const groupSlugs = new Set(
+          groupItems.map((g) => g.slug ?? g.group_slug)
+        );
+
+        // 개인지도만 남기기
+        const personalItems = items.filter((it) => !groupSlugs.has(it.slug));
+
+        // 전체 장소 저장 (개인지도만)
+        setAllPlaces(personalItems);
 
         // 역 단위로 고유화
         const stationMap = new Map();
-        items.forEach((x) => {
+        personalItems.forEach((x) => {
           if (!stationMap.has(x.station_name)) {
             stationMap.set(x.station_name, {
               id: stationMap.size + 1,
-              slug: x.slug, // 올바른 슬러그 사용
+              slug: x.slug,
               name: `${x.station_name}역`,
               lines: parseLines(x.station_line),
               address: x.road_address_name ?? "",
