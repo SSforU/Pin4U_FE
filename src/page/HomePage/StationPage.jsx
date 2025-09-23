@@ -36,7 +36,7 @@ export default function StationPage() {
       .map((p, idx) => ({
         id: p.slug ?? `m${idx + 1}`,
         slug: p.slug,
-        text: p.memo_text ?? p.road_address_name ?? "메모 없음",
+        text: p.request_message ?? p.road_address_name ?? "메모 없음",
         count: p.recommend_count ?? 0,
       }));
   }, [station, allPlaces]);
@@ -70,7 +70,7 @@ export default function StationPage() {
 
   const handleMemoClick = (memo) => {
     if (!isEditing) {
-      navigate(`/place-map/${station.slug}`);
+      navigate(`/place-map/${memo.slug}`);
     } else {
       // 편집 모드에서는 클릭시 아무 동작 안함
     }

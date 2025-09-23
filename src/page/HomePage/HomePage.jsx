@@ -161,7 +161,7 @@ export default function HomePage() {
           if (!stationMap.has(x.station_name)) {
             stationMap.set(x.station_name, {
               id: stationMap.size + 1,
-              slug: x.station_name, // 역 이름을 slug로 임시 사용
+              slug: x.slug, // 올바른 슬러그 사용
               name: `${x.station_name}역`,
               lines: parseLines(x.station_line),
               address: x.road_address_name ?? "",
