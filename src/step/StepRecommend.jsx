@@ -21,6 +21,8 @@ function StepRecommend() {
   const { slug } = useParams();
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const IMAGE_MAKE_KEY_PATH =
+    import.meta.env.VITE_IMAGE_MAKE_KEY_PATH || "/api/uploads/images/make-key";
 
   // StepLocation에서 선택한 장소들을 localStorage에서 불러오기
   const [selectedPlaces, setSelectedPlaces] = useState([]);
@@ -115,10 +117,82 @@ function StepRecommend() {
     [currentPlaceIndex]
   );
 
+  // 업로드 진행 상태
+  const [isUploading, setIsUploading] = useState(false);
+
+  // 이미지 업로드 함수 (make-key → S3 PUT)
+  const uploadImageToServer = useCallback(
+    async (file) => {
+      if (!file) return null;
+      try {
+        setIsUploading(true);
+        // 1) 키 생성 요청
+        const makeKeyRes = await axios.post(
+          `${BASE_URL}${IMAGE_MAKE_KEY_PATH}`,
+          {
+            slug,
+            filename: file.name || "image.jpg",
+          },
+          { withCredentials: true }
+        );
+
+        const key = makeKeyRes?.data?.data?.key;
+        const publicUrl = makeKeyRes?.data?.data?.public_url;
+        if (!key || !publicUrl) {
+          throw new Error("키 생성 실패: key 또는 public_url 누락");
+        }
+
+        // 2) 퍼블릭 URL로 직접 업로드 (버킷 정책이 퍼블릭 쓰기/테스트용 전제)
+        await axios.put(publicUrl, file, {
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          withCredentials: false,
+        });
+
+        // 3) 업로드 완료된 public_url 사용
+        return publicUrl;
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [BASE_URL, IMAGE_MAKE_KEY_PATH, slug]
+  );
+
   // 이미지 변경 처리 (퍼블리싱 단계) (메모이제이션)
-  const handleImageChange = useCallback((file) => {
-    setImageFile(file);
-  }, []);
+  const handleImageChange = useCallback(
+    async (file) => {
+      setImageFile(file);
+      if (file) {
+        try {
+          const url = await uploadImageToServer(file);
+          if (url) {
+            setPlaceRecommendations((prev) => {
+              const copy = [...prev];
+              copy[currentPlaceIndex] = {
+                ...copy[currentPlaceIndex],
+                image: url,
+              };
+              return copy;
+            });
+          }
+        } catch (e) {
+          console.error("이미지 업로드 실패:", e);
+        }
+      } else {
+        // 이미지 제거 시 URL도 제거
+        setPlaceRecommendations((prev) => {
+          const copy = [...prev];
+          copy[currentPlaceIndex] = {
+            ...copy[currentPlaceIndex],
+            image: null,
+          };
+          return copy;
+        });
+      }
+    },
+    [currentPlaceIndex, uploadImageToServer]
+  );
 
   // 카테고리 토글 처리 + 장소별 태그 반영 (최대 3개) (메모이제이션)
   const handleCategoryToggle = useCallback(
@@ -233,9 +307,19 @@ function StepRecommend() {
 
   // 완료 처리 (API 호출 후 CompleteRecommend로 이동) (메모이제이션)
   const handleComplete = useCallback(async () => {
+    if (isUploading) {
+      return; // 업로드 중엔 제출 방지
+    }
     try {
       // 1. localStorage에서 데이터 수집
-      const nickname = localStorage.getItem("recommendUserNickname"); // 닉네임 키 수정
+      const rawNickname = localStorage.getItem("recommendUserNickname") || ""; // 닉네임 키 수정
+      const nickname = rawNickname.trim();
+
+      // 닉네임 검증 (2~16자)
+      if (nickname.length < 2 || nickname.length > 16) {
+        alert("닉네임은 2~16자 사이로 입력해주세요.");
+        return;
+      }
       const locationsWithDetails = JSON.parse(
         localStorage.getItem("selectedLocationsWithDetails") || "[]"
       );
@@ -255,16 +339,18 @@ function StepRecommend() {
       const guestId = generateGuestId();
 
       const items = locationsWithDetails.map((location, index) => ({
-        external_id: location.external_id,
+        place_external_id: location.external_id,
         recommender_nickname: nickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
-        is_private: placeRecommendations[index]?.isPrivate || false, // 비공개 상태 추가
+        image_is_public: !(placeRecommendations[index]?.isPrivate || false), // 비공개 상태 추가
         guest_id: guestId, // guest_id 추가
       }));
 
       console.log("StepRecommend: API 요청 데이터:", { items });
+      console.log("StepRecommend: locationsWithDetails:", locationsWithDetails);
+      console.log("StepRecommend: placeRecommendations:", placeRecommendations);
 
       // 3. API 호출 - 추천 장소 최종 제출
       const response = await axios.post(
@@ -318,7 +404,7 @@ function StepRecommend() {
         console.error(`에러 ${status}:`, data.error?.message);
       }
     }
-  }, [slug, placeRecommendations, navigate, BASE_URL]);
+  }, [slug, placeRecommendations, navigate, BASE_URL, isUploading]);
 
   // 카테고리 배열 메모이제이션
   const categories = useMemo(
