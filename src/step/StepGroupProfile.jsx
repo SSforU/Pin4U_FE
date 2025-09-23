@@ -1,47 +1,115 @@
-import React, { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import React, { useState, useCallback, useEffect } from "react";
+import { useOutletContext, useParams } from "react-router-dom";
+import axios from "axios";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../styles/responsive.js";
 
 function StepGroupProfile() {
   const outlet = useOutletContext?.() || {};
   const { groupProfile, setGroupProfile } = outlet;
+  const { slug } = useParams();
+
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const [groupName, setGroupName] = useState(groupProfile?.name || "");
-  const [IMAGE_FILE, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  // 로컬 파일(선택 사항): 미리보기 생성에만 사용
+  const [imageFile, setImageFile] = useState(null);
+  // 서버에 업로드된 이미지의 실제 접근 URL
+  const [imageUrl, setImageUrl] = useState(groupProfile?.image || "");
+  // 미리보기(파일 선택 시 즉시 표시)
+  const [imagePreview, setImagePreview] = useState(groupProfile?.image || "");
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // 이미지 파일 선택 처리
-  const handleImageSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  // S3 업로드 (make-key → public_url PUT)
+  const uploadImageToServer = useCallback(
+    async (file) => {
+      if (!file) return null;
+      try {
+        setIsUploading(true);
+
+        // 1) 키 생성 요청
+        const makeKeyRes = await axios.post(
+          `${BASE_URL}/api/uploads/images/make-key`,
+          {
+            slug: slug || "",
+            filename: file.name || "image.jpg",
+          },
+          { withCredentials: true }
+        );
+
+        const key = makeKeyRes?.data?.data?.key;
+        const publicUrl = makeKeyRes?.data?.data?.public_url;
+        if (!key || !publicUrl) {
+          throw new Error("키 생성 실패: key 또는 public_url 누락");
+        }
+
+        // 2) 공개 URL로 파일 PUT
+        await axios.put(publicUrl, file, {
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+            // 중요
+            "x-amz-acl": "public-read",
+          },
+          withCredentials: false,
+        });
+
+        // 3) 업로드된 public_url 반환
+        return publicUrl;
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [BASE_URL, slug]
+  );
+
+  // 파일 선택 → 미리보기 생성 → 서버 업로드 → imageUrl 저장
+  const handleImageChange = useCallback(
+    async (file) => {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
-      reader.readAsDataURL(file);
-    }
+
+      if (file) {
+        // 미리보기 즉시 업데이트
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+
+        try {
+          const url = await uploadImageToServer(file);
+          if (url) {
+            setImageUrl(url);
+          }
+        } catch (e) {
+          console.error("이미지 업로드 실패:", e);
+        }
+      } else {
+        // 이미지 제거
+        setImagePreview("");
+        setImageUrl("");
+      }
+    },
+    [uploadImageToServer]
+  );
+
+  // <input type="file" /> onChange
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageChange(file);
   };
 
-  // 이미지 모달 열기 (전체 보기용)
-  const handleImageClick = () => {
-    setShowImageModal(true);
-  };
+  // 모달 토글
+  const handleImageClick = () => setShowImageModal(true);
+  const handleCloseModal = () => setShowImageModal(false);
 
-  // 이미지 모달 닫기
-  const handleCloseModal = () => {
-    setShowImageModal(false);
-  };
-
-  // groupProfile 상태 업데이트
-  React.useEffect(() => {
+  // groupProfile 동기화: 파일 객체 대신 URL을 저장
+  useEffect(() => {
     if (typeof setGroupProfile === "function") {
       setGroupProfile({
         name: groupName,
-        image: IMAGE_FILE,
+        image: imageUrl || "", // 서버 업로드 결과 URL
       });
     }
-  }, [groupName, IMAGE_FILE, setGroupProfile]);
+  }, [groupName, imageUrl, setGroupProfile]);
 
   return (
     <Wrapper>

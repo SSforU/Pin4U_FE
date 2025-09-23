@@ -12,7 +12,8 @@ const GlobalStyle = createGlobalStyle`
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow: hidden; /* 배경 이미지가 넘칠 때 방지용 */
+    min-height: 100%;
+    overflow: auto; /* 스크롤 허용 (모바일에서 하단 영역 잘림 방지) */
   }
 
   #root {
