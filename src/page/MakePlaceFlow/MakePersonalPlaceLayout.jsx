@@ -75,17 +75,6 @@ function MakePersonalPlaceLayout() {
         }
       } catch (error) {
         console.error("오류 발생:", error);
-
-        // 백엔드가 구현되지 않았을 때 임시 slug 생성
-        if (error.response?.status === 404 || !error.response) {
-          console.log("백엔드가 구현되지 않음. 임시 slug 생성");
-          const tempSlug = `temp-personal-${Date.now()}`;
-          localStorage.setItem("createdSlug", tempSlug);
-          localStorage.setItem("mapType", "personal");
-          navigate("/complete");
-          return;
-        }
-
         let message = "오류가 발생했습니다.";
 
         if (error.response?.status === 500) {
@@ -93,7 +82,6 @@ function MakePersonalPlaceLayout() {
         } else if (error.response?.status === 400) {
           message = "잘못된 요청입니다.";
         }
-
         setErrorMessage(message);
         setShowErrorModal(true);
       }
