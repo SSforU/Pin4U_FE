@@ -372,7 +372,7 @@ export default function HomePage() {
         <HomeSearchBox onSearch={setSearchTerm} />
         {!loading && !errorMsg && (
           <StationList
-            stations={stations}
+            stations={filteredStations}
             onItemClick={(station) =>
               navigate(`/station/${station.slug}`, {
                 state: { station, allPlaces }, // 전체 장소 같이 전달
