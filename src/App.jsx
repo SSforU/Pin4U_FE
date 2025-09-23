@@ -16,7 +16,9 @@ function App() {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${BASE_URL}/api/user/1`);
+        const response = await axios.get(`${BASE_URL}/api/me`, {
+          withCredentials: true,
+        });
 
         if (response.data.result === "success") {
           setUserProfile(response.data.data.user);
