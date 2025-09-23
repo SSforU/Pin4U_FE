@@ -147,6 +147,7 @@ function StepRecommend() {
           headers: {
             "Content-Type": file.type || "application/octet-stream",
           },
+          "x-amz-acl": "public-read",
           withCredentials: false,
         });
 
