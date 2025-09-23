@@ -18,7 +18,7 @@ export default function StationPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const station = state?.station; // StationListItem에서 넘겨준 객체
-  const allPlaces = state?.allPlaces ?? [];
+  const allPlaces = useMemo(() => state?.allPlaces ?? [], [state?.allPlaces]);
 
   // 새로고침 등으로 state가 사라졌으면 홈으로
   useEffect(() => {
