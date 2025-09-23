@@ -12,16 +12,20 @@ export default function GroupList({
       <SectionHead>{title}</SectionHead>
 
       <Scroller>
-        {groups.map((g) => (
-          <GroupListItem
-            key={g.id}
-            thumbnail={g.thumbnail}
-            name={g.name}
-            stationName={g.stationName}
-            lines={g.lines}
-            onClick={() => onItemClick?.(g)}
-          />
-        ))}
+        {groups.length === 0 ? (
+          <EmptyMessage>그룹지도를 추가해 주세요!!</EmptyMessage>
+        ) : (
+          groups.map((g) => (
+            <GroupListItem
+              key={g.id}
+              thumbnail={g.thumbnail}
+              name={g.name}
+              stationName={g.stationName}
+              lines={g.lines}
+              onClick={() => onItemClick?.(g)}
+            />
+          ))
+        )}
       </Scroller>
     </Section>
   );
@@ -63,4 +67,14 @@ const Scroller = styled.div`
     background: rgba(0, 0, 0, 0.25);
     border-radius: 10px;
   }
+`;
+
+const EmptyMessage = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #888;
 `;
