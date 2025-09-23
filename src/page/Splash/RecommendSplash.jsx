@@ -52,11 +52,13 @@ export default RecommendSplash;
 // styled-components
 const Wrapper = styled.div`
   width: 100%;
-  height: 100vh;
+  height: auto;
+  min-height: 100dvh;
   background-color: #ffffff;
   position: relative;
   display: flex;
   flex-direction: column;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   animation: fadeIn 1.5s ease-out;
 
   @keyframes fadeIn {

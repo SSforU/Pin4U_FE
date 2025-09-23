@@ -14,33 +14,9 @@ function StartRecommendGroupRequest() {
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [isRequested, setIsRequested] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
-  const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
+  const { userProfile } = useOutletContext(); // 방문자 프로필 (null 가능)
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-  // 멤버 요청 함수
-  const handleRequest = () => {
-    // 멤버 요청 처리 (백엔드 연동 전 임시)
-    setIsRequested(true);
-    setRequestSuccess(true);
-
-    // 3초 후 팝업 숨기기
-    setTimeout(() => {
-      setRequestSuccess(false);
-    }, 3000);
-
-    // 개발용: 5초 후 자동 승인 (실제로는 백엔드에서 승인 알림을 받아야 함)
-    setTimeout(() => {
-      setIsApproved(true);
-    }, 5000);
-  };
-
-  // 장소 추천 함수
-  const handleRecommend = () => {
-    if (isApproved) {
-      navigate(`/shared-map/group/${slug}/onboarding`);
-    }
-  };
 
   // API에서 받아온 데이터 상태
   const [locationData, setLocationData] = useState({
@@ -48,6 +24,7 @@ function StartRecommendGroupRequest() {
     memo: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [ownerNickname, setOwnerNickname] = useState("");
 
   // API에서 요청 정보 조회 (station + memo)
   useEffect(() => {
@@ -55,15 +32,23 @@ function StartRecommendGroupRequest() {
       try {
         setIsLoading(true);
         // API 호출
-        const response = await axios.get(`${BASE_URL}/api/requests/${slug}`);
+        const response = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
+          withCredentials: true,
+        });
+
+        // 디버그 로그: 응답 확인
+        console.log("/api/groups/:slug/map response:", response?.data);
 
         // 올바른 응답 구조에서 데이터 추출
-        const { station, requestMessage } = response.data.data;
+        const { station, requestMessage } = response.data.data || {};
+        const extractOwnerNickname = (d) => d?.group?.name || "";
+        const creatorName = extractOwnerNickname(response?.data?.data);
         // 필요한 데이터만 추출
         setLocationData({
           station: station.name, // 역 이름만
           memo: requestMessage, // 요청 메시지만
         });
+        setOwnerNickname(creatorName);
       } catch (error) {
         console.error("요청 정보 조회 실패:", error);
         // 에러 시 기본값 설정
@@ -71,6 +56,7 @@ function StartRecommendGroupRequest() {
           station: "정보를 불러올 수 없습니다",
           memo: "정보를 불러올 수 없습니다",
         });
+        setOwnerNickname("");
       } finally {
         setIsLoading(false);
       }
@@ -80,6 +66,54 @@ function StartRecommendGroupRequest() {
       fetchRequestInfo();
     }
   }, [slug, BASE_URL]);
+  // 멤버 요청 함수 (API 연동)
+  const handleRequest = async () => {
+    if (isRequested) return;
+    try {
+      setIsLoading(true);
+      const userId = userProfile?.id;
+      const body = { action: "request", user_id: userId };
+
+      const res = await axios.post(
+        `${BASE_URL}/api/groups/${slug}/members`,
+        body,
+        { withCredentials: true }
+      );
+
+      const apiResult = res?.data?.result;
+      const status = res?.data?.data?.status;
+
+      if (apiResult === "success") {
+        setIsRequested(true);
+        setRequestSuccess(true);
+
+        // 상태값이 내려오면 반영 (ex. requested/approved/rejected)
+        if (status === "approved") {
+          setIsApproved(true);
+        }
+
+        // 3초 후 팝업 자동 닫기
+        setTimeout(() => setRequestSuccess(false), 3000);
+      } else {
+        console.error("멤버 요청 실패:", res?.data?.error);
+        alert("멤버 요청에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("멤버 요청 중 오류:", error);
+      alert("멤버 요청 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 장소 추천 함수
+  const handleRecommend = () => {
+    if (isApproved) {
+      navigate(`/shared-map/group/${slug}/onboarding`);
+    }
+  };
+
+  // 중복 선언 제거됨 (위의 /api/groups/:slug/map 호출만 사용)
 
   return (
     <Wrapper>
@@ -89,8 +123,14 @@ function StartRecommendGroupRequest() {
         </ImageContainer>
         <Content>
           <Title>
-            {/* 그룹명 변수로 바꿔야함(백엔드) */} [
-            {userProfile?.nickname || "사용자"}]을 위한
+            [
+            {ownerNickname ||
+              userProfile?.nickname ||
+              (typeof window !== "undefined"
+                ? localStorage.getItem("recommendUserNickname") || ""
+                : "") ||
+              "사용자"}
+            ]을 위한
             <br />
             장소를 추천해주세요!
           </Title>

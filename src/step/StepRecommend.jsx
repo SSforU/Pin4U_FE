@@ -574,6 +574,7 @@ export default StepRecommend;
 const Wrapper = styled.div`
   ${getResponsiveStyles("search")}
   width: 100%;
+  min-height: 100dvh; /* 모바일에서 안전한 전체 높이 */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -854,8 +855,16 @@ const ArrowIcon = styled.img`
 `;
 
 const ButtonSection = styled.div`
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
+  background: #ffffff;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom)) 20px;
+  border-top: 1px solid #f0f0f0;
+  z-index: 10;
   opacity: 1;
   transform: translateY(0);
   transition: all 0.4s ease-out;

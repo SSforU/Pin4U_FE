@@ -10,7 +10,7 @@ import axios from "axios";
 
 function StartRecommendGroupLogin() {
   const { slug } = useParams();
-  const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
+  const { userProfile } = useOutletContext(); // 로그인 사용자의 프로필 (방문자는 null 가능)
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -26,6 +26,7 @@ function StartRecommendGroupLogin() {
     memo: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [ownerNickname, setOwnerNickname] = useState("");
 
   // API에서 요청 정보 조회 (station + memo)
   useEffect(() => {
@@ -37,13 +38,20 @@ function StartRecommendGroupLogin() {
           withCredentials: true,
         });
 
+        // 디버그 로그: 응답 전체를 확인
+        console.log("/api/groups/:slug/map response:", response?.data);
+
         // 올바른 응답 구조에서 데이터 추출
-        const { station, requestMessage } = response.data.data;
+        const { station, requestMessage } = response.data.data || {};
+        // 생성자 닉네임(백엔드 필드명 다양성 대비 안전하게 파싱)
+        const extractOwnerNickname = (d) => d?.group?.name || "";
+        const creatorName = extractOwnerNickname(response?.data?.data);
         // 필요한 데이터만 추출
         setLocationData({
           station: station.name, // 역 이름만
           memo: requestMessage, // 요청 메시지만
         });
+        setOwnerNickname(creatorName);
       } catch (error) {
         console.error("요청 정보 조회 실패:", error);
         // 에러 시 기본값 설정
@@ -51,6 +59,7 @@ function StartRecommendGroupLogin() {
           station: "정보를 불러올 수 없습니다",
           memo: "정보를 불러올 수 없습니다",
         });
+        setOwnerNickname("");
       } finally {
         setIsLoading(false);
       }
@@ -69,8 +78,14 @@ function StartRecommendGroupLogin() {
         </ImageContainer>
         <Content>
           <Title>
-            {/* 그룹명 변수로 바꿔야함(백엔드) */}[
-            {userProfile?.nickname || "사용자"}]을 위한
+            [
+            {ownerNickname ||
+              userProfile?.nickname ||
+              (typeof window !== "undefined"
+                ? localStorage.getItem("recommendUserNickname") || ""
+                : "") ||
+              "사용자"}
+            ]을 위한
             <br />
             장소를 추천해주세요!
           </Title>

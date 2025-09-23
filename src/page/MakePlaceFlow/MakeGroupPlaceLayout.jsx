@@ -54,43 +54,65 @@ function MakeGroupPlaceLayout() {
 
   async function goNext() {
     if (stepParam === "group-profile") {
+      // 이름을 localStorage에도 저장(완료 시 안전하게 읽기 위함)
+      if (groupProfile?.name) {
+        localStorage.setItem("groupName", groupProfile.name);
+      }
       navigate("/make-place/group/station");
     } else if (stepParam === "station") {
       goToStep(currentIndex + 1);
     } else if (stepParam === "memo") {
-      // 메모 단계에서 완료 버튼을 누르면 링크 생성 후 complete 페이지로 이동
+      // 메모 단계에서 완료 버튼을 누르면 그룹 생성 API 호출
       try {
-        let requestData = {
-          owner_nickname: nickname || userProfile?.nickname,
-          station_code: station?.code,
+        // localStorage에 저장된 그룹 이름 우선 사용
+        const savedGroupName = (localStorage.getItem("groupName") || "").trim();
+        const groupName = savedGroupName || groupProfile?.name || "";
+
+        // 역 이름에서 '역' 접미사 제거
+        const rawStationName = station?.name || "";
+        const stationName = rawStationName.endsWith("역")
+          ? rawStationName.slice(0, -1)
+          : rawStationName;
+
+        const body = {
+          name: groupName,
+          image_url: groupProfile?.image || "",
+          station_name: stationName,
+          station_line: station?.line || "",
           request_message: memo,
         };
 
-        // 그룹 생성 먼저
-        const groupResponse = await axios.post(`${BASE_URL}/api/groups`, {
-          group_name: groupProfile?.name,
-          group_description: groupProfile?.description,
-          owner_nickname: nickname || userProfile?.nickname,
+        const groupResponse = await axios.post(`${BASE_URL}/api/groups`, body, {
+          withCredentials: true,
         });
 
-        if (groupResponse.data.result === "success") {
-          const { group_slug } = groupResponse.data.data.group;
-          requestData.group_slug = group_slug;
+        console.log("👉 groupResponse.data:", groupResponse.data);
+
+        if (groupResponse.data?.result === "success") {
+          const { slug: groupSlug } = groupResponse.data.data || {};
+          if (!groupSlug) throw new Error("group slug missing");
+          console.log("👉 group_slug:", groupSlug);
+
+          // ★★★ 그룹 생성 직후 '첫 요청'을 반드시 만든다 ★★★
+          const reqBody = {
+            station_code: station?.code,
+            request_message: memo,
+            group_slug: groupSlug,
+          };
+          const reqRes = await axios.post(`${BASE_URL}/api/requests`, reqBody, {
+            withCredentials: true,
+          });
+          if (reqRes.data?.result !== "success")
+            throw new Error("첫 요청 생성 실패");
+
+          localStorage.setItem("createdSlug", groupSlug);
+          localStorage.setItem("mapType", "group");
+          navigate("/complete");
         } else {
           throw new Error("그룹 생성에 실패했습니다.");
         }
       } catch (error) {
         console.error("오류 발생:", error);
-
-        // 백엔드가 구현되지 않았을 때 임시 slug 생성
-        if (error.response?.status === 404 || !error.response) {
-          console.log("백엔드가 구현되지 않음. 임시 slug 생성");
-          const tempSlug = `temp-group-${Date.now()}`;
-          localStorage.setItem("createdSlug", tempSlug);
-          localStorage.setItem("mapType", "group");
-          navigate("/complete");
-          return;
-        }
 
         let message = "오류가 발생했습니다.";
 
@@ -171,6 +193,7 @@ export default MakeGroupPlaceLayout;
 const Wrapper = styled.div`
   display: grid;
   grid-template-rows: auto 1fr auto;
+  min-height: 100dvh; /* 모바일 브라우저 UI 제외한 뷰포트 기준 높이 */
   height: 100%;
 `;
 
@@ -181,6 +204,7 @@ const Top = styled.div`
 const Main = styled.main`
   padding: 20px;
   overflow: auto;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
 `;
 
 const PrevButtonContainer = styled.div`
@@ -194,7 +218,14 @@ const PrevButtonWraaper = styled.img`
 `;
 
 const Bottom = styled.div`
-  padding: 20px;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom)) 20px;
+  background: #ffffff;
+  border-top: 1px solid #f0f0f0;
+  z-index: 10;
 `;
 
 // 오류 발생 시 에러 모달 스타일
