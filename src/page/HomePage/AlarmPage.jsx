@@ -52,10 +52,19 @@ export default function AlarmPage() {
       setLoading(true);
       setErrorMsg("");
       try {
-        // 실제 API가 준비되면 이 부분으로 교체:
-        // const { data } = await axios.get(`${BASE_URL}/api/notifications`, { withCredentials: true });
-        // setItems(data?.data?.items ?? []);
-        setItems(MOCK);
+        const { data } = await axios.get(`${BASE_URL}/api/notifications`, {
+          params: {
+            status: "pending", // 기본값 (승인 대기중 알림만)
+            limit: 20, // 기본값
+          },
+          withCredentials: true, // uid는 cookie에서 자동 전송됨
+        });
+
+        if (data?.data?.items) {
+          setItems(data.data.items);
+        } else {
+          setItems([]);
+        }
       } catch (e) {
         setErrorMsg(
           e?.response?.data?.error?.message ||
@@ -67,7 +76,7 @@ export default function AlarmPage() {
       }
     };
     load();
-  }, [BASE_URL, MOCK]);
+  }, [BASE_URL]);
 
   const handleDone = (id, nextStatus) => {
     setItems((prev) =>
