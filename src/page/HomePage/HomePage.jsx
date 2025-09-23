@@ -281,7 +281,7 @@ export default function HomePage() {
     setLoggingOut(true);
     try {
       // 쿠키(uid) 기반 인증이므로 반드시 withCredentials:true
-      await axios.post(`${BASE_URL}/api/auth/logout`, null, {
+      await axios.post(`${BASE_URL}/api/auth/logout`, {
         withCredentials: true,
       });
 
