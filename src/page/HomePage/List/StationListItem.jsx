@@ -1,16 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 
-const StationListItem = ({ station }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/station/${station.slug}`, { state: { station } });
-  };
-
+const StationListItem = ({ station, onClick }) => {
   return (
-    <Container onClick={handleClick}>
+    <Container onClick={() => onClick?.(station)}>
       <StationInfo>
         <StationNameGroup>
           <StationName>{station.name}</StationName>

@@ -13,7 +13,7 @@ const ListContainer = styled.div`
   gap: 10px;
 `;
 
-function StationList({ stations, loading = false }) {
+function StationList({ stations, loading = false, onItemClick }) {
   if (loading) {
     return (
       <ListContainer>
@@ -34,7 +34,11 @@ function StationList({ stations, loading = false }) {
   return (
     <ListContainer>
       {stations.map((station) => (
-        <StationListItem key={station.id} station={station}></StationListItem>
+        <StationListItem
+          key={station.id}
+          station={station}
+          onClick={onItemClick}
+        ></StationListItem>
       ))}
     </ListContainer>
   );

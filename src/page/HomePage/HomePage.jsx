@@ -13,6 +13,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [stations, setStations] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]); // 전체 장소 목록 저장
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -151,18 +152,25 @@ export default function HomePage() {
           ? data.data.groups
           : [];
 
-        const mapped = items.map((x, i) => {
-          return {
-            id: String(i + 1),
-            slug: x.slug,
-            name: `${x.station_name ?? ""}역`,
-            lines: parseLines(x.station_line),
-            address: x.road_address_name ?? "",
-            recommended_counts: Number(x.recommend_count ?? 0),
-            created_at: x.created_at,
-          };
+        // 전체 장소 저장
+        setAllPlaces(items);
+
+        // 역 단위로 고유화
+        const stationMap = new Map();
+        items.forEach((x) => {
+          if (!stationMap.has(x.station_name)) {
+            stationMap.set(x.station_name, {
+              id: stationMap.size + 1,
+              slug: x.station_name, // 역 이름을 slug로 임시 사용
+              name: `${x.station_name}역`,
+              lines: parseLines(x.station_line),
+              address: x.road_address_name ?? "",
+              recommended_counts: Number(x.recommend_count ?? 0),
+              created_at: x.created_at,
+            });
+          }
         });
-        setStations(mapped);
+        setStations(Array.from(stationMap.values()));
 
         // 그룹 매핑(스키마 변동에 안전하게 여러 키를 대응)
         const mappedGroups = groupItems.map((g, i) => {
@@ -190,7 +198,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
     load();
   }, [BASE_URL]);
 
@@ -356,7 +363,16 @@ export default function HomePage() {
 
       <ContentContainer>
         <HomeSearchBox onSearch={setSearchTerm} />
-        {!loading && !errorMsg && <StationList stations={filteredStations} />}
+        {!loading && !errorMsg && (
+          <StationList
+            stations={stations}
+            onItemClick={(station) =>
+              navigate(`/station/${station.slug}`, {
+                state: { station, allPlaces }, // 전체 장소 같이 전달
+              })
+            }
+          />
+        )}
       </ContentContainer>
 
       <GroupList

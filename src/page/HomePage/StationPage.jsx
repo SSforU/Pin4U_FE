@@ -18,14 +18,27 @@ export default function StationPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const station = state?.station; // StationListItem에서 넘겨준 객체
+  const allPlaces = state?.allPlaces ?? [];
 
   // 새로고침 등으로 state가 사라졌으면 홈으로
   useEffect(() => {
     if (!station) navigate("/", { replace: true });
   }, [station, navigate]);
 
+  // 해당 역의 장소 메모만 필터링
+  const stationMemos = useMemo(() => {
+    if (!station) return [];
+    return allPlaces
+      .filter((p) => p.station_name === station.name.replace("역", ""))
+      .map((p, idx) => ({
+        id: p.slug ?? `m${idx + 1}`,
+        text: p.memo_text ?? p.road_address_name ?? "메모 없음",
+        count: p.recommend_count ?? 0,
+      }));
+  }, [station, allPlaces]);
+
   const [q, setQ] = useState("");
-  const [items, setItems] = useState(MOCK_MEMOS);
+  const [items, setItems] = useState(stationMemos);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
