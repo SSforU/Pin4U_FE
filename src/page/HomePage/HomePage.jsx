@@ -13,6 +13,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [stations, setStations] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]); // 전체 장소 목록 저장
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -129,36 +131,63 @@ export default function HomePage() {
       setLoading(true);
       setErrorMsg("");
 
+      const parseLines = (v) => {
+        if (!v) return [];
+        if (Array.isArray(v)) return v.map(Number).filter(Boolean);
+        return String(v)
+          .replace(/호선/g, "")
+          .split("·")
+          .map((s) => Number(s.trim()))
+          .filter(Boolean);
+      };
+
       try {
-        // const { data } = await axios.get(`${BASE_URL}/api/requests`, {
-        //   params: {},
-        // });
-
-        // const items = data?.data?.items ?? [];
-        const items = MOCK_ITEMS; // TODO: 나중에 주석 해제
-
-        const mapped = items.map((x, i) => {
-          const lines =
-            typeof x.station_line === "string"
-              ? x.station_line
-                  .replace(/호선/g, "")
-                  .split("·")
-                  .map((s) => Number(s.trim()))
-                  .filter(Boolean)
-              : [];
-
-          return {
-            id: String(i + 1),
-            slug: x.slug,
-            name: `${x.station_name}역`,
-            lines,
-            address: x.road_address_name ?? "",
-            recommended_counts: Number(x.recommend_count ?? 0),
-            created_at: x.created_at,
-          };
+        // 쿠키(uid) 인증이므로 반드시 withCredentials:true
+        const { data } = await axios.get(`${BASE_URL}/api/home`, {
+          withCredentials: true,
         });
 
-        setStations(mapped);
+        const items = Array.isArray(data?.data?.items) ? data.data.items : [];
+        const groupItems = Array.isArray(data?.data?.groups)
+          ? data.data.groups
+          : [];
+
+        // 전체 장소 저장
+        setAllPlaces(items);
+
+        // 역 단위로 고유화
+        const stationMap = new Map();
+        items.forEach((x) => {
+          if (!stationMap.has(x.station_name)) {
+            stationMap.set(x.station_name, {
+              id: stationMap.size + 1,
+              slug: x.slug, // 올바른 슬러그 사용
+              name: `${x.station_name}역`,
+              lines: parseLines(x.station_line),
+              address: x.road_address_name ?? "",
+              recommended_counts: Number(x.recommend_count ?? 0),
+              created_at: x.created_at,
+            });
+          }
+        });
+        setStations(Array.from(stationMap.values()));
+
+        // 그룹 매핑(스키마 변동에 안전하게 여러 키를 대응)
+        const mappedGroups = groupItems.map((g, i) => {
+          const slug = g.slug ?? g.group_slug ?? `g-${i + 1}`;
+          const name = g.name ?? g.group_name ?? "이름없는 그룹";
+          const stationName = g.station_name ?? g.anchor_station_name ?? "";
+          const linesRaw = g.lines ?? g.station_line ?? g.station_lines;
+          return {
+            id: String(g.id ?? i + 1),
+            slug,
+            name,
+            thumbnail: g.thumbnail ?? g.image_url ?? "",
+            stationName: stationName ? `${stationName}` : "",
+            lines: parseLines(linesRaw),
+          };
+        });
+        setGroups(mappedGroups);
       } catch (e) {
         setErrorMsg(
           e?.response?.data?.error?.message ||
@@ -169,9 +198,8 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
     load();
-  }, []);
+  }, [BASE_URL]);
 
   const handleAddMapClick = () => {
     navigate(`/make-place`);
@@ -244,8 +272,15 @@ export default function HomePage() {
     }
   };
 
+  // 컴포넌트 맨 위 쪽 (HomePage 함수 안, handlers 위)
+  const PLAN_AVAILABLE = false; // 아직 미구현
+
   const handlePlan = () => {
     setIsMenuOpen(false);
+    if (!PLAN_AVAILABLE) {
+      alert("요금제 관리 페이지는 준비 중이에요!");
+      return; // 네비게이션 차단
+    }
     navigate("/billing"); // 요금제 관리 라우트 예시
   };
 
@@ -260,7 +295,7 @@ export default function HomePage() {
     setLoggingOut(true);
     try {
       // 쿠키(uid) 기반 인증이므로 반드시 withCredentials:true
-      await axios.post(`${BASE_URL}/api/auth/logout`, null, {
+      await axios.post(`${BASE_URL}/api/auth/logout`, {
         withCredentials: true,
       });
 
@@ -335,12 +370,21 @@ export default function HomePage() {
 
       <ContentContainer>
         <HomeSearchBox onSearch={setSearchTerm} />
-        {!loading && !errorMsg && <StationList stations={filteredStations} />}
+        {!loading && !errorMsg && (
+          <StationList
+            stations={filteredStations}
+            onItemClick={(station) =>
+              navigate(`/station/${station.slug}`, {
+                state: { station, allPlaces }, // 전체 장소 같이 전달
+              })
+            }
+          />
+        )}
       </ContentContainer>
 
       <GroupList
         title="그룹 지도"
-        groups={MOCK_GROUPS}
+        groups={groups}
         onItemClick={(g) => navigate(`/group-place-map/${g.slug}`)}
       />
       <ButtonContainer>

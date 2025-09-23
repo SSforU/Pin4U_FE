@@ -4,6 +4,8 @@ import styled from "styled-components";
 import HomeSearchBox from "../HomePage/Component/HomeSearchBox.jsx";
 import MemoList from "./List/MemoList.jsx";
 import { useMemo, useState, useEffect } from "react";
+import axios from "axios";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 /** ---- 목업 메모 데이터 ---- */
 const MOCK_MEMOS = [
@@ -18,16 +20,33 @@ export default function StationPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const station = state?.station; // StationListItem에서 넘겨준 객체
+  const allPlaces = useMemo(() => state?.allPlaces ?? [], [state?.allPlaces]);
+  const [deleting, setDeleting] = useState(false);
 
   // 새로고침 등으로 state가 사라졌으면 홈으로
   useEffect(() => {
     if (!station) navigate("/", { replace: true });
   }, [station, navigate]);
 
+  // 해당 역의 장소 메모만 필터링
+  const stationMemos = useMemo(() => {
+    if (!station) return [];
+    return allPlaces
+      .filter((p) => p.station_name === station.name.replace("역", ""))
+      .map((p, idx) => ({
+        id: p.slug ?? `m${idx + 1}`,
+        slug: p.slug,
+        text: p.request_message ?? p.road_address_name ?? "메모 없음",
+        count: p.recommend_count ?? 0,
+      }));
+  }, [station, allPlaces]);
+
   const [q, setQ] = useState("");
-  const [items, setItems] = useState(MOCK_MEMOS);
+  const [items, setItems] = useState(stationMemos);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+
+  useEffect(() => setItems(stationMemos), [stationMemos]);
 
   const filtered = useMemo(() => {
     const keyword = q.trim();
@@ -51,7 +70,7 @@ export default function StationPage() {
 
   const handleMemoClick = (memo) => {
     if (!isEditing) {
-      navigate(`/place-map/${station.slug}`);
+      navigate(`/place-map/${memo.slug}`);
     } else {
       // 편집 모드에서는 클릭시 아무 동작 안함
     }
@@ -62,10 +81,38 @@ export default function StationPage() {
     setSelectedIds([]);
   };
 
-  const handleDelete = () => {
-    setItems((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
+  const handleDelete = async () => {
+    if (deleting || selectedIds.length === 0) return;
+    setDeleting(true);
+
+    // 선택된 아이템들의 slug 목록
+    const targets = items.filter((m) => selectedIds.includes(m.id));
+    const reqs = targets.map((m) =>
+      axios.delete(
+        `${BASE_URL}/api/requests/${encodeURIComponent(m.slug)}`,
+        { withCredentials: true } // uid 쿠키 인증
+      )
+    );
+
+    const results = await Promise.allSettled(reqs);
+    const failed = results.filter((r) => r.status === "rejected");
+
+    // 성공한 항목만 UI에서 제거
+    const succeededSlugs = new Set(
+      targets
+        .map((t, i) => (results[i].status === "fulfilled" ? t.slug : null))
+        .filter(Boolean)
+    );
+    setItems((prev) => prev.filter((m) => !succeededSlugs.has(m.slug)));
     setSelectedIds([]);
     setIsEditing(false);
+    setDeleting(false);
+
+    if (failed.length) {
+      alert(
+        `${failed.length}개 항목 삭제에 실패했어요. 잠시 후 다시 시도해 주세요.`
+      );
+    }
   };
 
   const handleDone = () => {
@@ -87,8 +134,12 @@ export default function StationPage() {
           <EditButton onClick={toggleEdit}>편집</EditButton>
         ) : (
           <div style={{ display: "flex", gap: "8px" }}>
-            <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
-            <DoneButton onClick={handleDone}>완료</DoneButton>
+            <DeleteButton onClick={handleDelete} disabled={deleting}>
+              {deleting ? "삭제 중..." : "삭제"}
+            </DeleteButton>
+            <DoneButton onClick={handleDone} disabled={deleting}>
+              완료
+            </DoneButton>
           </div>
         )}
       </Header>
@@ -171,6 +222,8 @@ const DeleteButton = styled.button`
   background: none;
   color: #ff7e74;
   cursor: pointer;
+  opacity: ${(p) => (p.disabled ? 0.6 : 1)};
+  pointer-events: ${(p) => (p.disabled ? "none" : "auto")};
 `;
 
 const DoneButton = styled.button`
@@ -180,6 +233,8 @@ const DoneButton = styled.button`
   background: none;
   color: #585858;
   cursor: pointer;
+  opacity: ${(p) => (p.disabled ? 0.6 : 1)};
+  pointer-events: ${(p) => (p.disabled ? "none" : "auto")};
 `;
 
 const ContentContainer = styled.div`
