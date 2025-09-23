@@ -272,8 +272,15 @@ export default function HomePage() {
     }
   };
 
+  // 컴포넌트 맨 위 쪽 (HomePage 함수 안, handlers 위)
+  const PLAN_AVAILABLE = false; // 아직 미구현
+
   const handlePlan = () => {
     setIsMenuOpen(false);
+    if (!PLAN_AVAILABLE) {
+      alert("요금제 관리 페이지는 준비 중이에요!");
+      return; // 네비게이션 차단
+    }
     navigate("/billing"); // 요금제 관리 라우트 예시
   };
 
