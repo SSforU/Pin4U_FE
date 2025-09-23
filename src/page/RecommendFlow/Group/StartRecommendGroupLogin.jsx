@@ -8,7 +8,7 @@ import { getResponsiveStyles } from "../../../styles/responsive.js";
 import { KAKAO_AUTH_URL } from "../../../utils/oauth";
 import axios from "axios";
 
-function StartRecommendGroup() {
+function StartRecommendGroupLogin() {
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
@@ -33,7 +33,9 @@ function StartRecommendGroup() {
       try {
         setIsLoading(true);
         // API 호출
-        const response = await axios.get(`${BASE_URL}/api/requests/${slug}`);
+        const response = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
+          withCredentials: true,
+        });
 
         // 올바른 응답 구조에서 데이터 추출
         const { station, requestMessage } = response.data.data;
@@ -107,7 +109,7 @@ function StartRecommendGroup() {
   );
 }
 
-export default StartRecommendGroup;
+export default StartRecommendGroupLogin;
 // styled-components
 const Wrapper = styled.div`
   ${getResponsiveStyles("layout")}

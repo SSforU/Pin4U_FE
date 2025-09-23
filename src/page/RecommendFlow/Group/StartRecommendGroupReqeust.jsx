@@ -8,7 +8,7 @@ import { getResponsiveStyles } from "../../../styles/responsive.js";
 import Button from "../../../component/ui/Button.jsx";
 import axios from "axios";
 
-function StartRecommendGroup() {
+function StartRecommendGroupRequest() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const [requestSuccess, setRequestSuccess] = useState(false);
@@ -157,7 +157,7 @@ function StartRecommendGroup() {
     </Wrapper>
   );
 }
-export default StartRecommendGroup;
+export default StartRecommendGroupRequest;
 // styled-components
 const Wrapper = styled.div`
   ${getResponsiveStyles("layout")}
