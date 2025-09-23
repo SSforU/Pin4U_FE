@@ -285,7 +285,7 @@ export default function HomePage() {
     } finally {
       setLoggingOut(false);
     }
-    navigate("/login");
+    navigate("/logout-splash", { replace: true });
   };
 
   // ESC로 닫기
