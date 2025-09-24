@@ -44,6 +44,8 @@ function RecommendPersonalPlaceLayout() {
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
   const currentStep = currentIndex + FLOW_OFFSET;
 
+  // Personal 추천 플로우: 로그인 여부와 무관하게 닉네임 스텝을 반드시 거친다
+
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
     (stepParam === "nickname" && !nickname.trim()) ||
