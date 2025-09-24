@@ -1,5 +1,5 @@
 // 지도 유형 선택 레이아웃
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
@@ -20,6 +20,13 @@ function MakePlaceLayout() {
   const [mapType, setMapType] = useState(null);
   const [nickname, setNickname] = useState("");
 
+  // 로그인 프로필 닉네임으로 초기화 (localStorage 미사용)
+  useEffect(() => {
+    if (!nickname && userProfile?.nickname) {
+      setNickname(userProfile.nickname);
+    }
+  }, [userProfile, nickname]);
+
   // useMatch로 현재 step 추출
   const match = useMatch("/make-place/:step");
   const stepParam = match?.params?.step || STEPS[0];
@@ -27,9 +34,21 @@ function MakePlaceLayout() {
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
   const currentStep = currentIndex + 1;
 
+  // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 maptype으로 이동
+  useEffect(() => {
+    if (stepParam === "nickname" && userProfile?.nickname) {
+      if (!nickname) {
+        setNickname(userProfile.nickname);
+      }
+      navigate("/make-place/maptype", { replace: true });
+    }
+  }, [stepParam, userProfile, nickname, navigate]);
+
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
+    (stepParam === "nickname" &&
+      !userProfile?.nickname &&
+      (!nickname.trim() || nickname.length < 2)) ||
     (stepParam === "maptype" && !mapType);
 
   function goToStep(index) {

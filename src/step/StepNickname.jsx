@@ -12,23 +12,15 @@ function StepNickname(props) {
   const detailText =
     props.detailText ?? "내 지도를 공유받은 친구들에게 공개돼요.";
 
-  // 초기값: localStorage 폴백
-  useEffect(() => {
-    if (!nickname) {
-      const saved = localStorage.getItem("recommendUserNickname") || "";
-      if (saved) {
-        setNickname(saved);
-      }
-    }
-  }, [nickname, setNickname]);
+  // 초기값은 상위 컨텍스트/props에서만 관리 (localStorage 사용 제거)
+  useEffect(() => {}, []);
 
   const handleNicknameChange = (e) => {
     const newNickname = e.target.value;
     if (newNickname.length <= 10) {
       // 10자 제한
       setNickname(newNickname);
-      // 로컬 저장 (다음 단계 및 공유 시 활용)
-      localStorage.setItem("recommendUserNickname", newNickname);
+      // 저장은 상위 상태에만 반영
     }
   };
 

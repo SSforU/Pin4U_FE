@@ -24,10 +24,7 @@ function CompleteRecommend() {
             <br />
             장소 추천을 완료했어요!
           </Title>
-          <Detail>
-            {localStorage.getItem("recommendUserNickname") || "친구"}님을 위한
-            지도도 생성해보세요!
-          </Detail>
+          <Detail>내 지도도 바로 만들어보세요!</Detail>
         </Content>
       </Main>
 
