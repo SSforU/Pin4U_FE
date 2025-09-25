@@ -47,7 +47,13 @@ function CompleteMakePlace() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    // 홈페이지 새로고침 트리거 설정
+    localStorage.setItem("shouldRefreshHome", "true");
+
+    // 백엔드에서 데이터가 완전히 처리될 시간을 주기 위해 지연
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     navigate("/");
   };
 

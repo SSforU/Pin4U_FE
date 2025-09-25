@@ -24,6 +24,11 @@ function RecommendPersonalPlaceLayout() {
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
+
+  // location 상태 변경 시 로그 추가
+  useEffect(() => {
+    console.log("RecommendPersonalPlaceLayout: location 상태 변경:", location);
+  }, [location]);
   const [memo, setMemo] = useState("");
 
   // 오류 발생 시 모달 상태
@@ -43,6 +48,8 @@ function RecommendPersonalPlaceLayout() {
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
   const currentStep = currentIndex + FLOW_OFFSET;
+
+  // Personal 추천 플로우: 로그인 여부와 무관하게 닉네임 스텝을 반드시 거친다
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =

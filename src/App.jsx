@@ -20,13 +20,13 @@ function App() {
           withCredentials: true,
         });
 
-        if (response.data.result === "success") {
-          setUserProfile(response.data.data.user);
-          // localStorage에도 저장 (백업용)
-          localStorage.setItem(
-            "userProfile",
-            JSON.stringify(response.data.data.user)
-          );
+        // 스펙: 200이면 사용자 객체 본문, 204이면 본문 없음
+        if (response.status === 200 && response.data && response.data.id) {
+          setUserProfile(response.data);
+          localStorage.setItem("userProfile", JSON.stringify(response.data));
+        } else if (response.status === 204) {
+          setUserProfile(null);
+          localStorage.removeItem("userProfile");
         }
       } catch (error) {
         console.error("사용자 프로필 조회 실패:", error);

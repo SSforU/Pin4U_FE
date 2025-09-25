@@ -32,12 +32,15 @@ function RecommendGroupPlaceLayout() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // 닉네임이 변경될 때마다 localStorage에 저장
+  // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 location으로 이동
   useEffect(() => {
-    if (nickname.trim()) {
-      localStorage.setItem("recommendUserNickname", nickname);
+    if (stepParam === "nickname" && userProfile?.nickname) {
+      if (!nickname) setNickname(userProfile.nickname);
+      navigate(`/shared-map/group/${slug}/onboarding/location`, {
+        replace: true,
+      });
     }
-  }, [nickname]);
+  }, [stepParam, userProfile, nickname, slug, navigate]);
 
   // useMatch로 현재 step 추출
   const match = useMatch("/shared-map/group/:slug/onboarding/:step");
@@ -48,7 +51,9 @@ function RecommendGroupPlaceLayout() {
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && (!nickname.trim() || nickname.length < 2)) ||
+    (stepParam === "nickname" &&
+      !userProfile?.nickname &&
+      (!nickname.trim() || nickname.length < 2)) ||
     (stepParam === "location" && !location);
 
   function goToStep(index) {

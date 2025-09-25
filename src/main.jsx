@@ -1,12 +1,15 @@
 import ReactDOM from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  RouterProvider,
+  createBrowserRouter,
+  Navigate,
+} from "react-router-dom";
 import App from "./App.jsx";
 import HomePage from "./page/HomePage/HomePage.jsx";
 import MakePlaceLayout from "./page/MakePlaceFlow/MakePlaceLayout.jsx";
 import MakePersonalPlaceLayout from "./page/MakePlaceFlow/MakePersonalPlaceLayout.jsx";
 import MakeGroupPlaceLayout from "./page/MakePlaceFlow/MakeGroupPlaceLayout.jsx";
 import PlaceMapPage from "./page/PlaceMapPage/PlaceMapPage.jsx";
-import { Navigate } from "react-router-dom";
 import StepStation from "./step/StepStation.jsx";
 import StepMemo from "./step/StepMemo.jsx";
 import CompleteMakePlace from "./page/MakePlaceFlow/CompleteMakePlace.jsx";
@@ -29,13 +32,15 @@ import KakaoCallback from "./page/Auth/KakaoCallback.jsx";
 import GroupPlaceMapPage from "./page/PlaceMapPage/GroupPlaceMapPage.jsx";
 import AlarmPage from "./page/HomePage/AlarmPage.jsx";
 import LogoutSplash from "./page/Splash/LogoutSplash.jsx";
+import RootEntry from "./routes/RootEntry.jsx";
+import StartMakePlaceGate from "./routes/StartMakePlaceGate.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <RootEntry /> },
       { path: "place-map/:slug", element: <PlaceMapPage /> },
       { path: "station/:slug", element: <StationPage /> },
       { path: "group-place-map/:slug", element: <GroupPlaceMapPage /> },
@@ -44,7 +49,7 @@ const router = createBrowserRouter([
 
       {
         path: "start-make-place",
-        element: <StartMakePlaceSplash />,
+        element: <StartMakePlaceGate />,
       },
 
       {

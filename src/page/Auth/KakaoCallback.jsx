@@ -62,9 +62,11 @@ function KakaoCallback() {
         // 백엔드 응답이 ApiResponse 래퍼가 아닌 LoginResponse 원형({ user, isNew })임
         // 기존 result === "success" 검사 → user 존재 여부로 판정
         const data = response.data;
-        if (data && data.user && data.user.id) {
-          // 로그인 성공 시 사용자 정보 저장
-          localStorage.setItem("userProfile", JSON.stringify(data));
+        // 백엔드가 { user, isNew } 또는 사용자 원형을 반환할 수 있으므로 모두 대응
+        const user = data && (data.user ? data.user : data);
+        if (user && user.id) {
+          // 로그인 성공 시 사용자 정보 저장(원형 사용자 객체만 저장)
+          localStorage.setItem("userProfile", JSON.stringify(user));
 
           setStatus("success");
           setMessage("로그인 성공! 잠시 후 페이지로 이동합니다...");

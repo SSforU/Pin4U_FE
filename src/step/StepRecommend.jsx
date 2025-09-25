@@ -12,7 +12,7 @@ import SkeletonUI from "../component/ui/SkeletonUI.jsx";
 import axios from "axios";
 
 function StepRecommend() {
-  const { memo, userProfile } = useOutletContext();
+  const { memo, userProfile, location, nickname } = useOutletContext();
   const [content, setContent] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [IMAGE_FILE, setImageFile] = useState(null);
@@ -24,50 +24,44 @@ function StepRecommend() {
   const IMAGE_MAKE_KEY_PATH =
     import.meta.env.VITE_IMAGE_MAKE_KEY_PATH || "/api/uploads/images/make-key";
 
-  // StepLocation에서 선택한 장소들을 localStorage에서 불러오기
+  // StepLocation에서 선택한 장소들 (상위 컨텍스트 전달)
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [currentPlaceIndex, setCurrentPlaceIndex] = useState(0);
   // 장소별 입력 데이터 저장 (tags, message, image)
   const [placeRecommendations, setPlaceRecommendations] = useState([]);
 
-  // 컴포넌트 마운트 시 localStorage에서 선택된 장소들 불러오기
+  // 컴포넌트 마운트/상위 location 변경 시 선택 장소 초기화
   useEffect(() => {
-    const loadSelectedLocations = () => {
-      try {
-        setIsLoading(true);
-        // selectedLocationsWithDetails에서 데이터 로드
-        const savedLocationsWithDetails = localStorage.getItem(
-          "selectedLocationsWithDetails"
-        );
-        if (savedLocationsWithDetails) {
-          const locationsWithDetails = JSON.parse(savedLocationsWithDetails);
+    try {
+      setIsLoading(true);
+      const locationsArray = Array.isArray(location)
+        ? location
+        : location
+        ? [location]
+        : [];
+      const normalized = locationsArray.map((loc) => ({
+        id: loc.id, // StepLocation에서 설정한 id 필드 사용
+        external_id: loc.external_id, // 원본 external_id도 보존
+        title: loc.title,
+      }));
+      const initialRecommendations = normalized.map(() => ({
+        tags: [],
+        message: "",
+        image: null,
+      }));
+      setSelectedPlaces(normalized);
+      setPlaceRecommendations(initialRecommendations);
+    } catch (error) {
+      console.error("선택된 장소 초기화 실패:", error);
+      setSelectedPlaces([]);
+      setPlaceRecommendations([]);
+    } finally {
+      setTimeout(() => setIsLoading(false), 300);
+    }
+  }, [location]);
 
-          // 각 장소별로 기본 데이터 구조 초기화 (기존 데이터 유지)
-          const initialRecommendations = locationsWithDetails.map(
-            (location) => ({
-              tags: location.tags || [],
-              message: location.recommend_message || "",
-              image: location.image_url || null,
-            })
-          );
-
-          setSelectedPlaces(locationsWithDetails);
-          setPlaceRecommendations(initialRecommendations);
-        } else {
-          // localStorage에 선택된 장소가 없습니다.
-        }
-      } catch (error) {
-        console.error("선택된 장소 정보 로드 실패:", error);
-        setSelectedPlaces([]);
-        setPlaceRecommendations([]);
-      } finally {
-        // 로딩 완료
-        setTimeout(() => setIsLoading(false), 800); // 자연스러운 로딩을 위해 약간의 지연
-      }
-    };
-
-    loadSelectedLocations();
-  }, []);
+  // 닉네임은 상위 컨텍스트에서 전달됨
+  useEffect(() => {}, [userProfile, nickname]);
 
   // 현재 장소의 데이터를 UI에 반영
   useEffect(() => {
@@ -146,8 +140,8 @@ function StepRecommend() {
         await axios.put(publicUrl, file, {
           headers: {
             "Content-Type": file.type || "application/octet-stream",
+            "x-amz-acl": "public-read",
           },
-          "x-amz-acl": "public-read",
           withCredentials: false,
         });
 
@@ -312,18 +306,15 @@ function StepRecommend() {
       return; // 업로드 중엔 제출 방지
     }
     try {
-      // 1. localStorage에서 데이터 수집
-      const rawNickname = localStorage.getItem("recommendUserNickname") || ""; // 닉네임 키 수정
-      const nickname = rawNickname.trim();
+      // 1. 상위 컨텍스트에서 닉네임 수집
+      const recommenderNickname = (nickname || "").trim();
 
       // 닉네임 검증 (2~16자)
-      if (nickname.length < 2 || nickname.length > 16) {
+      if (recommenderNickname.length < 2 || recommenderNickname.length > 16) {
         alert("닉네임은 2~16자 사이로 입력해주세요.");
         return;
       }
-      const locationsWithDetails = JSON.parse(
-        localStorage.getItem("selectedLocationsWithDetails") || "[]"
-      );
+      const locationsWithDetails = selectedPlaces || [];
       // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
       // guest_id 생성 (UUID v4 형식)
       const generateGuestId = () => {
@@ -340,8 +331,8 @@ function StepRecommend() {
       const guestId = generateGuestId();
 
       const items = locationsWithDetails.map((location, index) => ({
-        place_external_id: location.external_id,
-        recommender_nickname: nickname,
+        place_external_id: location.external_id, // validator 통과용
+        recommender_nickname: recommenderNickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
@@ -353,6 +344,16 @@ function StepRecommend() {
       console.log("StepRecommend: locationsWithDetails:", locationsWithDetails);
       console.log("StepRecommend: placeRecommendations:", placeRecommendations);
 
+      // 디버깅을 위한 추가 로그
+      console.log("StepRecommend: 각 장소의 external_id 확인:");
+      locationsWithDetails.forEach((loc, index) => {
+        console.log(`장소 ${index + 1}:`, {
+          id: loc.id,
+          external_id: loc.external_id,
+          title: loc.title,
+        });
+      });
+
       // 3. API 호출 - 추천 장소 최종 제출
       const response = await axios.post(
         `${BASE_URL}/api/requests/${slug}/recommendations`,
@@ -361,31 +362,7 @@ function StepRecommend() {
       );
 
       if (response.data.result === "success") {
-        // 4. localStorage에 데이터 저장
-        const finalData = {
-          slug,
-          placeRecommendations,
-          completedAt: new Date().toISOString(),
-        };
-
-        localStorage.setItem(
-          "recommendMessages",
-          JSON.stringify(placeRecommendations.map((p) => p.message))
-        );
-        localStorage.setItem(
-          "recommendImages",
-          JSON.stringify(placeRecommendations.map((p) => p.image))
-        );
-        localStorage.setItem(
-          "recommendTags",
-          JSON.stringify(placeRecommendations.map((p) => p.tags))
-        );
-        localStorage.setItem(
-          `recommendations_${slug}`,
-          JSON.stringify(finalData)
-        );
-
-        console.log("추천 제출 완료:", finalData);
+        console.log("추천 제출 완료");
 
         // 5. CompleteRecommend로 이동 (현재 경로 기준으로 personal/group 분기)
         const currentPath = window.location.pathname;
