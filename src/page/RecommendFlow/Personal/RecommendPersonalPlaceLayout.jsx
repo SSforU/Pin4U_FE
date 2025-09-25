@@ -24,6 +24,11 @@ function RecommendPersonalPlaceLayout() {
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
+
+  // location 상태 변경 시 로그 추가
+  useEffect(() => {
+    console.log("RecommendPersonalPlaceLayout: location 상태 변경:", location);
+  }, [location]);
   const [memo, setMemo] = useState("");
 
   // 오류 발생 시 모달 상태

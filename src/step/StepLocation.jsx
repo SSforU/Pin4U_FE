@@ -24,15 +24,10 @@ function StepLocation(props) {
 
   // 오류 처리 로직 추가
   const [selectedLocations, setSelectedLocations] = useState(() => {
-    // location이 배열이고 내용이 있을 때만 초기화
-    if (location && Array.isArray(location) && location.length > 0) {
+    if (location && Array.isArray(location) && location.length > 0)
       return location;
-    }
-    // location이 단일 객체일 때도 배열로 변환
-    if (location && typeof location === "object" && !Array.isArray(location)) {
+    if (location && typeof location === "object" && !Array.isArray(location))
       return [location];
-    }
-    // 그 외의 경우 빈 배열
     return [];
   });
 
@@ -46,9 +41,9 @@ function StepLocation(props) {
         const requestResponse = await axios.get(
           `${BASE_URL}/api/requests/${slug}`
         );
-        if (requestResponse.data.result === "success") {
+        if (requestResponse.data?.data?.station) {
           setStationInfo(requestResponse.data.data.station);
-          setRequestMemo(requestResponse.data.data.requestMessage);
+          setRequestMemo(requestResponse.data.data.requestMessage || "");
         }
       } catch (error) {
         console.error("데이터 조회 실패:", error);
@@ -132,33 +127,24 @@ function StepLocation(props) {
       (loc) => loc.id === item.id
     );
     if (!isAlreadySelected) {
+      console.log("StepLocation: 선택된 장소 데이터:", item);
+      console.log("StepLocation: item.external_id:", item.external_id);
+      console.log("StepLocation: item.id:", item.id);
+
       const newSelectedLocations = [...selectedLocations, item];
 
       setSelectedLocations(newSelectedLocations);
 
       // 부모 컴포넌트에 배열로 전달 (다음 버튼 활성화를 위해)
       if (typeof setLocation === "function") {
+        console.log(
+          "StepLocation: setLocation 호출, 데이터:",
+          newSelectedLocations
+        );
         setLocation(newSelectedLocations);
       }
 
-      // localStorage에 기본 구조로 저장 (API 명세에 맞게)
-      const locationsWithDetails = newSelectedLocations.map((location) => ({
-        external_id: location.external_id,
-        title: location.title,
-        recommender_nickname: "", // 나중에 입력받을 닉네임
-        recommend_message: "", // 나중에 입력받을 메시지
-        tags: [], // 나중에 선택할 태그들
-        image_url: null, // 나중에 첨부할 이미지
-      }));
-
-      localStorage.setItem(
-        "selectedLocations",
-        JSON.stringify(newSelectedLocations)
-      );
-      localStorage.setItem(
-        "selectedLocationsWithDetails",
-        JSON.stringify(locationsWithDetails)
-      );
+      // 상위 상태에만 반영; 저장은 제출 시 서버로 전송
 
       setQuery(""); // 검색어 초기화
     }
@@ -176,31 +162,7 @@ function StepLocation(props) {
       );
     }
 
-    // localStorage에 저장
-    localStorage.setItem(
-      "selectedLocations",
-      JSON.stringify(newSelectedLocations)
-    );
-
-    // selectedLocationsWithDetails도 업데이트
-    if (newSelectedLocations.length > 0) {
-      const locationsWithDetails = newSelectedLocations.map((location) => ({
-        external_id: location.external_id,
-        title: location.title,
-        recommender_nickname: "",
-        recommend_message: "",
-        tags: [],
-        image_url: null,
-      }));
-
-      localStorage.setItem(
-        "selectedLocationsWithDetails",
-        JSON.stringify(locationsWithDetails)
-      );
-    } else {
-      // 장소가 없으면 localStorage에서 제거
-      localStorage.removeItem("selectedLocationsWithDetails");
-    }
+    // 로컬 저장 제거
   };
 
   return (
