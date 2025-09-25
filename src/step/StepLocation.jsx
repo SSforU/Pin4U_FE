@@ -128,23 +128,14 @@ function StepLocation(props) {
     );
     if (!isAlreadySelected) {
       console.log("StepLocation: 선택된 장소 데이터:", item);
-      console.log("StepLocation: item.external_id:", item.external_id);
-      console.log("StepLocation: item.id:", item.id);
-
       const newSelectedLocations = [...selectedLocations, item];
 
       setSelectedLocations(newSelectedLocations);
 
       // 부모 컴포넌트에 배열로 전달 (다음 버튼 활성화를 위해)
       if (typeof setLocation === "function") {
-        console.log(
-          "StepLocation: setLocation 호출, 데이터:",
-          newSelectedLocations
-        );
         setLocation(newSelectedLocations);
       }
-
-      // 상위 상태에만 반영; 저장은 제출 시 서버로 전송
 
       setQuery(""); // 검색어 초기화
     }
@@ -161,8 +152,6 @@ function StepLocation(props) {
         newSelectedLocations.length > 0 ? newSelectedLocations : null
       );
     }
-
-    // 로컬 저장 제거
   };
 
   return (
