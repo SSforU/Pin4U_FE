@@ -22,7 +22,7 @@ export default function GroupPlaceMapPage() {
   const [copySuccess, setCopySuccess] = useState(false); // 복사 성공 상태 추가
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const USE_MOCK = true; // 목업으로 실행하려면 true
+  const USE_MOCK = false; // 목업으로 실행하려면 true
 
   // 링크 복사 함수
   const handleCopyLink = async () => {

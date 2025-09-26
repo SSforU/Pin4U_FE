@@ -166,6 +166,11 @@ export default function HomePage() {
         // 역 단위로 고유화
         const stationMap = new Map();
         personalItems.forEach((x) => {
+          // 같은 역 이름 가진 place 개수 카운트
+          const count = personalItems.filter(
+            (p) => p.station_name === x.station_name
+          ).length;
+
           if (!stationMap.has(x.station_name)) {
             stationMap.set(x.station_name, {
               id: stationMap.size + 1,
@@ -173,7 +178,7 @@ export default function HomePage() {
               name: `${x.station_name}역`,
               lines: parseLines(x.station_line),
               address: x.road_address_name ?? "",
-              recommended_counts: Number(x.recommend_count ?? 0),
+              place_count: count,
               created_at: x.created_at,
             });
           }
