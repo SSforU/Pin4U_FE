@@ -289,6 +289,7 @@ export default function PlaceMapPage() {
         // 실제 API 모드
         const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
           signal: controller.signal,
+          withCredentials: true,
         });
         const reqData = reqRes?.data?.data;
         if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
@@ -299,6 +300,7 @@ export default function PlaceMapPage() {
             `${BASE_URL}/api/recommendations/auto?slug=${slug}&n=5&q=`,
             {
               signal: controller.signal,
+              withCredentials: true,
             }
           );
           aiItems = aiRes?.data?.data?.items ?? [];

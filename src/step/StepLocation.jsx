@@ -39,7 +39,8 @@ function StepLocation(props) {
       try {
         // 7번 API: 역 정보와 메모
         const requestResponse = await axios.get(
-          `${BASE_URL}/api/requests/${slug}`
+          `${BASE_URL}/api/requests/${slug}`,
+          { withCredentials: true }
         );
         if (requestResponse.data?.data?.station) {
           setStationInfo(requestResponse.data.data.station);
@@ -67,6 +68,7 @@ function StepLocation(props) {
           q: q.trim(),
           station: stationInfo.code,
         },
+        withCredentials: true,
       });
 
       if (response.data.result === "success") {

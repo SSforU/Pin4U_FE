@@ -31,7 +31,8 @@ function StepStation() {
     // TODO: API 연동 시 아래 주석 해제하고 위 Mock Data 로직 제거
     try {
       const response = await axios.get(
-        `${BASE_URL}/api/stations/search?q=${encodeURIComponent(q.trim())}`
+        `${BASE_URL}/api/stations/search?q=${encodeURIComponent(q.trim())}`,
+        { withCredentials: true }
       );
 
       if (response.data.result === "success") {
