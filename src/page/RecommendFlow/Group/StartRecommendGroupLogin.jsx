@@ -28,47 +28,15 @@ function StartRecommendGroupLogin() {
   const [isLoading, setIsLoading] = useState(true);
   const [ownerNickname, setOwnerNickname] = useState("");
 
-  // API에서 요청 정보 조회 (station + memo)
+  // 로그인 페이지이므로 API 호출 없이 기본 메시지 표시
   useEffect(() => {
-    const fetchRequestInfo = async () => {
-      try {
-        setIsLoading(true);
-        // API 호출
-        const response = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
-          withCredentials: true,
-        });
-
-        // 디버그 로그: 응답 전체를 확인
-        console.log("/api/groups/:slug/map response:", response?.data);
-
-        // 올바른 응답 구조에서 데이터 추출
-        const { station, requestMessage } = response.data.data || {};
-        // 생성자 닉네임(백엔드 필드명 다양성 대비 안전하게 파싱)
-        const extractOwnerNickname = (d) => d?.group?.name || "";
-        const creatorName = extractOwnerNickname(response?.data?.data);
-        // 필요한 데이터만 추출
-        setLocationData({
-          station: station.name, // 역 이름만
-          memo: requestMessage, // 요청 메시지만
-        });
-        setOwnerNickname(creatorName);
-      } catch (error) {
-        console.error("요청 정보 조회 실패:", error);
-        // 에러 시 기본값 설정
-        setLocationData({
-          station: "정보를 불러올 수 없습니다",
-          memo: "정보를 불러올 수 없습니다",
-        });
-        setOwnerNickname("");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (slug) {
-      fetchRequestInfo();
-    }
-  }, [slug, BASE_URL]);
+    setIsLoading(false);
+    setLocationData({
+      station: "로그인 후 확인 가능",
+      memo: "그룹에 가입하여 내용을 확인하세요",
+    });
+    setOwnerNickname("그룹 멤버");
+  }, [slug]);
 
   return (
     <Wrapper>

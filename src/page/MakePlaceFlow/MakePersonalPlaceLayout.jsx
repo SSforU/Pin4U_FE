@@ -60,13 +60,6 @@ function MakePersonalPlaceLayout() {
           request_message: memo,
         };
 
-        console.log("🔍 개인지도 생성 요청 데이터:", {
-          requestData,
-          userProfile,
-          station,
-          memo,
-        });
-
         // 요청 생성(API 연동)
         const response = await axios.post(
           `${BASE_URL}/api/requests`,
@@ -74,45 +67,20 @@ function MakePersonalPlaceLayout() {
           { withCredentials: true }
         );
 
-        console.log("👉 개인지도 생성 응답:", {
-          status: response.status,
-          data: response.data,
-          headers: response.headers,
-        });
-
         if (response.data.result === "success") {
           const { slug } = response.data.data.request;
           localStorage.setItem("createdSlug", slug);
           localStorage.setItem("mapType", "personal"); // 개인 지도 타입 저장
-
-          // 개인지도 생성 후 홈페이지 새로고침 트리거 설정
-          localStorage.setItem("shouldRefreshHome", "true");
-
           navigate("/complete");
         }
       } catch (error) {
-        console.error("❌ 개인지도 생성 오류 상세:", {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          config: {
-            url: error.config?.url,
-            method: error.config?.method,
-            withCredentials: error.config?.withCredentials,
-          },
-        });
-
+        console.error("오류 발생:", error);
         let message = "오류가 발생했습니다.";
 
         if (error.response?.status === 500) {
           message = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
         } else if (error.response?.status === 400) {
           message = "잘못된 요청입니다.";
-        } else if (error.response?.status === 401) {
-          message = "로그인이 필요합니다.";
-        } else if (error.response?.status === 403) {
-          message = "권한이 없습니다.";
         }
         setErrorMessage(message);
         setShowErrorModal(true);
