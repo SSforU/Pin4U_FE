@@ -28,7 +28,9 @@ function StartRecommendPersonal() {
       try {
         setIsLoading(true);
         // API 호출
-        const response = await axios.get(`${BASE_URL}/api/requests/${slug}`);
+        const response = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
+          withCredentials: true,
+        });
 
         // 올바른 응답 구조에서 데이터 추출
         const { station, requestMessage } = response.data.data;

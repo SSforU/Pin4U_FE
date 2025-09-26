@@ -28,7 +28,10 @@ export default function PlaceDetail({ item, onClose }) {
     try {
       const res = await axios.get(
         `${BASE_URL}/api/requests/${slug}/places/notes`,
-        { params: { external_id: item.externalId } } // ?external_id=...
+        {
+          params: { external_id: item.externalId }, // ?external_id=...
+          withCredentials: true,
+        }
       );
       const payload = res?.data?.data;
       if (!payload) throw new Error("메시지 데이터가 비어 있습니다.");
