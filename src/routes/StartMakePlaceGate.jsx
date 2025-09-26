@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useOutletContext } from "react-router-dom";
 import StartMakePlaceSplash from "../page/Splash/StartMakePlaceSplash.jsx";
 
 export default function StartMakePlaceGate() {
-  const hasProfile = Boolean(localStorage.getItem("userProfile"));
-  return hasProfile ? <Navigate to="/" replace /> : <StartMakePlaceSplash />;
+  const { userProfile } = useOutletContext();
+  return userProfile ? <Navigate to="/" replace /> : <StartMakePlaceSplash />;
 }
