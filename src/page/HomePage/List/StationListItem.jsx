@@ -18,7 +18,7 @@ const StationListItem = ({ station, onClick }) => {
           src="/Recommend_Memo.png"
           style={{ width: "16px", height: "16px" }}
         />
-        <LikeCount>{station.recommended_counts}</LikeCount>
+        <LikeCount>{station.place_count}</LikeCount>
       </LikeGroup>
     </Container>
   );
