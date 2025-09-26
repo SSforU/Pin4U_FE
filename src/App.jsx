@@ -11,11 +11,12 @@ function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  // 고정 사용자(id=1) 프로필 조회
+  // 사용자 프로필 조회
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
+
         const response = await axios.get(`${BASE_URL}/api/me`, {
           withCredentials: true,
         });
@@ -36,6 +37,35 @@ function App() {
     };
     fetchUserProfile();
   }, [BASE_URL]);
+
+  // 사용자 프로필 상태 동기화 (localStorage 변경 감지)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedProfile = localStorage.getItem("userProfile");
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          setUserProfile(parsedProfile);
+        } catch (error) {
+          console.error("localStorage 프로필 파싱 실패:", error);
+          localStorage.removeItem("userProfile");
+          setUserProfile(null);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    };
+
+    // 초기 로드 시 localStorage 확인
+    handleStorageChange();
+
+    // storage 이벤트 리스너 등록 (다른 탭에서의 변경 감지)
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   // 로딩 중일 때
   if (loading) {

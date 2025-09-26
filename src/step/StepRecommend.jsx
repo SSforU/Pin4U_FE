@@ -331,7 +331,7 @@ function StepRecommend() {
       const guestId = generateGuestId();
 
       const items = locationsWithDetails.map((location, index) => ({
-        place_external_id: location.external_id, // validator 통과용
+        external_id: location.external_id, // 서버 검증용
         recommender_nickname: recommenderNickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,

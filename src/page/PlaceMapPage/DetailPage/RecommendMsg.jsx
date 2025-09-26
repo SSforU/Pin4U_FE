@@ -178,6 +178,7 @@ export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
 
   const currentNote = notes[currentIndex];
   const hasMultipleNotes = notes && notes.length > 1;
+  const imageSrc = currentNote?.imageUrl || currentNote?.image_url;
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % notes.length);
@@ -220,9 +221,7 @@ export default function RecommendMsg({ place, notes, onClose, placeUrl }) {
             ))}
           </SectionTitle>
         )}
-        {currentNote.image_url && (
-          <MessageImage src={currentNote.imageUrl} alt="추천 사진" />
-        )}
+        {imageSrc && <MessageImage src={imageSrc} alt="추천 사진" />}
         <MessageContentBorder>
           <MessageContentInner>
             <MessageText>{currentNote.recommendMessage}</MessageText>
