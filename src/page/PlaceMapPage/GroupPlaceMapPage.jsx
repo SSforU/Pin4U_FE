@@ -61,7 +61,7 @@ export default function GroupPlaceMapPage() {
       window.alert("그룹 slug가 없어요.");
       return;
     }
-    navigate(`/shared-map/group/${slug}/onbording/location`); // <StartRecommendGroupReqeust /> 라우트로
+    navigate(`/shared-map/group/${slug}/onboarding/location?step=location`); // <StartRecommendGroupReqeust /> 라우트로
   };
 
   function goPrev() {
@@ -203,7 +203,6 @@ export default function GroupPlaceMapPage() {
             timestamp: new Date().toISOString(),
           };
 
-          // /api/recommendation/auto 목업 (AI 추천)
           const autoResp = {
             result: "ok",
             data: {
