@@ -45,6 +45,7 @@ function CompleteRecommendGroup() {
   };
 
   const handleComplete = () => {
+    // 추천 작성자(로그인한 사용자)의 홈페이지로 이동
     navigate("/");
   };
 

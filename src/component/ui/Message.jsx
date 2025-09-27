@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Memo from "./Memo.jsx";
 
@@ -11,13 +11,29 @@ function Message({
   onPrivateChange,
   isPrivate = false,
   userProfile,
+  currentImageFile = null,
+  currentImageUrl = null,
   ...props
 }) {
-  const [IMAGE_FILE, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [IMAGE_FILE, setImageFile] = useState(currentImageFile);
+  const [imagePreview, setImagePreview] = useState(currentImageUrl || "");
   const [showImageModal, setShowImageModal] = useState(false);
   const [showPublicNoticePopup, setShowPublicNoticePopup] = useState(false);
   const [showPrivateSuccessPopup, setShowPrivateSuccessPopup] = useState(false);
+
+  // 파일 input에 대한 ref
+  const fileInputRef = useRef(null);
+
+  // 부모 컴포넌트에서 전달받은 이미지 정보로 상태 업데이트
+  useEffect(() => {
+    setImageFile(currentImageFile);
+    setImagePreview(currentImageUrl || "");
+
+    // 파일 input 초기화 - 장소가 바뀔 때마다 새로 업로드할 수 있도록
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [currentImageFile, currentImageUrl]);
 
   // 이미지 파일 선택 처리
   const handleImageSelect = (e) => {
@@ -149,6 +165,7 @@ function Message({
 
         {/* 숨겨진 파일 입력 */}
         <ImageInput
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handleImageSelect}
