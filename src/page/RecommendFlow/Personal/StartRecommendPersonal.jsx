@@ -2,7 +2,7 @@
 // 링크로 접속한 사용자가 station과 memo 정보를 조회
 // #7 A-지도화면 API 연동
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useOutletContext } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
 import Button from "../../../component/ui/Button.jsx";
@@ -11,7 +11,6 @@ import axios from "axios";
 function StartRecommendPersonal() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -20,7 +19,35 @@ function StartRecommendPersonal() {
     station: "",
     memo: "",
   });
+  const [ownerNickname, setOwnerNickname] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // 오너 닉네임 조회 (비인증)
+  useEffect(() => {
+    const fetchOwner = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/api/requests/${slug}/owner`
+        );
+        console.log("개인 요청 오너 API 응답:", response.data);
+
+        const data = response?.data?.data;
+        const nickname =
+          data?.nickname ||
+          data?.owner_nickname ||
+          data?.user_nickname ||
+          "사용자";
+        setOwnerNickname(nickname);
+      } catch (error) {
+        console.error("오너 닉네임 조회 실패:", error);
+        setOwnerNickname("사용자");
+      }
+    };
+
+    if (slug) {
+      fetchOwner();
+    }
+  }, [slug, BASE_URL]);
 
   // API에서 요청 정보 조회 (station + memo)
   useEffect(() => {
@@ -68,7 +95,7 @@ function StartRecommendPersonal() {
         </ImageContainer>
         <Content>
           <Title>
-            {userProfile?.nickname || "사용자"} 님을 위한
+            {ownerNickname || "사용자"} 님을 위한
             <br />
             장소를 추천해주세요!
           </Title>

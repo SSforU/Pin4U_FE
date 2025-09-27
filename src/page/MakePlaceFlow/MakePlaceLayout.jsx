@@ -74,8 +74,17 @@ function MakePlaceLayout() {
 
   function goPrev() {
     if (currentIndex > 0) {
-      goToStep(currentIndex - 1);
+      // maptype 단계에서 뒤로가기 시 로그인 여부 확인
+      if (stepParam === "maptype" && userProfile?.nickname) {
+        // 로그인된 사용자는 nickname을 건너뛰었으므로 홈으로 이동
+        console.log("로그인된 사용자 - 홈으로 이동");
+        navigate("/");
+      } else {
+        console.log("이전 단계로 이동");
+        goToStep(currentIndex - 1);
+      }
     } else {
+      console.log("첫 번째 단계 - 홈으로 이동");
       navigate("/");
     }
   }
@@ -88,7 +97,9 @@ function MakePlaceLayout() {
           <PrevButtonWraaper
             src="/PrevButton.png"
             alt="뒤로가기"
-            onClick={goPrev}
+            onClick={() => {
+              goPrev();
+            }}
           />
         </PrevButtonContainer>
       </Top>
