@@ -297,7 +297,11 @@ export default function PlaceMapPage() {
       </MapWrapper>
 
       {selectedItemId ? (
-        <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
+        <PlaceDetail
+          item={selectedItem}
+          onClose={handleCloseDetail}
+          notesSlug={slug}
+        />
       ) : (
         <CardListWrapper>
           <PlaceCardList
