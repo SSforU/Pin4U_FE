@@ -122,7 +122,7 @@ export default function PlaceDetail({ item, onClose }) {
       )}
       {showGallery && (
         <PhotoGallery
-          imageUrls={item?.mock?.image_urls}
+          $imageUrls={item?.mock?.image_urls}
           onClose={() => setShowGallery(false)}
         />
       )}
