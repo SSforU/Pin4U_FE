@@ -159,9 +159,9 @@ const ImageContainer = styled.div`
 
 const Image = styled.img`
   width: 100%;
-  max-width: 70px;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 `;
 
 const InfoSection = styled.div`

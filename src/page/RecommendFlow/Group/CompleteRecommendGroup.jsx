@@ -1,29 +1,51 @@
 // #1 고정 사용자 조회 API 호출
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
 
 function CompleteRecommendGroup() {
   const navigate = useNavigate();
   const { userProfile } = useOutletContext();
+  const { slug } = useParams(); // URL에서 slug 가져오기
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // 링크 복사 함수 - CompleteMakePlace에서 생성된 링크 그대로 사용
-  const handleCopyLink = () => {
-    const savedLink = localStorage.getItem("savedShareLink");
-    if (savedLink) {
-      navigator.clipboard.writeText(savedLink).then(() => {
+  // 링크 복사 함수 - PlaceMapPage 로직 참고해서 견고하게 구현
+  const handleCopyLink = async () => {
+    // 라우트 파라미터 우선, 없으면 localStorage에서 slug 확인
+    const s = slug || localStorage.getItem("createdSlug");
+    if (!s) {
+      window.alert("공유할 링크의 slug가 없습니다.");
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}/shared-map/group/${s}/splash`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
+    } catch (err) {
+      try {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 3000);
-      });
-    } else {
-      // 링크가 저장되지 않았으면 에러 처리
-      alert("저장된 링크가 없습니다.");
+        setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
+      } catch (err) {
+        window.prompt(
+          "복사에 실패했어요. 아래 링크를 수동으로 복사해 주세요:",
+          shareUrl
+        );
+      }
     }
   };
 
   const handleComplete = () => {
+    // 추천 작성자(로그인한 사용자)의 홈페이지로 이동
     navigate("/");
   };
 
