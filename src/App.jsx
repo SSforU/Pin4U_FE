@@ -34,7 +34,22 @@ function App() {
         setLoading(false);
       }
     };
+
     fetchUserProfile();
+
+    // 닉네임 업데이트 후 프로필 새로고침을 위한 이벤트 리스너
+    const handleRefreshUserProfile = () => {
+      fetchUserProfile();
+    };
+
+    window.addEventListener("refreshUserProfile", handleRefreshUserProfile);
+
+    return () => {
+      window.removeEventListener(
+        "refreshUserProfile",
+        handleRefreshUserProfile
+      );
+    };
   }, [BASE_URL]);
 
   // 로딩 중일 때
@@ -52,7 +67,7 @@ function App() {
   return (
     <AppShell>
       <GlobalStyle />
-      <Outlet context={{ userProfile }} />
+      <Outlet context={{ userProfile, isUserProfileLoading: loading }} />
     </AppShell>
   );
 }

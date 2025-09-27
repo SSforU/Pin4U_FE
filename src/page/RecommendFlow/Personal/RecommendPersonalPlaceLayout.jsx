@@ -3,9 +3,9 @@ import React, { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
-  useMatch,
   useParams,
   useOutletContext,
+  useSearchParams,
 } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../../../component/ui/ProgressBar.jsx";
@@ -17,11 +17,19 @@ import { getResponsiveStyles } from "../../../styles/responsive.js";
 const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
+const STEP_DEFAULT = "location";
 
 function RecommendPersonalPlaceLayout() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
+
+  const [searchParams, _setSearchParams] = useSearchParams();
+  // 1) 먼저 쿼리에서 읽음
+  const qsStep = searchParams.get("step") ?? STEP_DEFAULT;
+  // 2) 그 다음 상태 초기화
+  const [step, setStep] = useState(qsStep);
+
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
 
@@ -35,6 +43,11 @@ function RecommendPersonalPlaceLayout() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // 3) 주소창의 step이 바뀌면 상태도 맞추기
+  useEffect(() => {
+    setStep(qsStep);
+  }, [qsStep]);
+
   // 닉네임이 변경될 때마다 localStorage에 저장
   useEffect(() => {
     if (nickname.trim()) {
@@ -42,19 +55,15 @@ function RecommendPersonalPlaceLayout() {
     }
   }, [nickname]);
 
-  // useMatch로 현재 step 추출
-  const match = useMatch("/shared-map/personal/:slug/onboarding/:step");
-  const stepParam = match?.params?.step || STEPS[0];
-
-  const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
+  const currentIndex = Math.max(0, STEPS.indexOf(step));
   const currentStep = currentIndex + FLOW_OFFSET;
 
   // Personal 추천 플로우: 로그인 여부와 무관하게 닉네임 스텝을 반드시 거친다
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" && !nickname.trim()) ||
-    (stepParam === "location" && !location);
+    (step === "nickname" && !nickname.trim()) ||
+    (step === "location" && !location);
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
@@ -72,9 +81,9 @@ function RecommendPersonalPlaceLayout() {
 
   async function goNext() {
     try {
-      if (stepParam === "nickname") {
+      if (step === "nickname") {
         goToStep(currentIndex + 1);
-      } else if (stepParam === "location") {
+      } else if (step === "location") {
         goToStep(currentIndex + 1);
       }
     } catch (error) {
@@ -126,13 +135,13 @@ function RecommendPersonalPlaceLayout() {
       </Top>
 
       <Main>
-        {stepParam === "nickname" ? (
+        {step === "nickname" ? (
           <StepNickname
             nickname={nickname}
             setNickname={setNickname}
             detailText="내 추천 장소를 공유받는 친구들에게 공개돼요."
           />
-        ) : stepParam === "location" ? (
+        ) : step === "location" ? (
           <ContentSection>
             <TextBlock>
               <Title>
@@ -141,7 +150,7 @@ function RecommendPersonalPlaceLayout() {
               </Title>
               <Detail>
                 {userProfile?.nickname || "사용자"}님이 설정한 역 반경{" "}
-                <span style={{ color: "#ff7e74" }}>800m</span>안에서 추천이
+                <span style={{ color: "#ff7e74" }}>1.5km</span>안에서 추천이
                 가능해요.
               </Detail>
             </TextBlock>
@@ -163,7 +172,7 @@ function RecommendPersonalPlaceLayout() {
         )}
       </Main>
 
-      {stepParam !== "recommend" && (
+      {step !== "recommend" && (
         // Recommend 단계에서는 버튼 미노출
         <Bottom>
           <Button disabled={isNextDisabled} onClick={goNext}>
