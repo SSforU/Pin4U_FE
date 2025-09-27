@@ -3,11 +3,12 @@ import React, { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
-  useMatch,
   useParams,
   useOutletContext,
+  useSearchParams,
 } from "react-router-dom";
 import styled from "styled-components";
+import axios from "axios";
 import ProgressBar from "../../../component/ui/ProgressBar.jsx";
 import Button from "../../../component/ui/Button.jsx";
 import StepNickname from "../../../step/StepNickname.jsx";
@@ -24,57 +25,190 @@ function RecommendGroupPlaceLayout() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
+
+  const [searchParams, _setSearchParams] = useSearchParams();
+  // 1) 먼저 쿼리에서 읽음, URL 경로에서 step 추출
+  const getStepFromUrl = () => {
+    const pathname = window.location.pathname;
+    const pathParts = pathname.split("/");
+    const lastPart = pathParts[pathParts.length - 1];
+
+    // URL 경로의 마지막 부분이 STEPS에 포함되어 있으면 그것을 사용
+    if (STEPS.includes(lastPart)) {
+      return lastPart;
+    }
+
+    // 그렇지 않으면 로그인 상태에 따라 기본값 결정
+    return userProfile?.nickname ? "location" : "nickname";
+  };
+  const qsStep = searchParams.get("step") ?? getStepFromUrl();
+  // 2) 그 다음 상태 초기화
+  const [step, setStep] = useState(qsStep);
+
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
+
+  // location 상태 변경 시 로그 추가
+  useEffect(() => {
+    console.log("RecommendGroupPlaceLayout: location 상태 변경:", {
+      location,
+      isArray: Array.isArray(location),
+      length: Array.isArray(location) ? location.length : "N/A",
+      step,
+      isNextDisabled:
+        step === "location" &&
+        (!location || (Array.isArray(location) && location.length === 0)),
+    });
+  }, [location, step]);
   const [memo, setMemo] = useState("");
 
   // 오류 발생 시 모달 상태
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // useMatch로 현재 step 추출
-  const match = useMatch("/shared-map/group/:slug/onboarding/:step");
-  const stepParam = match?.params?.step || STEPS[0];
-
-  // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 location으로 이동
+  // 3) 주소창의 step이 바뀌면 상태도 맞추기
   useEffect(() => {
-    if (stepParam === "nickname" && userProfile?.nickname) {
-      if (!nickname) setNickname(userProfile.nickname);
+    console.log("URL 변경 감지:", {
+      qsStep,
+      currentStep: step,
+      currentPath: window.location.pathname,
+    });
+    setStep(qsStep);
+  }, [qsStep, step]);
+
+  // 4) 컴포넌트 최초 로드 시에만 로그인 사용자 리다이렉트
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const isOnMainPath =
+      currentPath.endsWith("/onboarding") ||
+      currentPath.endsWith("/onboarding/");
+
+    // 메인 온보딩 경로에 있고, 로그인된 사용자면 location으로 리다이렉트
+    // userProfile이 로드된 후에만 실행
+    if (isOnMainPath && userProfile?.nickname) {
       navigate(`/shared-map/group/${slug}/onboarding/location`, {
         replace: true,
       });
     }
-  }, [stepParam, userProfile, nickname, slug, navigate]);
+  }, [userProfile, navigate, slug]); // 필요한 의존성 추가
 
-  const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
+  // 로그인된 사용자 닉네임 자동 설정
+  useEffect(() => {
+    if (userProfile?.nickname && !nickname) {
+      setNickname(userProfile.nickname);
+    }
+  }, [userProfile, nickname]);
+
+  // 신규 회원가입 사용자의 닉네임 서버 저장
+  const updateNicknameToServer = async (newNickname) => {
+    try {
+      const response = await axios.patch(
+        `${BASE_URL}/api/me`,
+        {
+          nickname: newNickname,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("닉네임 업데이트 성공:", response.data);
+
+      // userProfile 새로고침을 위해 App.jsx에서 다시 불러오기 트리거
+      window.dispatchEvent(new CustomEvent("refreshUserProfile"));
+    } catch (error) {
+      console.error("닉네임 업데이트 실패:", error);
+      alert("닉네임 저장에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 location으로 이동
+  useEffect(() => {
+    // userProfile이 로드되고 닉네임이 있으면 스킵
+    if (step === "nickname" && userProfile?.nickname) {
+      console.log("로그인된 사용자 닉네임 스킵 실행");
+      navigate(`/shared-map/group/${slug}/onboarding/location`, {
+        replace: true,
+      });
+    }
+  }, [step, userProfile, slug, navigate]);
+
+  const currentIndex = Math.max(0, STEPS.indexOf(step));
   const currentStep = currentIndex + FLOW_OFFSET;
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (stepParam === "nickname" &&
+    (step === "nickname" &&
       !userProfile?.nickname &&
       (!nickname.trim() || nickname.length < 2)) ||
-    (stepParam === "location" && !location);
+    (step === "location" &&
+      (!location || (Array.isArray(location) && location.length === 0)));
+
+  // 디버깅: 버튼 상태 확인
+  useEffect(() => {
+    console.log("버튼 상태 디버깅:", {
+      step,
+      location,
+      isNextDisabled,
+      locationCheck:
+        !location || (Array.isArray(location) && location.length === 0),
+      nicknameCheck:
+        step === "nickname" &&
+        !userProfile?.nickname &&
+        (!nickname.trim() || nickname.length < 2),
+    });
+  }, [step, location, isNextDisabled, userProfile, nickname]);
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
+    console.log("goToStep 호출:", {
+      index,
+      safe,
+      stepName: STEPS[safe],
+      currentPath: window.location.pathname,
+    });
+
     // 현재 경로를 확인하여 적절한 경로로 이동
     const currentPath = window.location.pathname;
+    let targetPath;
+
     if (currentPath.includes("/personal/")) {
-      navigate(`/shared-map/personal/${slug}/onboarding/${STEPS[safe]}`);
+      targetPath = `/shared-map/personal/${slug}/onboarding/${STEPS[safe]}`;
     } else if (currentPath.includes("/group/")) {
-      navigate(`/shared-map/group/${slug}/onboarding/${STEPS[safe]}`);
+      targetPath = `/shared-map/group/${slug}/onboarding/${STEPS[safe]}`;
     } else {
       // 기본값 (fallback)
-      navigate(`/shared-map/${slug}/onboarding/${STEPS[safe]}`);
+      targetPath = `/shared-map/${slug}/onboarding/${STEPS[safe]}`;
+    }
+
+    console.log("네비게이션 경로:", targetPath);
+    console.log("현재 경로와 목표 경로 비교:", {
+      currentPath,
+      targetPath,
+      isSame: currentPath === targetPath,
+    });
+
+    // 현재 경로와 목표 경로가 다를 때만 네비게이션
+    if (currentPath !== targetPath) {
+      navigate(targetPath);
+    } else {
+      console.log("이미 목표 경로에 있어서 네비게이션하지 않음");
     }
   }
 
   async function goNext() {
+    console.log("goNext 함수 호출됨:", { step, currentIndex, location });
+
     try {
-      if (stepParam === "nickname") {
+      if (step === "nickname") {
+        console.log("닉네임 단계 처리");
+        // 신규 회원가입 사용자인 경우 (로그인은 되어있지만 닉네임이 없는 경우)
+        if (userProfile?.id && !userProfile?.nickname && nickname.trim()) {
+          await updateNicknameToServer(nickname.trim());
+        }
         goToStep(currentIndex + 1);
-      } else if (stepParam === "location") {
+      } else if (step === "location") {
+        console.log("장소 단계 처리, 다음 단계로 이동:", currentIndex + 1);
         goToStep(currentIndex + 1);
       }
     } catch (error) {
@@ -126,7 +260,7 @@ function RecommendGroupPlaceLayout() {
       </Top>
 
       <Main>
-        {stepParam === "nickname" ? (
+        {step === "nickname" ? (
           <StepNickname
             nickname={nickname}
             setNickname={setNickname}
@@ -134,7 +268,7 @@ function RecommendGroupPlaceLayout() {
               userProfile?.nickname || "사용자"
             }] 멤버에게 공개돼요.`}
           />
-        ) : stepParam === "location" ? (
+        ) : step === "location" ? (
           <ContentSection>
             <TextBlock>
               <Title>
@@ -165,7 +299,7 @@ function RecommendGroupPlaceLayout() {
         )}
       </Main>
 
-      {stepParam !== "recommend" && (
+      {step !== "recommend" && (
         // Recommend 단계에서는 버튼 미노출
         <Bottom>
           <Button disabled={isNextDisabled} onClick={goNext}>
