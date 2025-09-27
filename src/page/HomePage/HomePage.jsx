@@ -20,6 +20,7 @@ export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [hasPendingNoti, setHasPendingNoti] = useState(false);
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const actionsRef = useRef(null); // 아이콘 영역
@@ -350,6 +351,36 @@ export default function HomePage() {
     return stations.filter((s) => s.name.includes(q));
   }, [searchTerm, stations]);
 
+  useEffect(() => {
+    let alive = true;
+
+    const checkNoti = async () => {
+      try {
+        const { data } = await axios.get(`${BASE_URL}/api/notifications`, {
+          params: { status: "pending", limit: 1 }, // 존재 여부만 확인
+          withCredentials: true,
+        });
+        const items = data?.data?.items ?? [];
+        if (alive) setHasPendingNoti(items.length > 0);
+      } catch {
+        if (alive) setHasPendingNoti(false); // 실패 시 점 숨김
+      }
+    };
+
+    checkNoti();
+
+    // 탭으로 돌아왔을 때 갱신
+    const onVisible = () => {
+      if (document.visibilityState === "visible") checkNoti();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      alive = false;
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [BASE_URL]);
+
   return (
     <PageContainer>
       <TitleBox>
@@ -357,9 +388,14 @@ export default function HomePage() {
           {displayNickname || userProfile?.nickname} 님의 지도
         </PageTitle>
         <RightActions ref={actionsRef}>
-          <IconButton aria-label="알림" onClick={handleBellClick} title="알림">
-            <img src="/Bell.svg" alt="알림" width={24} height={24} />
-          </IconButton>
+          <BellButton
+            aria-label={hasPendingNoti ? "알림(새 알림 있음)" : "알림"}
+            onClick={handleBellClick}
+            title={hasPendingNoti ? "알림 - 새 알림 있음" : "알림"}
+          >
+            <img src="/Bell.svg" alt="" width={24} height={24} />
+            {hasPendingNoti && <NotiDot aria-hidden="true" />}
+          </BellButton>
 
           <IconButton
             aria-label="설정"
@@ -714,4 +750,20 @@ const ButtonContainer = styled.div`
   bottom: 0;
   background: linear-gradient(#fff 60%, rgba(255, 255, 255, 0));
   z-index: 5;
+`;
+
+// IconButton 아래쪽 스타일 근처에 추가
+const BellButton = styled(IconButton)`
+  position: relative;
+`;
+
+const NotiDot = styled.span`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #ff5b5b;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff; /* 아이콘 가장자리와 분리 */
 `;

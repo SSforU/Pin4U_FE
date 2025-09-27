@@ -1,45 +1,122 @@
 // PlaceMapPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Map from "./Component/Map.jsx";
 import PlaceCardList from "./PlaceCardList.jsx";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PlaceDetail from "./DetailPage/PlaceDetail.jsx";
 import LoadingSpinner from "../../component/ui/LoadingSpinner.jsx";
 import { toPinVM, toCardVM } from "../../viewModels/placeVMs.js";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL; // e.g. "https://api.ss4u-pin4u.store"
 
 export default function PlaceMapPage() {
   const navigate = useNavigate();
-  const { slug } = useParams(); // /api/requests/{slug} 에서 slug 사용
+  const { slug } = useParams();
 
   const [data, setData] = useState(null);
-  const [isMemoOpen, setIsMemoOpen] = useState(false); // Memo 상태 추가
+  const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [showAiPopup, setShowAiPopup] = useState(false); // AI 팝업 상태 추가
+  const [showAiPopup, setShowAiPopup] = useState(false);
   const [error, setError] = useState("");
-  const [copySuccess, setCopySuccess] = useState(false); // 복사 성공 상태 추가
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const USE_MOCK = false; // 목업으로 실행하려면 true
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  // 링크 복사 함수
-  const handleCopyLink = async () => {
-    // 라우트 파라미터 우선, 없으면 로드된 데이터의 slug 사용
-    const s = slug || data?.slug;
-    if (!s) {
-      window.alert("공유할 링크의 slug가 없습니다.");
-      return;
+  /* ---------- utils ---------- */
+  const safeJsonArray = (maybeJson) => {
+    if (!maybeJson) return undefined;
+    try {
+      const parsed =
+        typeof maybeJson === "string" ? JSON.parse(maybeJson) : maybeJson;
+      return Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
     }
+  };
 
+  // BE camelCase 위주 + 구버전 snake_case/문자열도 허용
+  const normalizeItem = (raw) => {
+    if (!raw) return null;
+
+    const placeName = raw.placeName ?? raw.place_name ?? raw.name ?? "";
+    const x = String(raw.x ?? "");
+    const y = String(raw.y ?? "");
+    const distanceM = raw.distanceM ?? raw.distance_m;
+    const placeUrl =
+      raw.placeUrl ??
+      raw.place_url ??
+      (raw.externalId && String(raw.externalId).startsWith("kakao:")
+        ? `http://place.map.kakao.com/${String(raw.externalId).split(":")[1]}`
+        : undefined);
+
+    // id 우선순위: id -> place_id -> externalId
+    const id = raw.id ?? raw.place_id ?? raw.externalId ?? raw.external_id;
+
+    // 대표 이미지 후보 (있어도 시연에선 미사용, 그래도 값은 구성)
+    const primaryImage =
+      raw.image_url ??
+      raw.thumbnail_url ??
+      raw.cover_url ??
+      (Array.isArray(raw.mock?.imageUrls) ? raw.mock.imageUrls[0] : undefined);
+
+    // mock 통합 (이미지 배열은 시연 제외 가능, 나머지 전부 사용)
+    const m = raw.mock || {};
+    const mock = {
+      rating: m.rating ?? raw.mock_rating ?? null,
+      ratingCount: m.ratingCount ?? raw.mock_rating_count ?? null,
+      // 이미지: BE가 imageUrls(array)거나, 과거 *_json(string)일 수도 있음
+      image_urls:
+        m.image_urls ??
+        m.imageUrls ??
+        safeJsonArray(raw.mock_image_urls_json) ??
+        (primaryImage ? [primaryImage] : undefined),
+      opening_hours:
+        m.opening_hours ??
+        m.openingHours ??
+        safeJsonArray(raw.mock_opening_hours_json),
+      review_snippets:
+        m.review_snippets ??
+        m.reviewSnippets ??
+        safeJsonArray(raw.mock_review_snippets_json),
+    };
+
+    // ai 블럭도 단일화
+    const ai = raw.ai ?? {
+      summaryText: raw.summaryText ?? raw.ai_summary_text ?? undefined,
+      evidence: raw.evidence ?? raw.ai_evidence ?? undefined,
+      updatedAt: raw.updatedAt ?? raw.ai_updated_at ?? undefined,
+    };
+
+    return {
+      ...raw,
+      id,
+      placeName,
+      x,
+      y,
+      distanceM,
+      placeUrl,
+      mock,
+      ai,
+      // BE는 recommended_count로 내려줌(명시 어노테이션). 그 외 대비.
+      recommended_count:
+        raw.recommended_count ??
+        raw.recommendedCount ??
+        raw.recommend_count ??
+        0,
+    };
+  };
+
+  /* ---------- 공유 링크 복사 ---------- */
+  const handleCopyLink = async () => {
+    const s = slug || data?.slug;
+    if (!s) return window.alert("공유할 링크의 slug가 없습니다.");
     const shareUrl = `${window.location.origin}/shared-map/personal/${s}/splash`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
-    } catch (err) {
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
       try {
-        // Fallback for older browsers
         const textArea = document.createElement("textarea");
         textArea.value = shareUrl;
         document.body.appendChild(textArea);
@@ -47,8 +124,8 @@ export default function PlaceMapPage() {
         document.execCommand("copy");
         document.body.removeChild(textArea);
         setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000); // 2초 후에 토스트 숨기기
-      } catch (err) {
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch {
         window.prompt(
           "복사에 실패했어요. 아래 링크를 수동으로 복사해 주세요:",
           shareUrl
@@ -57,300 +134,106 @@ export default function PlaceMapPage() {
     }
   };
 
-  function goPrev() {
-    navigate("/");
-  }
+  const goPrev = () => navigate("/");
 
-  const selectedItem = selectedItemId
-    ? data.items.find((item) => item.id === selectedItemId)
-    : null;
+  const selectedItem = useMemo(() => {
+    if (!data || !selectedItemId) return null;
+    return (
+      data.items.find((it) => String(it.id) === String(selectedItemId)) || null
+    );
+  }, [data, selectedItemId]);
 
-  // PlaceDetail 닫기 함수
-  const handleCloseDetail = () => {
-    setSelectedItemId(null);
-  };
+  const handleCloseDetail = () => setSelectedItemId(null);
 
-  // AI 팝업 타이머 설정
   useEffect(() => {
-    if (showAiPopup) {
-      const timer = setTimeout(() => {
-        setShowAiPopup(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
+    if (!showAiPopup) return;
+    const t = setTimeout(() => setShowAiPopup(false), 5000);
+    return () => clearTimeout(t);
   }, [showAiPopup]);
 
+  /* ---------- 데이터 로드 ---------- */
   useEffect(() => {
+    if (!slug) return;
     const controller = new AbortController();
 
-    async function fetchAll() {
+    (async () => {
       setError("");
-
       try {
-        if (USE_MOCK) {
-          const BASE_LAT = 37.4969;
-          const BASE_LNG = 126.9575;
-          const jitter = (n) => (Math.random() - 0.5) * n;
-
-          const station = {
-            code: "SSU-710",
-            name: "숭실대입구",
-            line: "7호선",
-            lat: BASE_LAT,
-            lng: BASE_LNG,
-          };
-
-          // /api/request/{slug} 목업 (친구 추천)
-          const requestResp = {
-            result: "ok",
-            data: {
-              slug: slug || "soongsil-univ",
-              station,
-              requestMessage:
-                "학교 주변에서 브런치나 디저트 먹기 좋은 아늑한 곳 추천해줘!",
-              items: [
-                {
-                  externalId: "kakao_1001",
-                  id: "f-101",
-                  placeName: "카페 이층양옥",
-                  categoryGroupCode: "CE7",
-                  categoryGroupName: "카페",
-                  categoryName: "브런치 카페",
-                  addressName: "서울 동작구 상도로 369",
-                  roadAddressName: "서울 동작구 상도로 369",
-                  x: String(BASE_LNG + jitter(0.004)), // lng
-                  y: String(BASE_LAT + jitter(0.004)), // lat
-                  distanceM: 240,
-                  placeUrl: "https://place.map.kakao.com/1001",
-                  mock: {
-                    rating: 4.6,
-                    ratingCount: 183,
-                    imageUrls: ["/mock/cafe_1.jpg"],
-                    openingHours: ["월-일 10:00-22:00"],
-                  },
-                  ai: {
-                    summaryText:
-                      "빈티지 감성, 브런치·디저트가 안정적인 카페. 친구와 수다 떨기 좋아요.",
-                    evidence: "인근 후기 요약",
-                    updatedAt: new Date().toISOString(),
-                  },
-                  recommended_count: 12,
-                },
-                {
-                  externalId: "kakao_1002",
-                  id: "f-102",
-                  placeName: "평양냉면 수풀",
-                  categoryGroupCode: "FD6",
-                  categoryGroupName: "음식점",
-                  categoryName: "한식",
-                  addressName: "서울 동작구 상도로 411",
-                  roadAddressName: "서울 동작구 상도로 411",
-                  x: String(BASE_LNG + jitter(0.004)),
-                  y: String(BASE_LAT + jitter(0.004)),
-                  distanceM: 430,
-                  placeUrl: "https://place.map.kakao.com/1002",
-                  mock: {
-                    rating: 4.4,
-                    ratingCount: 96,
-                    imageUrls: ["/mock/noodle_1.jpg"],
-                    openingHours: ["화-일 11:00-21:00", "월 휴무"],
-                  },
-                  ai: {
-                    summaryText:
-                      "담백한 평냉과 수육이 인기. 시원한 점심으로 가볍게 좋아요.",
-                    evidence: "블로그·리뷰 요약",
-                    updatedAt: new Date().toISOString(),
-                  },
-                  recommended_count: 8,
-                },
-                {
-                  externalId: "kakao_1003",
-                  id: "f-103",
-                  placeName: "리틀모닝",
-                  categoryGroupCode: "FD6",
-                  categoryGroupName: "음식점",
-                  categoryName: "브런치",
-                  addressName: "서울 동작구 상도로 285",
-                  roadAddressName: "서울 동작구 상도로 285",
-                  x: String(BASE_LNG + jitter(0.004)),
-                  y: String(BASE_LAT + jitter(0.004)),
-                  distanceM: 350,
-                  placeUrl: "https://place.map.kakao.com/1003",
-                  mock: {
-                    rating: 4.5,
-                    ratingCount: 142,
-                    imageUrls: ["/mock/brunch_1.jpg"],
-                    openingHours: ["월-일 10:00-16:00"],
-                  },
-                  ai: {
-                    summaryText:
-                      "전체적으로 밝고 포근한 분위기. 달걀요리·팬케이크 평이 좋아요.",
-                    evidence: "포토리뷰 요약",
-                    updatedAt: new Date().toISOString(),
-                  },
-                  recommended_count: 10,
-                },
-              ],
-            },
-            error: null,
-            timestamp: new Date().toISOString(),
-          };
-
-          // /api/recommendation/auto 목업 (AI 추천)
-          const autoResp = {
-            result: "ok",
-            data: {
-              slug: slug || "soongsil-univ",
-              station,
-              requestMessage: requestResp.data.requestMessage,
-              items: [
-                {
-                  externalId: "kakao_2001",
-                  id: "a-201",
-                  placeName: "버터필름",
-                  categoryGroupCode: "FD6",
-                  categoryGroupName: "음식점",
-                  categoryName: "베이커리",
-                  addressName: "서울 동작구 상도로 190",
-                  roadAddressName: "서울 동작구 상도로 190",
-                  x: String(BASE_LNG + jitter(0.005)),
-                  y: String(BASE_LAT + jitter(0.005)),
-                  distanceM: 510,
-                  placeUrl: "https://place.map.kakao.com/2001",
-                  mock: {
-                    rating: 4.7,
-                    ratingCount: 220,
-                    imageUrls: ["/mock/bakery_1.jpg"],
-                    openingHours: ["화-일 10:00-21:00", "월 휴무"],
-                  },
-                  ai: {
-                    summaryText:
-                      "버터 풍미 진한 페이스트리와 시즌 크루아상이 강점.",
-                    evidence: "AI 추천 모델",
-                    updatedAt: new Date().toISOString(),
-                  },
-                  recommended_count: 0,
-                },
-                {
-                  externalId: "kakao_2002",
-                  id: "a-202",
-                  placeName: "스테이션버거",
-                  categoryGroupCode: "FD6",
-                  categoryGroupName: "음식점",
-                  categoryName: "수제버거",
-                  addressName: "서울 동작구 상도로 201",
-                  roadAddressName: "서울 동작구 상도로 201",
-                  x: String(BASE_LNG + jitter(0.005)),
-                  y: String(BASE_LAT + jitter(0.005)),
-                  distanceM: 580,
-                  placeUrl: "https://place.map.kakao.com/2002",
-                  mock: {
-                    rating: 4.3,
-                    ratingCount: 74,
-                    imageUrls: ["/mock/burger_1.jpg"],
-                    openingHours: ["월-일 11:30-21:30"],
-                  },
-                  ai: {
-                    summaryText:
-                      "빵이 달지 않고 패티가 촉촉—감자튀김까지 균형 좋음.",
-                    evidence: "AI 추천 모델",
-                    updatedAt: new Date().toISOString(),
-                  },
-                  recommended_count: 0,
-                },
-              ],
-            },
-            error: null,
-            timestamp: new Date().toISOString(),
-          };
-
-          const friend = requestResp.data.items.map((it) => ({
-            ...it,
-            isAI: false,
-          }));
-          const ai = autoResp.data.items.map((it) => ({ ...it, isAI: true }));
-          const merged = [...friend, ...ai];
-
-          const pinVMs = merged.map((it) => toPinVM(it, it.isAI));
-          const cardVMs = merged.map((it) => toCardVM(it, it.isAI));
-
-          setData({
-            id: `req-${requestResp.data.slug}`,
-            slug: requestResp.data.slug,
-            requestMessage: requestResp.data.requestMessage,
-            station: requestResp.data.station,
-            items: merged,
-            pinVMs,
-            cardVMs,
-          });
-          return;
-        }
-
-        // 실제 API 모드
+        // 1) 친구 추천(+근처 장소)
         const reqRes = await axios.get(`${BASE_URL}/api/requests/${slug}`, {
-          signal: controller.signal,
           withCredentials: true,
+          signal: controller.signal,
         });
         const reqData = reqRes?.data?.data;
         if (!reqData) throw new Error("요청 데이터가 비어 있습니다.");
 
+        const friendItems = (reqData.items ?? [])
+          .map(normalizeItem)
+          .filter(Boolean)
+          .map((it) => ({ ...it, isAI: false }));
+
+        // 2) AI 추천 (실패 허용)
         let aiItems = [];
         try {
           const aiRes = await axios.get(
-            `${BASE_URL}/api/recommendations/auto?slug=${slug}&n=5&q=`,
+            `${BASE_URL}/api/recommendations/auto`,
             {
-              signal: controller.signal,
               withCredentials: true,
+              params: { slug, n: 5, q: "" },
+              signal: controller.signal,
             }
           );
-          aiItems = aiRes?.data?.data?.items ?? [];
-        } catch (e) {
-          // AI가 아직 없거나 실패해도 메인 로딩을 막지 않도록 조용히 넘어감
+          aiItems =
+            (aiRes?.data?.data?.items ?? [])
+              .map(normalizeItem)
+              .filter(Boolean)
+              .map((it) => ({ ...it, isAI: true })) ?? [];
+        } catch {
           aiItems = [];
         }
 
-        // 3) 아이템 합치기 + isAI 플래그
-        const friendItems = (reqData.items ?? []).map((it) => ({
-          ...it,
-          isAI: false,
-        }));
-        const aiItemsMarked = aiItems.map((it) => ({ ...it, isAI: true }));
+        const merged = [...friendItems, ...aiItems];
 
-        const mergedItems = [...friendItems, ...aiItemsMarked];
+        // 3) 뷰모델
+        const pinVMs = merged.map((it) => toPinVM(it, it.isAI));
+        const cardVMs = merged.map((it) => toCardVM(it, it.isAI));
 
-        // 4) 뷰모델 구성
-        const pinVMs = mergedItems.map((item) => toPinVM(item, item.isAI));
-        const cardVMs = mergedItems.map((item) => toCardVM(item, item.isAI));
-
-        // 5) 화면 상태 세팅(기존 형태 유지)
         setData({
-          ...reqData,
-          items: mergedItems,
+          id: `req-${reqData.slug}`,
+          slug: reqData.slug,
+          requestMessage: reqData.requestMessage,
+          station: reqData.station, // { code, name, line, lat, lng }
+          group: reqData.group ?? null, // { id, slug, name, image_url }
+          items: merged,
           pinVMs,
           cardVMs,
         });
 
-        // AI 결과가 있다면 안내 팝업 잠깐 노출
+        if (aiItems.length > 0) setShowAiPopup(true);
       } catch (e) {
         if (e.name !== "CanceledError") {
-          console.error(e);
-          setError(e.message || "데이터를 불러오지 못했습니다.");
+          console.error("[request error]", {
+            url: e?.config?.url,
+            method: e?.config?.method,
+            params: e?.config?.params,
+            status: e?.response?.status,
+            data: e?.response?.data,
+            headers: e?.response?.headers,
+          });
+          setError(
+            e?.response?.status >= 500
+              ? "서버 오류가 발생했어요. 잠시 후 다시 시도해 주세요."
+              : e?.response?.data?.error?.message || e.message
+          );
         }
       }
-    }
+    })();
 
-    if (slug || USE_MOCK) fetchAll();
     return () => controller.abort();
   }, [slug]);
 
-  const handleCardClick = (item) => {
-    setSelectedItemId(item.id); // 클릭된 카드의 id를 상태에 저장
-  };
-
-  const handleAiTagClick = (item) => {
-    console.log(`AI Tag clicked: ${item.place_name}`);
-    setShowAiPopup(true);
-  };
+  const handleCardClick = (item) => setSelectedItemId(item.id);
+  const handleAiTagClick = () => setShowAiPopup(true);
 
   if (!data) {
     return (
@@ -360,15 +243,13 @@ export default function PlaceMapPage() {
     );
   }
 
-  // 2) API가 "7", 7, "7호선", "4,7" 등 무엇을 주든 첫 번째 라인 번호만 추출
+  // 라인 키 추출(“7호선”, “7”, “4,7” 등 대응)
   const getLineKey = (line) => {
     if (line == null) return "";
-    // 문자열로 만들고, "호선" 제거, 콤마/공백 기준 첫 토큰만 사용, 숫자만 남기기
     const first = String(line).split(",")[0].trim().replace("호선", "");
     const digits = first.match(/\d+/)?.[0] ?? "";
     return digits;
   };
-
   const lineKey = getLineKey(data?.station?.line);
   const lineSrc = subwayLineImages[lineKey];
 
@@ -377,13 +258,13 @@ export default function PlaceMapPage() {
       <Header>
         <StationWrapper>
           <PrevButton src="/PrevButton.png" alt="뒤로가기" onClick={goPrev} />
-          <StationName>{data.station.name}역</StationName>
+          <StationName>{data.station?.name}역</StationName>
           <SubwayLineIcon $imageUrl={lineSrc} />
         </StationWrapper>
         <ActionsRight>
           <CopyLinkBtnImage
             onClick={handleCopyLink}
-            src="/Link_Horizontal.svg" // 아이콘 경로(원하는 이미지로 교체 가능)
+            src="/Link_Horizontal.svg"
             alt="링크 복사"
             title="링크 복사"
             style={{ border: "1px solid #383838" }}
@@ -400,6 +281,7 @@ export default function PlaceMapPage() {
           />
         </ActionsRight>
       </Header>
+
       <MapWrapper>
         {isMemoOpen && (
           <MapMemo>
@@ -410,9 +292,10 @@ export default function PlaceMapPage() {
           station={data.station}
           items={data.pinVMs}
           selectedItemId={selectedItemId}
-          onMarkerClick={handleCardClick} // 마커 클릭 이벤트 연결
+          onMarkerClick={handleCardClick}
         />
       </MapWrapper>
+
       {selectedItemId ? (
         <PlaceDetail item={selectedItem} onClose={handleCloseDetail} />
       ) : (
@@ -424,27 +307,29 @@ export default function PlaceMapPage() {
           />
         </CardListWrapper>
       )}
+
       {showAiPopup && (
         <MessagePopup>
           김숭실 님이 추천 받은 장소에 기반하여 AI가 추천한 장소예요.
         </MessagePopup>
       )}
       {copySuccess && <CopyToast>링크가 복사되었어요!</CopyToast>}
+      {error && <CopyToast>{error}</CopyToast>}
     </PageContainer>
   );
 }
 
+/* --- styled --- */
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
   background-color: #ffffff;
 `;
-
 const Header = styled.div`
   padding: 16px;
   font-size: 20px;
-  font-weight: medium;
+  font-weight: 500;
   text-align: center;
   height: calc(100dvh * 140 / 844);
   border-bottom: 1px solid #ffffff;
@@ -453,27 +338,22 @@ const Header = styled.div`
   align-items: end;
   justify-content: space-between;
 `;
-
 const MapWrapper = styled.div`
   position: relative;
 `;
-
 const StationName = styled.div`
   padding: 0;
   margin: 0;
 `;
-
 const StationWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 10px;
 `;
-
 const CardListWrapper = styled.div`
   height: 220px;
 `;
-
 const PrevButton = styled.img`
   cursor: pointer;
   width: 28px;
@@ -481,7 +361,6 @@ const PrevButton = styled.img`
   position: relative;
   top: 2px;
 `;
-
 const subwayLineImages = {
   1: "/subway/1호선.png",
   2: "/subway/2호선.png",
@@ -493,7 +372,6 @@ const subwayLineImages = {
   8: "/subway/8호선.png",
   9: "/subway/9호선.png",
 };
-
 const SubwayLineIcon = styled.div`
   width: 35px;
   height: 35px;
@@ -510,25 +388,22 @@ const MapMemoBtnImage = styled.img`
   padding: 2.5px;
   border-radius: 999px;
 `;
-
 const MapMemo = styled.div`
   position: absolute;
   top: 16px;
   left: 16px;
   right: 16px;
-  background-color: #ffefedc8; // 분홍색
+  background-color: #ffefedc8;
   padding: 10px 16px;
   border-radius: 8px;
   text-align: start;
-  z-index: 10; /* 이 속성을 추가하여 지도보다 위에 오도록 합니다 */
+  z-index: 10;
 `;
-
 const MemoText = styled.p`
   margin: 0;
   font-size: 16px;
   color: #333;
 `;
-
 const MessagePopup = styled.div`
   position: fixed;
   bottom: calc(100svh * 265 / 844);
@@ -542,13 +417,11 @@ const MessagePopup = styled.div`
   z-index: 1000;
   white-space: nowrap;
 `;
-
 const ActionsRight = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
 `;
-
 const CopyLinkBtnImage = styled.img`
   width: 25px;
   height: 25px;
@@ -557,11 +430,10 @@ const CopyLinkBtnImage = styled.img`
   padding: 2.5px;
   border-radius: 999px;
 `;
-
 const CopyToast = styled.div`
   position: fixed;
   left: 50%;
-  bottom: 18px; /* iOS 홈인디케이터 위로 살짝 */
+  bottom: 18px;
   transform: translateX(-50%);
   background: #ffefed;
   color: #585858;
