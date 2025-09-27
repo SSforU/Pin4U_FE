@@ -1,7 +1,7 @@
 // 그룹 지도용 추천 시작 페이지
 // 링크로 접속한 사용자가 station과 memo 정보를 조회
 // #7 A-지도화면 API 연동
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
@@ -11,68 +11,155 @@ import axios from "axios";
 function StartRecommendGroupRequest() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const [requestSuccess, setRequestSuccess] = useState(false);
-  const [isRequested, setIsRequested] = useState(false);
-  const [isApproved, setIsApproved] = useState(false);
-  const { userProfile } = useOutletContext(); // 방문자 프로필 (null 가능)
-
+  const { userProfile } = useOutletContext(); // null 가능
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-  // API에서 받아온 데이터 상태
-  const [locationData, setLocationData] = useState({
-    station: "",
-    memo: "",
-  });
   const [isLoading, setIsLoading] = useState(true);
-  const [ownerNickname, setOwnerNickname] = useState("");
+  const [groupInfo, setGroupInfo] = useState({ name: "", image_url: "" });
 
-  // API에서 요청 정보 조회 (station + memo)
+  const [isRequested, setIsRequested] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
+
+  const [locationData, setLocationData] = useState({ station: "", memo: "" });
+
+  const pollTimerRef = useRef(null);
+
+  // 1) 그룹 정보 조회 (비인증)
   useEffect(() => {
-    const fetchRequestInfo = async () => {
+    const fetchGroupInfo = async () => {
       try {
-        setIsLoading(true);
-        // API 호출
-        const response = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
+        const res = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
           withCredentials: true,
         });
+        console.log("그룹 맵 API 응답:", res.data);
 
-        // 디버그 로그: 응답 확인
-        console.log("/api/groups/:slug/map response:", response?.data);
-
-        // 올바른 응답 구조에서 데이터 추출
-        const { station, requestMessage } = response.data.data || {};
-        const extractOwnerNickname = (d) => d?.group?.name || "";
-        const creatorName = extractOwnerNickname(response?.data?.data);
-        // 필요한 데이터만 추출
-        setLocationData({
-          station: station.name, // 역 이름만
-          memo: requestMessage, // 요청 메시지만
+        const data = res?.data?.data;
+        // group 객체에서 그룹 정보 추출
+        setGroupInfo({
+          name: data?.group?.name || "그룹",
+          image_url: data?.group?.image_url || "/Pin4U_Logo.png",
         });
-        setOwnerNickname(creatorName);
       } catch (error) {
-        console.error("요청 정보 조회 실패:", error);
-        // 에러 시 기본값 설정
-        setLocationData({
-          station: "정보를 불러올 수 없습니다",
-          memo: "정보를 불러올 수 없습니다",
-        });
-        setOwnerNickname("");
+        console.error("그룹 정보 조회 실패:", error);
+        setGroupInfo({ name: "그룹", image_url: "/Pin4U_Logo.png" });
+      }
+    };
+    if (slug) fetchGroupInfo();
+  }, [slug, BASE_URL]);
+
+  // 2) 내 멤버십 상태 확인 → 승인된 경우에만 map 조회
+  useEffect(() => {
+    const fetchStatusThenMaybeMap = async () => {
+      setIsLoading(true);
+      try {
+        // 쿠키 상태 확인
+        console.log("API 호출 전 쿠키 상태:", document.cookie);
+        console.log("사용자 프로필 상태:", userProfile);
+
+        const res = await axios.get(
+          `${BASE_URL}/api/groups/${slug}/members/me/status`,
+          { withCredentials: true }
+        );
+        const status = res?.data?.data?.status; // "none"|"pending"|"approved"
+
+        console.log("멤버십 상태:", status);
+
+        setIsRequested(status === "pending" || status === "approved");
+        setIsApproved(status === "approved");
+
+        if (status === "approved") {
+          // 3) 승인된 경우에만 /map 호출
+          console.log("승인된 멤버 - 지도 데이터 조회 중...");
+          const mapRes = await axios.get(`${BASE_URL}/api/groups/${slug}/map`, {
+            withCredentials: true,
+          });
+
+          console.log("/api/groups/:slug/map response:", mapRes?.data);
+
+          const { station, requestMessage } = mapRes?.data?.data || {};
+          setLocationData({
+            station: station?.name || "",
+            memo: requestMessage || "",
+          });
+        } else {
+          // 승인되지 않은 경우 기본값 설정
+          setLocationData({
+            station: "승인 후 노출",
+            memo: "승인 후 노출",
+          });
+        }
+      } catch (err) {
+        console.error("멤버십 상태 조회 실패:", err);
+
+        // 401: 로그인 필요
+        if (err?.response?.status === 401) {
+          console.warn("로그인 필요");
+          setLocationData({
+            station: "로그인 후 확인 가능",
+            memo: "로그인이 필요합니다",
+          });
+        }
+        // 403: 오너 승인 필요 → isApproved=false 유지
+        else if (err?.response?.status === 403) {
+          console.warn("오너 승인 필요");
+          setLocationData({
+            station: "승인 후 노출",
+            memo: "그룹 멤버 승인이 필요합니다",
+          });
+        }
+        // 404: 그룹 없음
+        else if (err?.response?.status === 404) {
+          console.error("그룹을 찾을 수 없음");
+          setLocationData({
+            station: "그룹을 찾을 수 없습니다",
+            memo: "유효하지 않은 그룹입니다",
+          });
+        } else {
+          setLocationData({
+            station: "정보를 불러올 수 없습니다",
+            memo: "정보를 불러올 수 없습니다",
+          });
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (slug) {
-      fetchRequestInfo();
-    }
-  }, [slug, BASE_URL]);
-  // 멤버 요청 함수 (API 연동)
+    if (slug) fetchStatusThenMaybeMap();
+
+    // 컴포넌트 언마운트 시 폴링 정리
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, [slug, BASE_URL, userProfile]);
+
+  // 3) 멤버 요청 함수 (API 연동)
   const handleRequest = async () => {
     if (isRequested) return;
+
+    // 로그인 상태 확인
+    if (!userProfile || !userProfile.id) {
+      alert("로그인이 필요합니다. 다시 로그인해주세요.");
+      // 로그인 페이지로 리다이렉트
+      window.location.href = `/shared-map/group/${slug}/login`;
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const userId = userProfile?.id;
-      const body = { action: "request", user_id: userId };
+
+      // 디버깅 정보 추가
+      console.log("그룹 가입 요청 디버깅:", {
+        userProfile,
+        slug,
+        BASE_URL,
+        로그인상태: !!userProfile,
+        쿠키확인: document.cookie,
+      });
+
+      // user_id 제거 - 백엔드에서 쿠키로 식별
+      const body = { action: "request" };
 
       const res = await axios.post(
         `${BASE_URL}/api/groups/${slug}/members`,
@@ -81,56 +168,96 @@ function StartRecommendGroupRequest() {
       );
 
       const apiResult = res?.data?.result;
-      const status = res?.data?.data?.status;
 
       if (apiResult === "success") {
         setIsRequested(true);
         setRequestSuccess(true);
 
-        // 상태값이 내려오면 반영 (ex. requested/approved/rejected)
-        if (status === "approved") {
-          setIsApproved(true);
-        }
+        // 성공 메시지 표시
+        setTimeout(() => setRequestSuccess(false), 2000);
 
-        // 3초 후 팝업 자동 닫기
-        setTimeout(() => setRequestSuccess(false), 3000);
+        // 4) 승인 폴링 (최대 60초, 3초 간격)
+        if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+        let elapsed = 0;
+
+        console.log("승인 상태 폴링 시작...");
+
+        pollTimerRef.current = setInterval(async () => {
+          elapsed += 3000;
+          try {
+            const statusRes = await axios.get(
+              `${BASE_URL}/api/groups/${slug}/members/me/status`,
+              { withCredentials: true }
+            );
+            const status = statusRes?.data?.data?.status;
+
+            console.log(`폴링 ${elapsed / 1000}초: 상태 = ${status}`);
+
+            if (status === "approved") {
+              console.log("승인 완료! 지도 데이터 로딩...");
+              setIsApproved(true);
+              clearInterval(pollTimerRef.current);
+
+              // 승인됐으니 /map 로딩해서 정보 채우기
+              const mapRes = await axios.get(
+                `${BASE_URL}/api/groups/${slug}/map`,
+                { withCredentials: true }
+              );
+              const { station, requestMessage } = mapRes?.data?.data || {};
+              setLocationData({
+                station: station?.name || "",
+                memo: requestMessage || "",
+              });
+            }
+          } catch (e) {
+            // 401/403 등은 무시하고 계속 폴링
+            console.log("폴링 중 에러 (무시):", e?.response?.status);
+          }
+
+          if (elapsed >= 60000) {
+            console.log("폴링 시간 초과 (60초)");
+            clearInterval(pollTimerRef.current);
+          }
+        }, 3000);
       } else {
         console.error("멤버 요청 실패:", res?.data?.error);
         alert("멤버 요청에 실패했습니다. 잠시 후 다시 시도해주세요.");
       }
     } catch (error) {
       console.error("멤버 요청 중 오류:", error);
-      alert("멤버 요청 중 오류가 발생했습니다.");
+
+      if (error?.response?.status === 401) {
+        alert("로그인이 필요합니다.");
+        window.location.href = `/shared-map/group/${slug}/login`;
+      } else if (error?.response?.status === 404) {
+        alert("그룹을 찾을 수 없습니다.");
+      } else {
+        alert("멤버 요청 중 오류가 발생했습니다.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 장소 추천 함수
+  // 5) 장소 추천 함수: 승인된 경우에만
   const handleRecommend = () => {
     if (isApproved) {
       navigate(`/shared-map/group/${slug}/onboarding`);
     }
   };
 
-  // 중복 선언 제거됨 (위의 /api/groups/:slug/map 호출만 사용)
-
   return (
     <Wrapper>
       <Main>
         <ImageContainer>
-          <Image src="/Pin4U_Logo.png" alt="그룹 프로필" />
+          <Image
+            src={groupInfo.image_url || "/Pin4U_Logo.png"}
+            alt="그룹 프로필"
+          />
         </ImageContainer>
         <Content>
           <Title>
-            [
-            {ownerNickname ||
-              userProfile?.nickname ||
-              (typeof window !== "undefined"
-                ? localStorage.getItem("recommendUserNickname") || ""
-                : "") ||
-              "사용자"}
-            ]을 위한
+            [{groupInfo.name || "그룹"}]을 위한
             <br />
             장소를 추천해주세요!
           </Title>
@@ -142,14 +269,24 @@ function StartRecommendGroupRequest() {
           <InfoItem>
             <InfoIcon src="/Pin.png" alt="위치" />
             <InfoText>
-              {isLoading ? "로딩 중..." : locationData.station}
+              {isLoading
+                ? "로딩 중..."
+                : isApproved
+                ? locationData.station || "역 정보 없음"
+                : locationData.station || "승인 후 노출"}
             </InfoText>
           </InfoItem>
 
           {/* 메모 정보 */}
           <InfoItem>
             <InfoIcon src="/Recommend_Memo.png" alt="메모" />
-            <InfoText>{isLoading ? "로딩 중..." : locationData.memo}</InfoText>
+            <InfoText>
+              {isLoading
+                ? "로딩 중..."
+                : isApproved
+                ? locationData.memo || "메모 없음"
+                : locationData.memo || "승인 후 노출"}
+            </InfoText>
           </InfoItem>
         </InfoSection>
       </Main>
@@ -164,7 +301,7 @@ function StartRecommendGroupRequest() {
             {isRequested ? (
               <>
                 <ButtonCheckIcon src="/LinkCopyComplete.png" alt="체크" />
-                멤버 요청 완료
+                멤버 요청 완료 (승인 대기)
               </>
             ) : (
               "멤버 요청하기"
@@ -185,9 +322,7 @@ function StartRecommendGroupRequest() {
               <RequestSuccessText>
                 멤버 요청이 완료되었어요!
                 <br />
-                {userProfile?.nickname || "사용자"} 님이 요청을 수락하면
-                <br />
-                장소 추천이 가능해요.
+                오너가 승인하면 장소 추천이 가능해요.
               </RequestSuccessText>
             </RequestSuccessContent>
           </RequestSuccessPopup>
@@ -198,7 +333,8 @@ function StartRecommendGroupRequest() {
   );
 }
 export default StartRecommendGroupRequest;
-// styled-components
+
+// styled-components는 기존과 동일하게 유지
 const Wrapper = styled.div`
   ${getResponsiveStyles("layout")}
   display: grid;
@@ -285,9 +421,9 @@ const ImageContainer = styled.div`
 
 const Image = styled.img`
   width: 100%;
-  max-width: 70px;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 `;
 
 const InfoSection = styled.div`

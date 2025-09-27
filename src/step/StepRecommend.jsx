@@ -15,7 +15,6 @@ function StepRecommend() {
   const { memo, userProfile, location, nickname } = useOutletContext();
   const [content, setContent] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [IMAGE_FILE, setImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -72,7 +71,6 @@ function StepRecommend() {
       const currentData = placeRecommendations[currentPlaceIndex];
       setContent(currentData.message || "");
       setSelectedCategories(currentData.tags || []);
-      setImageFile(currentData.image || null);
     }
   }, [currentPlaceIndex, placeRecommendations]);
 
@@ -157,7 +155,6 @@ function StepRecommend() {
   // 이미지 변경 처리 (퍼블리싱 단계) (메모이제이션)
   const handleImageChange = useCallback(
     async (file) => {
-      setImageFile(file);
       if (file) {
         try {
           const url = await uploadImageToServer(file);
@@ -167,6 +164,7 @@ function StepRecommend() {
               copy[currentPlaceIndex] = {
                 ...copy[currentPlaceIndex],
                 image: url,
+                imageFile: file, // 파일 객체도 저장
               };
               return copy;
             });
@@ -175,12 +173,13 @@ function StepRecommend() {
           console.error("이미지 업로드 실패:", e);
         }
       } else {
-        // 이미지 제거 시 URL도 제거
+        // 이미지 제거 시 URL과 파일 모두 제거
         setPlaceRecommendations((prev) => {
           const copy = [...prev];
           copy[currentPlaceIndex] = {
             ...copy[currentPlaceIndex],
             image: null,
+            imageFile: null,
           };
           return copy;
         });
@@ -257,7 +256,6 @@ function StepRecommend() {
       );
       setSelectedCategories(nextPlaceData?.tags || []);
       setContent(nextPlaceData?.message || "");
-      setImageFile(nextPlaceData?.image || null);
     }
   }, [
     currentPlaceIndex,
@@ -296,7 +294,6 @@ function StepRecommend() {
       );
       setSelectedCategories(prevPlaceData?.tags || []);
       setContent(prevPlaceData?.message || "");
-      setImageFile(prevPlaceData?.image || null);
     }
   }, [currentPlaceIndex, placeRecommendations, selectedCategories, content]);
 
@@ -306,13 +303,27 @@ function StepRecommend() {
       return; // 업로드 중엔 제출 방지
     }
     try {
-      // 1. 상위 컨텍스트에서 닉네임 수집
-      const recommenderNickname = (nickname || "").trim();
+      // 1. 닉네임 수집 - 개인은 입력받은 닉네임, 그룹은 나중에 그룹명 사용
+      const currentPath = window.location.pathname;
+      let recommenderNickname = "";
 
-      // 닉네임 검증 (2~16자)
-      if (recommenderNickname.length < 2 || recommenderNickname.length > 16) {
-        alert("닉네임은 2~16자 사이로 입력해주세요.");
-        return;
+      if (currentPath.includes("/shared-map/group/")) {
+        // 그룹 추천: 로그인한 사용자의 닉네임 사용
+        recommenderNickname = (userProfile?.nickname || "").trim();
+
+        // 로그인 사용자 닉네임 검증
+        if (recommenderNickname.length < 2 || recommenderNickname.length > 16) {
+          alert("로그인 정보에 문제가 있습니다. 다시 로그인해주세요.");
+          return;
+        }
+      } else {
+        // 개인 추천: 입력받은 닉네임 사용 및 검증
+        recommenderNickname = (nickname || "").trim();
+
+        if (recommenderNickname.length < 2 || recommenderNickname.length > 16) {
+          alert("닉네임은 2~16자 사이로 입력해주세요.");
+          return;
+        }
       }
       const locationsWithDetails = selectedPlaces || [];
       // 2. API 요청 데이터 구성 - API 명세에 맞게 수정
@@ -330,9 +341,12 @@ function StepRecommend() {
 
       const guestId = generateGuestId();
 
+      // 그룹인 경우 그룹 이름을 사용하기 위해 최종 추천자 닉네임 결정
+      let finalRecommenderNickname = recommenderNickname;
+
       const items = locationsWithDetails.map((location, index) => ({
         external_id: location.external_id, // 서버 검증용
-        recommender_nickname: recommenderNickname,
+        recommender_nickname: finalRecommenderNickname,
         recommend_message: placeRecommendations[index]?.message || "",
         image_url: placeRecommendations[index]?.image || null,
         tags: placeRecommendations[index]?.tags || [],
@@ -354,9 +368,107 @@ function StepRecommend() {
         });
       });
 
-      // 3. API 호출 - 추천 장소 최종 제출
+      // 3. 그룹인 경우 개인 요청 생성, 개인인 경우 바로 추천 제출
+      let finalSlug = slug;
+
+      if (currentPath.includes("/shared-map/group/")) {
+        console.log("StepRecommend: 그룹 추천 - 개인 요청 생성 시도");
+        try {
+          // 1. 먼저 그룹 정보를 가져와서 station_code와 request_message 확인
+          const groupInfoResponse = await axios.get(
+            `${BASE_URL}/api/groups/${slug}/map`,
+            { withCredentials: true }
+          );
+
+          const groupData = groupInfoResponse.data.data;
+          console.log("StepRecommend: 그룹 정보:", groupData);
+
+          // 로그인 사용자 닉네임을 그대로 사용 (이미 설정됨)
+          console.log(
+            "StepRecommend: 로그인 사용자 닉네임 사용:",
+            finalRecommenderNickname
+          );
+
+          // 2. 그룹 정보를 바탕으로 개인 요청 생성
+          const createRequestResponse = await axios.post(
+            `${BASE_URL}/api/requests`,
+            {
+              station_code: groupData.station?.code || "",
+              request_message: groupData.requestMessage || "",
+              group_slug: slug,
+            },
+            { withCredentials: true }
+          );
+
+          console.log(
+            "StepRecommend: 개인 요청 생성 응답:",
+            createRequestResponse.data
+          );
+
+          if (createRequestResponse.data.result === "success") {
+            // API 응답 구조 확인: data.request.slug 또는 data.slug
+            const responseData = createRequestResponse.data.data;
+            console.log(
+              "🔍 DEBUGGING - 전체 responseData:",
+              JSON.stringify(responseData, null, 2)
+            );
+            console.log(
+              "🔍 DEBUGGING - responseData.request:",
+              responseData.request
+            );
+            console.log(
+              "🔍 DEBUGGING - responseData.request?.slug:",
+              responseData.request?.slug
+            );
+
+            finalSlug =
+              responseData.slug ||
+              responseData.request?.slug ||
+              responseData.request?.id;
+
+            console.log("StepRecommend: API 응답 data 구조:", responseData);
+            console.log(
+              "StepRecommend: 개인 요청 생성 완료, 새 slug:",
+              finalSlug
+            );
+
+            if (!finalSlug) {
+              console.error(
+                "StepRecommend: slug를 찾을 수 없습니다. 전체 응답:",
+                createRequestResponse.data
+              );
+              throw new Error("생성된 요청에서 slug를 찾을 수 없습니다");
+            }
+          } else {
+            throw new Error(
+              "개인 요청 생성 실패: " +
+                createRequestResponse.data.error?.message
+            );
+          }
+        } catch (createError) {
+          console.error("StepRecommend: 개인 요청 생성 실패:", createError);
+          if (createError.response) {
+            console.error(
+              "StepRecommend: 에러 응답:",
+              createError.response.data
+            );
+          }
+          throw createError;
+        }
+
+        // 로그인 사용자 닉네임이 이미 items에 설정되어 있음
+      }
+
+      // 4. API 호출 - 추천 장소 최종 제출
+      console.log(
+        "StepRecommend: API 요청 URL:",
+        `${BASE_URL}/api/requests/${finalSlug}/recommendations`
+      );
+      console.log("StepRecommend: 사용할 slug 값:", finalSlug);
+      console.log("StepRecommend: 현재 경로:", currentPath);
+
       const response = await axios.post(
-        `${BASE_URL}/api/requests/${slug}/recommendations`,
+        `${BASE_URL}/api/requests/${finalSlug}/recommendations`,
         { items: items },
         { withCredentials: true }
       );
@@ -382,7 +494,16 @@ function StepRecommend() {
         console.error(`에러 ${status}:`, data.error?.message);
       }
     }
-  }, [slug, placeRecommendations, navigate, BASE_URL, isUploading]);
+  }, [
+    slug,
+    placeRecommendations,
+    navigate,
+    BASE_URL,
+    isUploading,
+    nickname,
+    selectedPlaces,
+    userProfile?.nickname,
+  ]);
 
   // 카테고리 배열 메모이제이션
   const categories = useMemo(
@@ -496,6 +617,12 @@ function StepRecommend() {
               }}
               isPrivate={
                 placeRecommendations[currentPlaceIndex]?.isPrivate || false
+              }
+              currentImageFile={
+                placeRecommendations[currentPlaceIndex]?.imageFile || null
+              }
+              currentImageUrl={
+                placeRecommendations[currentPlaceIndex]?.image || null
               }
               userProfile={userProfile}
             />

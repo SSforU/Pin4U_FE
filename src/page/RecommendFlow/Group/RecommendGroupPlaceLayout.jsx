@@ -32,6 +32,10 @@ function RecommendGroupPlaceLayout() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // useMatch로 현재 step 추출
+  const match = useMatch("/shared-map/group/:slug/onboarding/:step");
+  const stepParam = match?.params?.step || STEPS[0];
+
   // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 location으로 이동
   useEffect(() => {
     if (stepParam === "nickname" && userProfile?.nickname) {
@@ -41,10 +45,6 @@ function RecommendGroupPlaceLayout() {
       });
     }
   }, [stepParam, userProfile, nickname, slug, navigate]);
-
-  // useMatch로 현재 step 추출
-  const match = useMatch("/shared-map/group/:slug/onboarding/:step");
-  const stepParam = match?.params?.step || STEPS[0];
 
   const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
   const currentStep = currentIndex + FLOW_OFFSET;
