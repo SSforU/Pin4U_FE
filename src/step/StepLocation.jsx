@@ -34,20 +34,80 @@ function StepLocation(props) {
   // slug로부터 역 정보와 메모 가져오기
   useEffect(() => {
     const fetchData = async () => {
-      if (!slug) return;
+      // 현재 URL 경로에서 개인/그룹 구분
+      const currentPath = window.location.pathname;
+      const isGroupMap = currentPath.includes("/group/");
+      const isPersonalMap = currentPath.includes("/personal/");
+
+      console.log("🔍 디버깅 정보:", {
+        slug,
+        slugType: typeof slug,
+        baseUrl: BASE_URL,
+        currentUrl: window.location.href,
+        currentPath,
+        isGroupMap,
+        isPersonalMap,
+      });
+
+      if (!slug) {
+        console.warn("slug가 없습니다:", slug);
+        return;
+      }
+
+      if (!BASE_URL) {
+        console.error("BASE_URL이 설정되지 않았습니다:", BASE_URL);
+        return;
+      }
+
+      // 개인/그룹에 따라 다른 API 엔드포인트 사용
+      let apiUrl;
+      if (isGroupMap) {
+        apiUrl = `${BASE_URL}/api/groups/${slug}/map`;
+      } else if (isPersonalMap) {
+        apiUrl = `${BASE_URL}/api/requests/${slug}`;
+      } else {
+        console.error("개인/그룹 지도 타입을 확인할 수 없습니다:", currentPath);
+        return;
+      }
 
       try {
-        // 7번 API: 역 정보와 메모
-        const requestResponse = await axios.get(
-          `${BASE_URL}/api/requests/${slug}`,
-          { withCredentials: true }
-        );
+        const requestResponse = await axios.get(apiUrl, {
+          withCredentials: true,
+        });
+
+        console.log("✅ API 응답 성공:", {
+          mapType: isGroupMap ? "group" : "personal",
+          data: requestResponse.data,
+        });
+
         if (requestResponse.data?.data?.station) {
           setStationInfo(requestResponse.data.data.station);
           setRequestMemo(requestResponse.data.data.requestMessage || "");
         }
       } catch (error) {
-        console.error("데이터 조회 실패:", error);
+        console.error("💥 데이터 조회 실패:", {
+          error,
+          slug,
+          baseUrl: BASE_URL,
+          mapType: isGroupMap ? "group" : "personal",
+          apiUrl,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+        });
+
+        // 사용자에게 보여줄 에러 메시지
+        if (error.response?.status === 404) {
+          console.error("해당 요청을 찾을 수 없습니다. slug를 확인해주세요.");
+        } else if (error.response?.status === 500) {
+          console.error(
+            "서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+          );
+        } else if (!BASE_URL) {
+          console.error(
+            "API 서버 주소가 설정되지 않았습니다. 환경 변수를 확인해주세요."
+          );
+        }
       }
     };
     fetchData();

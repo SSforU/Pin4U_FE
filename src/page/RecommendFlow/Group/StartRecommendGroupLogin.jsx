@@ -2,17 +2,13 @@
 // 링크로 접속한 사용자가 station과 memo 정보를 조회
 // #7 A-지도화면 API 연동
 import React, { useState, useEffect } from "react";
-import { useParams, useOutletContext } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { getResponsiveStyles } from "../../../styles/responsive.js";
 import { KAKAO_AUTH_URL } from "../../../utils/oauth";
-import axios from "axios";
 
 function StartRecommendGroupLogin() {
   const { slug } = useParams();
-  const { userProfile } = useOutletContext(); // 로그인 사용자의 프로필 (방문자는 null 가능)
-
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const handleKakaoLogin = () => {
     // 출발점 정보를 localStorage에 저장
@@ -26,34 +22,38 @@ function StartRecommendGroupLogin() {
     memo: "",
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [ownerNickname, setOwnerNickname] = useState("");
+  const [groupInfo, setGroupInfo] = useState({ name: "", image_url: "" });
 
-  // 로그인 페이지이므로 API 호출 없이 기본 메시지 표시
+  // 로그인 전이므로 기본값 사용 (그룹 정보 API는 인증 필요)
+  useEffect(() => {
+    // 로그인 전에는 그룹 상세 정보를 가져올 수 없으므로 기본값 사용
+    setGroupInfo({
+      name: "그룹",
+      image_url: "/Pin4U_Logo.png",
+    });
+  }, []);
+
+  // 로그인 페이지이므로 기본 메시지 표시
   useEffect(() => {
     setIsLoading(false);
     setLocationData({
       station: "로그인 후 확인 가능",
       memo: "그룹에 가입하여 내용을 확인하세요",
     });
-    setOwnerNickname("그룹 멤버");
-  }, [slug]);
+  }, []);
 
   return (
     <Wrapper>
       <Main>
         <ImageContainer>
-          <Image src="/Pin4U_Logo.png" alt="그룹 프로필" />
+          <Image
+            src={groupInfo.image_url || "/Pin4U_Logo.png"}
+            alt="그룹 프로필"
+          />
         </ImageContainer>
         <Content>
           <Title>
-            [
-            {ownerNickname ||
-              userProfile?.nickname ||
-              (typeof window !== "undefined"
-                ? localStorage.getItem("recommendUserNickname") || ""
-                : "") ||
-              "사용자"}
-            ]을 위한
+            [{groupInfo.name || "그룹"}]을 위한
             <br />
             장소를 추천해주세요!
           </Title>
