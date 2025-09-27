@@ -1,11 +1,10 @@
-// #1 고정 사용자 조회 API 호출 (props 전달용)
 import React, { useState, useEffect } from "react";
 import {
   Outlet,
   useNavigate,
+  useMatch,
   useParams,
   useOutletContext,
-  useSearchParams,
 } from "react-router-dom";
 import styled from "styled-components";
 import ProgressBar from "../../../component/ui/ProgressBar.jsx";
@@ -17,36 +16,24 @@ import { getResponsiveStyles } from "../../../styles/responsive.js";
 const STEPS = ["nickname", "location", "recommend"];
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
-const STEP_DEFAULT = "location";
 
 function RecommendPersonalPlaceLayout() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
 
-  const [searchParams, _setSearchParams] = useSearchParams();
-  // 1) 먼저 쿼리에서 읽음
-  const qsStep = searchParams.get("step") ?? STEP_DEFAULT;
-  // 2) 그 다음 상태 초기화
-  const [step, setStep] = useState(qsStep);
-
   const [nickname, setNickname] = useState("");
   const [location, setLocation] = useState(null);
-
-  // location 상태 변경 시 로그 추가
-  useEffect(() => {
-    console.log("RecommendPersonalPlaceLayout: location 상태 변경:", location);
-  }, [location]);
   const [memo, setMemo] = useState("");
 
   // 오류 발생 시 모달 상태
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // 3) 주소창의 step이 바뀌면 상태도 맞추기
+  // location 상태 변경 시 로그 추가
   useEffect(() => {
-    setStep(qsStep);
-  }, [qsStep]);
+    console.log("RecommendPersonalPlaceLayout: location 상태 변경:", location);
+  }, [location]);
 
   // 닉네임이 변경될 때마다 localStorage에 저장
   useEffect(() => {
@@ -55,18 +42,21 @@ function RecommendPersonalPlaceLayout() {
     }
   }, [nickname]);
 
-  const currentIndex = Math.max(0, STEPS.indexOf(step));
-  const currentStep = currentIndex + FLOW_OFFSET;
+  // useMatch로 현재 step 추출
+  const match = useMatch("/shared-map/personal/:slug/onboarding/:step");
+  const stepParam = match?.params?.step || STEPS[0];
 
-  // Personal 추천 플로우: 로그인 여부와 무관하게 닉네임 스텝을 반드시 거친다
+  const currentIndex = Math.max(0, STEPS.indexOf(stepParam));
+  const currentStep = currentIndex + FLOW_OFFSET;
 
   // 다음 버튼 비활성화 조건
   const isNextDisabled =
-    (step === "nickname" && !nickname.trim()) ||
-    (step === "location" && !location);
+    (stepParam === "nickname" && !nickname.trim()) ||
+    (stepParam === "location" && !location);
 
   function goToStep(index) {
     const safe = Math.max(0, Math.min(index, STEPS.length - 1));
+
     // 현재 경로를 확인하여 적절한 경로로 이동
     const currentPath = window.location.pathname;
     if (currentPath.includes("/personal/")) {
@@ -81,16 +71,14 @@ function RecommendPersonalPlaceLayout() {
 
   async function goNext() {
     try {
-      if (step === "nickname") {
+      if (stepParam === "nickname") {
         goToStep(currentIndex + 1);
-      } else if (step === "location") {
+      } else if (stepParam === "location") {
         goToStep(currentIndex + 1);
       }
     } catch (error) {
       console.error("오류 발생:", error);
-
       let message = "오류가 발생했습니다.";
-
       if (error.response?.status === 500) {
         message = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
       } else if (error.response?.status === 400) {
@@ -98,7 +86,6 @@ function RecommendPersonalPlaceLayout() {
       } else if (!error.response) {
         message = "서버에 연결할 수 없습니다.";
       }
-
       setErrorMessage(message);
       setShowErrorModal(true);
     }
@@ -135,13 +122,13 @@ function RecommendPersonalPlaceLayout() {
       </Top>
 
       <Main>
-        {step === "nickname" ? (
+        {stepParam === "nickname" ? (
           <StepNickname
             nickname={nickname}
             setNickname={setNickname}
             detailText="내 추천 장소를 공유받는 친구들에게 공개돼요."
           />
-        ) : step === "location" ? (
+        ) : stepParam === "location" ? (
           <ContentSection>
             <TextBlock>
               <Title>
@@ -150,7 +137,7 @@ function RecommendPersonalPlaceLayout() {
               </Title>
               <Detail>
                 {userProfile?.nickname || "사용자"}님이 설정한 역 반경{" "}
-                <span style={{ color: "#ff7e74" }}>1.5km</span>안에서 추천이
+                <span style={{ color: "#ff7e74" }}>800m</span>안에서 추천이
                 가능해요.
               </Detail>
             </TextBlock>
@@ -166,13 +153,13 @@ function RecommendPersonalPlaceLayout() {
               memo,
               setMemo,
               slug,
-              userProfile, // userProfile을 하위 컴포넌트들에게 전달
+              userProfile, // 하위 컴포넌트에게 전달
             }}
           />
         )}
       </Main>
 
-      {step !== "recommend" && (
+      {stepParam !== "recommend" && (
         // Recommend 단계에서는 버튼 미노출
         <Bottom>
           <Button disabled={isNextDisabled} onClick={goNext}>
@@ -204,26 +191,21 @@ const Wrapper = styled.div`
   grid-template-rows: auto 1fr auto;
   height: 100%;
 `;
-
 const Top = styled.div`
   padding: 20px 20px 0px 20px;
 `;
-
 const Main = styled.main`
   padding: 0px 20px 20px 20px;
   overflow: auto;
 `;
-
 const PrevButtonContainer = styled.div`
   ${getResponsiveStyles("layout")}
   margin-top: 25px;
   display: flex;
 `;
-
 const PrevButtonWrapper = styled.img`
   cursor: pointer;
 `;
-
 const Bottom = styled.div`
   padding: 40px;
 `;
@@ -241,7 +223,6 @@ const ErrorModal = styled.div`
   justify-content: center;
   z-index: 1000;
 `;
-
 const ErrorContent = styled.div`
   background: white;
   border-radius: 12px;
@@ -250,14 +231,12 @@ const ErrorContent = styled.div`
   width: 90%;
   text-align: center;
 `;
-
 const ErrorMessage = styled.p`
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 16px 0;
   color: #333;
 `;
-
 const ErrorButton = styled.button`
   background-color: #ff7e74;
   color: white;
@@ -267,12 +246,10 @@ const ErrorButton = styled.button`
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-
   &:hover {
     background-color: #ff6b61;
   }
 `;
-
 const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
@@ -281,7 +258,6 @@ const TextBlock = styled.div`
   text-align: left;
   margin-bottom: 24px;
 `;
-
 const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -291,7 +267,6 @@ const ContentSection = styled.div`
   height: 100%;
   justify-content: flex-start;
 `;
-
 const Title = styled.h1`
   font-family: "Pretendard", sans-serif;
   font-size: 24px;
@@ -301,7 +276,6 @@ const Title = styled.h1`
   color: #333;
   margin: 0;
 `;
-
 const Detail = styled.p`
   font-family: "Pretendard", sans-serif;
   color: #585858;
