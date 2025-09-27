@@ -18,15 +18,10 @@ import { getResponsiveStyles } from "../../../styles/responsive.js";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const STEPS = ["nickname", "location", "recommend"];
-console.log("STEPS 배열:", STEPS);
 const FLOW_OFFSET = 1; // 1단계부터 시작
 const TOTAL_STEPS = 3; // 전체 단계 수
 
 function RecommendGroupPlaceLayout() {
-  console.log(
-    "🚀 RecommendGroupPlaceLayout 컴포넌트 렌더링됨 - " +
-      new Date().toISOString()
-  );
   const navigate = useNavigate();
   const { slug } = useParams();
   const { userProfile } = useOutletContext(); // App.jsx에서 userProfile 받기
@@ -79,7 +74,7 @@ function RecommendGroupPlaceLayout() {
       currentPath: window.location.pathname,
     });
     setStep(qsStep);
-  }, [qsStep]);
+  }, [qsStep, step]);
 
   // 4) 컴포넌트 최초 로드 시에만 로그인 사용자 리다이렉트
   useEffect(() => {
@@ -89,12 +84,13 @@ function RecommendGroupPlaceLayout() {
       currentPath.endsWith("/onboarding/");
 
     // 메인 온보딩 경로에 있고, 로그인된 사용자면 location으로 리다이렉트
+    // userProfile이 로드된 후에만 실행
     if (isOnMainPath && userProfile?.nickname) {
       navigate(`/shared-map/group/${slug}/onboarding/location`, {
         replace: true,
       });
     }
-  }, []); // 빈 의존성 배열로 한 번만 실행
+  }, [userProfile, navigate, slug]); // 필요한 의존성 추가
 
   // 로그인된 사용자 닉네임 자동 설정
   useEffect(() => {
@@ -128,20 +124,14 @@ function RecommendGroupPlaceLayout() {
 
   // 로그인 시 닉네임 스텝 생략: 프로필 닉네임으로 설정 후 location으로 이동
   useEffect(() => {
-    console.log("닉네임 스킵 로직 체크:", {
-      step,
-      userProfileNickname: userProfile?.nickname,
-      nickname,
-      slug,
-    });
-
+    // userProfile이 로드되고 닉네임이 있으면 스킵
     if (step === "nickname" && userProfile?.nickname) {
       console.log("로그인된 사용자 닉네임 스킵 실행");
       navigate(`/shared-map/group/${slug}/onboarding/location`, {
         replace: true,
       });
     }
-  }, [step, userProfile?.nickname, nickname, slug, navigate]);
+  }, [step, userProfile, slug, navigate]);
 
   const currentIndex = Math.max(0, STEPS.indexOf(step));
   const currentStep = currentIndex + FLOW_OFFSET;

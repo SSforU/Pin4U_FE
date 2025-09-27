@@ -327,7 +327,6 @@ function StartRecommendGroupRequest() {
             </RequestSuccessContent>
           </RequestSuccessPopup>
         )}
-        <LoginSuccessText>로그인이 완료되었어요!</LoginSuccessText>
       </Bottom>
     </Wrapper>
   );
@@ -651,12 +650,4 @@ const RequestSuccessText = styled.p`
   @media (max-width: 480px) {
     font-size: 12px;
   }
-`;
-
-const LoginSuccessText = styled.p`
-  font-family: "Pretendard", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  color: #838383;
-  text-align: center;
 `;
